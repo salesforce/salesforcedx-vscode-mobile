@@ -1,37 +1,45 @@
 {
-  "name": "offline-onboarding",
-  "displayName": "Offline Onboarding",
+  "name": "salesforcedx-vscode-offline-app",
+  "displayName": "Salesforce Offline App for Visual Studio Code",
   "description": "",
   "version": "0.0.1",
+  "publisher": "salesforce",
   "engines": {
     "vscode": "^1.77.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "com.khawkins.sandbox.starterkit.wizard",
-        "title": "Offline Starter Kit: Configuration Wizard"
+        "command": "salesforcedx-vscode-offline-app.onboardingWizard",
+        "title": "Configuration Wizard",
+        "category": "Offline Starter Kit"
       },
       {
-        "command": "com.khawkins.sandbox.starterkit.configureProject",
-        "title": "Offline Starter Kit: Create or Open Project"
+        "command": "salesforcedx-vscode-offline-app.onboardingConfigureProject",
+        "title": "Create or Open Project",
+        "category": "Offline Starter Kit"
       },
       {
-        "command": "com.khawkins.sandbox.starterkit.deployProject",
-        "title": "Offline Starter Kit: Deploy Project to Org"
+        "command": "salesforcedx-vscode-offline-app.onboardingDeployProject",
+        "title": "Deploy Project to Org",
+        "category": "Offline Starter Kit"
       },
       {
-        "command": "com.khawkins.sandbox.starterkit.landingPage",
-        "title": "Offline Starter Kit: Configure Landing Page"
+        "command": "salesforcedx-vscode-offline-app.onboardingLandingPage",
+        "title": "Configure Landing Page",
+        "category": "Offline Starter Kit"
       },
       {
-        "command": "com.khawkins.sandbox.starterkit.sObjectSetup",
-        "title": "Offline Starter Kit: LWC and Quick Action Setup"
+        "command": "salesforcedx-vscode-offline-app.sObjectSetup",
+        "title": "LWC and Quick Action Setup",
+        "category": "Offline Starter Kit"
       }
     ]
   },
