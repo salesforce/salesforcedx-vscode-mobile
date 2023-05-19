@@ -5,7 +5,7 @@ import { OnboardingCommands } from "./onboardingCommands";
 
 const wizardCommand = "salesforcedx-vscode-offline-app.onboardingWizard";
 const onboardingWizardStateKey =
-  "com.salesforce.sandbox.offlineWizard.projectCreationState";
+  "salesforcedx-vscode-offline-app.onboardingWizard.projectCreationState";
 
 enum OnboardingWizardState {
   projectCreated,
@@ -26,6 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
     async (fromPostProjectCreation: boolean = false) => {
       if (fromPostProjectCreation) {
         await OnboardingCommands.deployToOrg();
+        await OnboardingCommands.setupBriefcase();
       } else {
         const projectDir = await OnboardingCommands.configureProject(true);
         if (projectDir === "") {
