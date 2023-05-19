@@ -20,26 +20,6 @@
         "command": "salesforcedx-vscode-offline-app.onboardingWizard",
         "title": "Configuration Wizard",
         "category": "Offline Starter Kit"
-      },
-      {
-        "command": "salesforcedx-vscode-offline-app.onboardingConfigureProject",
-        "title": "Create or Open Project",
-        "category": "Offline Starter Kit"
-      },
-      {
-        "command": "salesforcedx-vscode-offline-app.onboardingDeployProject",
-        "title": "Deploy Project to Org",
-        "category": "Offline Starter Kit"
-      },
-      {
-        "command": "salesforcedx-vscode-offline-app.onboardingLandingPage",
-        "title": "Configure Landing Page",
-        "category": "Offline Starter Kit"
-      },
-      {
-        "command": "salesforcedx-vscode-offline-app.sObjectSetup",
-        "title": "LWC and Quick Action Setup",
-        "category": "Offline Starter Kit"
       }
     ]
   },

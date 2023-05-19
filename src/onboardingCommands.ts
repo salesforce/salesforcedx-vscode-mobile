@@ -123,7 +123,7 @@ export class OnboardingCommands {
     // TODO: this `withProgress` call probably needs tweaking on UX.
     await vscode.window.withProgress(
       {
-        location: vscode.ProgressLocation.Window,
+        location: vscode.ProgressLocation.Notification,
         title: "Launching Briefcase Builder...",
       },
       async (progress, token) => {
