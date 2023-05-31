@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import * as fs from "fs";
 import { CommonUtils } from "@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils";
 
 export class OnboardingCommands {
@@ -113,6 +114,30 @@ export class OnboardingCommands {
     }
   }
 
+  static async showInstructionWebPage(name: string) {
+    const panel = vscode.window.createWebviewPanel(
+      "myWebview",
+      "My Webview",
+      vscode.ViewColumn.Beside,
+      {
+        enableScripts: true,
+      }
+    );
+
+    panel.webview.onDidReceiveMessage((data) => {
+      switch (data.command) {
+        case "closePanel": {
+          panel.dispose();
+          break;
+        }
+      }
+    });
+    
+    const instructionsFolderPath = path.join(__dirname, '..', 'src', 'instructions');
+    const fileContents = fs.readFileSync(path.join(instructionsFolderPath, `${name}.html`)).toString();
+    panel.webview.html = fileContents;
+  }
+
   public static async setupBriefcase(): Promise<void> {
     await vscode.window.showInformationMessage(
       "Click OK to launch your org to the Briefcase Builder page. After " +
@@ -130,6 +155,7 @@ export class OnboardingCommands {
         await CommonUtils.executeCommandAsync(
           "sfdx org open -p '/lightning/setup/Briefcase/home'"
         );
+        await OnboardingCommands.showInstructionWebPage('briefcase');
       }
     );
 
