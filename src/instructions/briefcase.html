@@ -15,15 +15,6 @@
             <li>Associate the Salesforce iOS and Android apps with the Briefcase, save, and Activate</li>
         </ol>
         <button id="okButton">OK</button>
-        <script>
-            const vscode = acquireVsCodeApi();
-            const okButton = document.getElementById('okButton');
-            const messageElement = document.getElementById('message');
-            // Event listener for the button click
-            okButton.addEventListener('click', () => {
-            messageElement.innerHTML = 'OK button got clicked.';
-            vscode.postMessage({ command: 'closePanel' });
-            });
-    </script>
+        <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
     </body>
 </html>

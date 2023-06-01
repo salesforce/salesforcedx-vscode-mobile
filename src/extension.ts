@@ -33,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
     async (fromPostProjectCreation: boolean = false) => {
       if (fromPostProjectCreation) {
         await OnboardingCommands.deployToOrg();
-        await OnboardingCommands.setupBriefcase();
+        await OnboardingCommands.setupBriefcase(context.extensionUri);
       } else {
         const projectDir = await OnboardingCommands.configureProject(true);
         if (projectDir === "") {
