@@ -138,7 +138,6 @@ export class OnboardingCommands {
         await CommonUtils.executeCommandAsync(
           "sfdx org open -p '/lightning/setup/Briefcase/home'"
         );
-        await OnboardingCommands.showInstructionWebPage('briefcase');
       }
     );
 
