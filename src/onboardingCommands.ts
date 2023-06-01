@@ -116,8 +116,8 @@ export class OnboardingCommands {
 
   static async showInstructionWebPage(name: string) {
     const panel = vscode.window.createWebviewPanel(
-      "myWebview",
-      "My Webview",
+      "Briefcase Builder Instruction",
+      "Briefcase Builder Instruction",
       vscode.ViewColumn.Beside,
       {
         enableScripts: true,
