@@ -1,6 +1,14 @@
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
+ */
+
 import * as vscode from "vscode";
 import * as path from "path";
 import { CommonUtils } from "@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils";
+import { InstructionsWebviewProvider } from "./webviews";
 
 export class OnboardingCommands {
   public static async configureProject(
@@ -113,7 +121,7 @@ export class OnboardingCommands {
     }
   }
 
-  public static async setupBriefcase(): Promise<void> {
+  public static async setupBriefcase(extensionUri: vscode.Uri): Promise<void> {
     await vscode.window.showInformationMessage(
       "Click OK to launch your org to the Briefcase Builder page. After " +
         "launching, return here for instructions to set up a Briefcase rule.",
@@ -133,16 +141,19 @@ export class OnboardingCommands {
       }
     );
 
-    // TODO: Need a different view here (cf. https://github.com/microsoft/vscode-extension-samples/tree/main/webview-view-sample)
-    // because the show*Message() methods don't support text formatting like line breaks.
-    await vscode.window.showInformationMessage(
-      `On the Briefcase Builder page, do the following:
-        1. Click "New Briefcase"
-        2. Name the Briefcase "Account test"
-        3. Add an Object Rule for Account and remove the Filter. Keep the other defaults and click "Next"
-        4. Select your user to assign it to the "Account test" Briefcase and click "Next"
-        5. Associate the Salesforce iOS and Android apps with the Briefcase, save, and Activate`,
-      { title: "OK" }
+    const provider: InstructionsWebviewProvider =
+      new InstructionsWebviewProvider(extensionUri);
+    provider.showInstructionWebview(
+      "Briefcase Setup Instructions",
+      "src/instructions/briefcase.html",
+      [
+        {
+          buttonId: "okButton",
+          action: (panel) => {
+            panel.dispose();
+          },
+        },
+      ]
     );
   }
 }

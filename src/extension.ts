@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
+ */
+
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
@@ -26,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
     async (fromPostProjectCreation: boolean = false) => {
       if (fromPostProjectCreation) {
         await OnboardingCommands.deployToOrg();
-        await OnboardingCommands.setupBriefcase();
+        await OnboardingCommands.setupBriefcase(context.extensionUri);
       } else {
         const projectDir = await OnboardingCommands.configureProject(true);
         if (projectDir === "") {
