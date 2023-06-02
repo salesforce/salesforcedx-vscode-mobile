@@ -1,16 +1,21 @@
+import { messages } from "../messages/messages";
+
 export class UEMBuilder {
     cards: any[] = [];
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    static readonly GLOBAL_ACTIONS_LABEL = messages.getMessage('card_name_global_actions');
 
     addGlobalActionCard(): UEMBuilder {
         const listUEM = {
             definition: "mcfp/actionList",
             name: "actions_list",
-            label: "Global Actions",
+            label: UEMBuilder.GLOBAL_ACTIONS_LABEL,
             properties: {},
             regions: {},
         };
 
-        this.cards.push(this.cardUEM("global_actions", "Global Actions", listUEM));
+        this.cards.push(this.cardUEM("global_actions", UEMBuilder.GLOBAL_ACTIONS_LABEL, listUEM));
         return this;
     }
 

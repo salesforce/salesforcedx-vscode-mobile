@@ -14,6 +14,14 @@
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
+  "files": [
+    "/out",
+    "/messages",
+    "!**/__tests__/",
+    "!**/__mocks__/",
+    "!**/*.test.*",
+    "!**/.DS_Store"
+  ],
   "contributes": {
     "commands": [
       {

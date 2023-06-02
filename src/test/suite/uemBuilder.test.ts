@@ -1,6 +1,5 @@
 import * as assert from 'assert';
-import * as vscode from 'vscode';
-import { UEMBuilder } from '../../utils/uemBuilder';
+import { UEMBuilder } from '../../landingPage/uemBuilder';
 
 suite('UEM Builder Test Suite', () => {
 

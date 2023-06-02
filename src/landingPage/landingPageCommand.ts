@@ -1,29 +1,29 @@
 import * as vscode from "vscode";
-import { QuickPickItem } from "vscode";
-import { QuickPickItemKind } from "vscode";
-import { UEMBuilder } from "../utils/uemBuilder";
+import { UEMBuilder } from "./uemBuilder";
+import { messages } from "../messages/messages";
 
 export class LandingPageCommand {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  public static readonly GLOBAL_ACTIONS_CARD_LABEL = "Global Actions";
+  public static readonly GLOBAL_ACTIONS_CARD_LABEL = messages.getMessage('card_name_global_actions');
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  public static readonly TIMED_LIST_CARD_LABEL = "Timed List";
+  public static readonly TIMED_LIST_CARD_LABEL = messages.getMessage('card_name_timed_list');
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  public static readonly RECORD_LIST_CARD_LABEL = "Record List";
+  public static readonly RECORD_LIST_CARD_LABEL = messages.getMessage('card_name_record_list');
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  public static readonly FINISHED_LABEL = "Finished";
+  public static readonly FINISHED_LABEL = messages.getMessage('finished');;
+
 
   /**
    * Prompts user, in a loop, for cards to include on the landing page. Each card has different parameters
    * which we will need to collect as well.
    */
   public static async execute() {
-    var selectedCardTypes: QuickPickItem[] = [];
+    var selectedCardTypes: vscode.QuickPickItem[] = [];
     var selectedCardType: vscode.QuickPickItem | undefined;
 
-    while (selectedCardType?.label !== "Finished") {
+    while (selectedCardType?.label !== LandingPageCommand.FINISHED_LABEL) {
       selectedCardType = await vscode.window.showQuickPick(cardTypes, {
-        placeHolder: "Select a card type to add to the landing page:",
+        placeHolder: messages.getMessage('quickpick_card_placeholder'),
         canPickMany: false,
         ignoreFocusOut: true
       });
@@ -85,26 +85,26 @@ export class LandingPageCommand {
   }
 }
 
-const cardTypes: QuickPickItem[] =
+const cardTypes: vscode.QuickPickItem[] =
   [
     {
       label: `${LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL}`,
-      description: "A card showing the LWC Global Quick Actions defined in the org."
+      description: messages.getMessage('desc_global_action_card'),
     },
     {
       label: `${LandingPageCommand.RECORD_LIST_CARD_LABEL}`,
-      description: "A card showing a list of records."
+      description: messages.getMessage('desc_record_list_card'),
     },
     {
       label: `${LandingPageCommand.TIMED_LIST_CARD_LABEL}`,
-      description: "A card showing a list of records filtered and sorted by a date/time range."
+      description: messages.getMessage('desc_timed_list_card'),
     },
     {
       label: "",
-      kind: QuickPickItemKind.Separator
+      kind: vscode.QuickPickItemKind.Separator
     },
     {
       label: `${LandingPageCommand.FINISHED_LABEL}`,
-      description: "Finish and generate the landing page."
+      description: messages.getMessage('desc_finished')
     }
   ];
