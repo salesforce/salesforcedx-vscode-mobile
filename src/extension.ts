@@ -9,7 +9,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { OnboardingCommands } from "./onboardingCommands";
-import { LandingPageCommand } from "./landingPageCommand";
+import { LandingPageCommand } from "./landingPage/landingPageCommand";
 
 const wizardCommand = "salesforcedx-vscode-offline-app.onboardingWizard";
 const onboardingWizardStateKey =

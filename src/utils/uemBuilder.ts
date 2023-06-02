@@ -1,7 +1,5 @@
-
 export class UEMBuilder {
-
-    private cards: any[] = [];
+    cards: any[] = [];
 
     addGlobalActionCard(): UEMBuilder {
         const listUEM = {
@@ -16,13 +14,13 @@ export class UEMBuilder {
         return this;
     }
 
-    build(): string {
-        let uem = this.getUEMTemplate();
+    build(): any {
+        let uem = this.uemTemplate();
         const cmps = uem.view.regions.components.components[0].regions.components.components;
         for (const card of this.cards) {
             cmps.push(card);
         }
-        return JSON.stringify(uem, null, 2);
+        return uem;
     }
 
     private cardUEM(name: string, label: string, ...children: any[]): any {
@@ -39,7 +37,7 @@ export class UEMBuilder {
         };
     }
 
-    private getUEMTemplate(): any {
+    private uemTemplate(): any {
         return {
             view: {
                 definition: "generated/uem_output",
@@ -69,6 +67,6 @@ export class UEMBuilder {
             target: "mcf__native",
             apiName: "landing_page",
             id: "611ca737-feb2-41c8-8c87-4f48a3415e3b",
-        }
-    };
+        };
+    }
 }

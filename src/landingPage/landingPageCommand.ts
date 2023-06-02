@@ -1,13 +1,17 @@
 import * as vscode from "vscode";
 import { QuickPickItem } from "vscode";
 import { QuickPickItemKind } from "vscode";
-import { UEMBuilder } from "./utils/uemBuilder";
+import { UEMBuilder } from "../utils/uemBuilder";
 
-const GLOBAL_ACTIONS_CARD_LABEL = "Global Actions";
-const TIMED_LIST_CARD_LABEL = "Timed List";
-const RECORD_LIST_CARD_LABEL = "Record List";
-const FINISHED_LABEL = "Finished";
 export class LandingPageCommand {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public static readonly GLOBAL_ACTIONS_CARD_LABEL = "Global Actions";
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public static readonly TIMED_LIST_CARD_LABEL = "Timed List";
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public static readonly RECORD_LIST_CARD_LABEL = "Record List";
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  public static readonly FINISHED_LABEL = "Finished";
 
   /**
    * Prompts user, in a loop, for cards to include on the landing page. Each card has different parameters
@@ -15,7 +19,6 @@ export class LandingPageCommand {
    */
   public static async execute() {
     var selectedCardTypes: QuickPickItem[] = [];
-
     var selectedCardType: vscode.QuickPickItem | undefined;
 
     while (selectedCardType?.label !== "Finished") {
@@ -29,24 +32,23 @@ export class LandingPageCommand {
         return;
       }
 
-      if (selectedCardType!.label !== FINISHED_LABEL) {
+      if (selectedCardType!.label !== LandingPageCommand.FINISHED_LABEL) {
         selectedCardTypes.push(selectedCardType);
       }
     }
 
     var uem = new UEMBuilder();
     for (var card of selectedCardTypes) {
-      if (card.label == GLOBAL_ACTIONS_CARD_LABEL) {
+      if (card.label === LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL) {
         uem = LandingPageCommand.configureGlobalActionsCard(uem);
-      } else if (card.label === RECORD_LIST_CARD_LABEL) {
+      } else if (card.label === LandingPageCommand.RECORD_LIST_CARD_LABEL) {
         uem = LandingPageCommand.configureRecordListCard(uem);
-      } else if (card.label === TIMED_LIST_CARD_LABEL) {
+      } else if (card.label === LandingPageCommand.TIMED_LIST_CARD_LABEL) {
         uem = LandingPageCommand.configureTimedListCard(uem);
       }
     }
 
-    console.log("The Landing Page UEM is: ");
-    console.log(uem.build());
+    return uem.build();
   }
 
   /**
@@ -62,7 +64,7 @@ export class LandingPageCommand {
    * @returns json representation of a record list card.
    */
   static configureRecordListCard(uem: UEMBuilder): UEMBuilder {
-
+    // TODO
     return uem;
   }
 
@@ -78,6 +80,7 @@ export class LandingPageCommand {
    * @returns json representation of a timed and sorted list card.
    */
   static configureTimedListCard(uem: UEMBuilder): UEMBuilder {
+    // TODO
     return uem;
   }
 }
@@ -85,15 +88,15 @@ export class LandingPageCommand {
 const cardTypes: QuickPickItem[] =
   [
     {
-      label: `${GLOBAL_ACTIONS_CARD_LABEL}`,
+      label: `${LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL}`,
       description: "A card showing the LWC Global Quick Actions defined in the org."
     },
     {
-      label: `${RECORD_LIST_CARD_LABEL}`,
+      label: `${LandingPageCommand.RECORD_LIST_CARD_LABEL}`,
       description: "A card showing a list of records."
     },
     {
-      label: `${TIMED_LIST_CARD_LABEL}`,
+      label: `${LandingPageCommand.TIMED_LIST_CARD_LABEL}`,
       description: "A card showing a list of records filtered and sorted by a date/time range."
     },
     {
@@ -101,7 +104,7 @@ const cardTypes: QuickPickItem[] =
       kind: QuickPickItemKind.Separator
     },
     {
-      label: `${FINISHED_LABEL}`,
+      label: `${LandingPageCommand.FINISHED_LABEL}`,
       description: "Finish and generate the landing page."
     }
   ];
