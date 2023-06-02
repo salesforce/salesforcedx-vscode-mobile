@@ -9,6 +9,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
 import { OnboardingCommands } from "./onboardingCommands";
+import { LandingPageCommand } from "./landingPage/landingPageCommand";
 
 const wizardCommand = "salesforcedx-vscode-offline-app.onboardingWizard";
 const onboardingWizardStateKey =
@@ -34,6 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
       if (fromPostProjectCreation) {
         await OnboardingCommands.deployToOrg();
         await OnboardingCommands.setupBriefcase(context.extensionUri);
+        await LandingPageCommand.execute();
       } else {
         const projectDir = await OnboardingCommands.configureProject(true);
         if (projectDir === "") {
