@@ -10,6 +10,8 @@
 import * as vscode from "vscode";
 import { OnboardingCommands } from "./onboardingCommands";
 import { LandingPageCommand } from "./landingPage/landingPageCommand";
+import { InstructionsWebviewProvider } from "./webviews";
+import { messages } from "./messages/messages";
 
 const wizardCommand = "salesforcedx-vscode-offline-app.onboardingWizard";
 const onboardingWizardStateKey =
@@ -17,6 +19,23 @@ const onboardingWizardStateKey =
 
 enum OnboardingWizardState {
   projectCreated,
+}
+
+export function showInstructionWebView (extensionUri: vscode.Uri, tabName: string, htmlPath: string) {
+  const provider: InstructionsWebviewProvider =
+  new InstructionsWebviewProvider(extensionUri);
+    provider.showInstructionWebview(
+      tabName,
+      htmlPath,
+      [
+        {
+          buttonId: "okButton",
+          action: (panel) => {
+            panel.dispose();
+          },
+        },
+      ]
+    );
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -36,6 +55,12 @@ export function activate(context: vscode.ExtensionContext) {
         await OnboardingCommands.deployToOrg();
         await OnboardingCommands.setupBriefcase(context.extensionUri);
         await LandingPageCommand.execute();
+
+        showInstructionWebView(
+          context.extension.extensionUri,
+          messages.getMessage("salesforce_mobile_app_instruction"),
+          "src/instructions/salesforcemobileapp.html"
+        );
       } else {
         const projectDir = await OnboardingCommands.configureProject(true);
         if (projectDir === "") {
