@@ -88,7 +88,7 @@ export class UEMBuilder {
         orderByField: string = "Name",
         isAscending: boolean = true,
         size = 3
-    ): any {
+    ): UEMBuilder {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const fields: { [key: string]: string } = { Name: this.getFieldType(nameField) };
 

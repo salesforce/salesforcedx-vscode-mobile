@@ -22,10 +22,10 @@ export class OrgUtils {
                 };
                 return so;
             }).sort((a, b) => a.apiName.localeCompare(b.apiName));
-            return sobjects;
+            return Promise.resolve(sobjects);
         } catch (error) {
             console.log(error);
-            return [];
+            return Promise.reject();
         }
     }
 
@@ -33,6 +33,6 @@ export class OrgUtils {
         const aggregator = await ConfigAggregator.create();
         const currentUserConfig = aggregator.getInfo(OrgConfigProperties.TARGET_ORG);
         const currentUser = currentUserConfig.value ? currentUserConfig.value : "undefined";
-        return currentUser.toString();
+        return Promise.resolve(currentUser.toString());
     }
 }

@@ -1,7 +1,8 @@
-import * as vscode from "vscode";
+import { window, QuickPickItem, QuickPickItemKind } from "vscode";
 import { UEMBuilder } from "./uemBuilder";
 import { messages } from "../messages/messages";
 import { OrgUtils } from "./orgUtils";
+import { UIUtils } from "./uiUtils";
 
 export class LandingPageCommand {
 
@@ -21,12 +22,12 @@ export class LandingPageCommand {
    * which we will need to collect as well.
    */
   public static async buildLandingPage() {
-    let selectedCardType: vscode.QuickPickItem | undefined;
+    let selectedCardType: QuickPickItem | undefined;
 
     let uem = new UEMBuilder();
 
     while (selectedCardType?.label !== LandingPageCommand.FINISHED_LABEL) {
-      selectedCardType = await vscode.window.showQuickPick(cardTypes, {
+      selectedCardType = await window.showQuickPick(cardTypes, {
         placeHolder: messages.getMessage('quickpick_card_placeholder'),
         canPickMany: false,
         ignoreFocusOut: true
@@ -71,25 +72,27 @@ export class LandingPageCommand {
    * @returns json representation of a record list card.
    */
   static async configureRecordListCard(uem: UEMBuilder): Promise<UEMBuilder> {
-    const sobjectQuickPickChoices = (await OrgUtils.getSobjects()).map((sobject) => {
-      return {
-        label: sobject.label,
-        description: sobject.labelPlural,
-        sobject: sobject
-      };
-    });
+    const selectedItem = await UIUtils.showQuickPick(
+      messages.getMessage('quickpick_sobject_record_list'),
+      messages.getMessage('progress_message_retrieving_sobjects'),
+      () => {
+        return new Promise<QuickPickItem[]>(async (resolve, reject) => {
+          const sobjectQuickPickItems = (await OrgUtils.getSobjects()).map((sobject) => {
+            return {
+              label: sobject.labelPlural,
+              detail: sobject.apiName
+            };
+          });
+          resolve(sobjectQuickPickItems);
+        });
+      });
 
-    const selectedSobject = await vscode.window.showQuickPick(sobjectQuickPickChoices, {
-      placeHolder: messages.getMessage('quickpick_sobject_record_list'),
-      canPickMany: false,
-      ignoreFocusOut: true
-    });
-
-    if (selectedSobject === undefined) {
+    if (!selectedItem) {
       return uem;
     }
 
-    const sobject = selectedSobject.sobject;
+    const apiName = selectedItem.detail!;
+    const labelPlural = selectedItem.label;
 
     // TODO: Get Primary field
     // TODO: Get Secondary field
@@ -98,7 +101,7 @@ export class LandingPageCommand {
     // TODO: Get MaxItems
     // TODO: Swipe Actions
 
-    return uem.addRecordListCard(selectedSobject.sobject.apiName, selectedSobject.sobject.labelPlural);
+    return Promise.resolve(uem.addRecordListCard(apiName, labelPlural));
   }
 
   /**
@@ -113,11 +116,11 @@ export class LandingPageCommand {
    * @returns json representation of a timed and sorted list card.
    */
   static async configureTimedListCard(uem: UEMBuilder): Promise<UEMBuilder> {
-    return uem.addTimedListCard();
+    return Promise.resolve(uem.addTimedListCard());
   }
 }
 
-const cardTypes: vscode.QuickPickItem[] =
+const cardTypes: QuickPickItem[] =
   [
     {
       label: `${LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL}`,
@@ -133,7 +136,7 @@ const cardTypes: vscode.QuickPickItem[] =
     },
     {
       label: "",
-      kind: vscode.QuickPickItemKind.Separator
+      kind: QuickPickItemKind.Separator
     },
     {
       label: `${LandingPageCommand.FINISHED_LABEL}`,

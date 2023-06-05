@@ -5,6 +5,8 @@ import { LandingPageCommand } from '../../landingPage/landingPageCommand';
 import { SObject } from '../../landingPage/orgUtils';
 import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
+import { UIUtils } from '../../landingPage/uiUtils';
+import { UEMBuilder } from '../../landingPage/uemBuilder';
 
 suite('Landing Page Command Test Suite', () => {
 
@@ -37,17 +39,17 @@ suite('Landing Page Command Test Suite', () => {
     });
 
     test('Adds record list card', async () => {
-        const showQuickPickStub: SinonStub = sinon.stub(vscode.window, 'showQuickPick');
+        const showQuickPickStub: SinonStub = sinon.stub(UIUtils, 'showQuickPick');
         const sobject: SObject = {
             apiName: 'SomeApiName',
             label: 'SomeObject',
             labelPlural: 'SomeObjects'
         };
-        showQuickPickStub.onCall(0).returns({ label: LandingPageCommand.RECORD_LIST_CARD_LABEL });
-        showQuickPickStub.onCall(1).returns({ label: sobject.apiName, sobject: sobject });
-        showQuickPickStub.onCall(2).returns({ label: LandingPageCommand.FINISHED_LABEL });
+        showQuickPickStub.onCall(0).returns({ label: sobject.labelPlural, detail: sobject.apiName });
 
-        const json = await LandingPageCommand.buildLandingPage();
+        let uem = new UEMBuilder();
+        uem = await LandingPageCommand.configureRecordListCard(uem);
+        const json = uem.build();
 
         const recordListCard = json.view.regions.components.components[0].regions.components.components[0];
         const recordListUEM = recordListCard.regions.components.components[0];
@@ -57,10 +59,11 @@ suite('Landing Page Command Test Suite', () => {
         assert.equal(recordListUEM.label, sobject.labelPlural);
         assert.equal(recordListUEM.properties.size, 3);
         assert.equal(recordListUEM.properties.objectApiName, sobject.apiName);
-        assert.equal(recordListUEM.properties.objectApiName, sobject.apiName);
 
         const fields = recordListUEM.properties.fields;
         const fieldMap = recordListUEM.properties.fieldMap;
+        assert.equal(fields.Name, "StringValue");
+        assert.equal(fieldMap.mainField, "Name");
 
         const rowMap = recordListUEM.regions.components.components[0];
         assert.equal(rowMap.definition, "mcf/recordRow");
