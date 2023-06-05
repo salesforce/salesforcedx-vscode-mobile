@@ -5,11 +5,11 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import * as vscode from "vscode";
-import * as path from "path";
-import { CommonUtils } from "@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils";
-import { InstructionsWebviewProvider } from "./webviews";
-import { showInstructionWebView } from "./extension";
+import * as vscode from 'vscode';
+import * as path from 'path';
+import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
+import { showInstructionWebView } from './extension';
+import { messages } from './messages/messages';
 
 export class OnboardingCommands {
     public static async configureProject(
@@ -147,19 +147,10 @@ export class OnboardingCommands {
             }
         );
 
-        const provider: InstructionsWebviewProvider =
-            new InstructionsWebviewProvider(extensionUri);
-        provider.showInstructionWebview(
-            'Briefcase Setup Instructions',
-            'src/instructions/briefcase.html',
-            [
-                {
-                    buttonId: 'okButton',
-                    action: (panel) => {
-                        panel.dispose();
-                    }
-                }
-            ]
+        showInstructionWebView(
+            extensionUri,
+            messages.getMessage('briefcase_setup_instruction'),
+            'src/instructions/briefcase.html'
         );
     }
 }
