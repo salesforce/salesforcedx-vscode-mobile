@@ -57,4 +57,21 @@ export class InstructionsWebviewProvider {
         );
         panel.webview.html = webviewContent;
     }
+
+    public static showDismissableInstructions(
+        extensionUri: vscode.Uri,
+        title: string,
+        contentPath: string
+    ) {
+        const provider: InstructionsWebviewProvider =
+            new InstructionsWebviewProvider(extensionUri);
+        provider.showInstructionWebview(title, contentPath, [
+            {
+                buttonId: 'okButton',
+                action: (panel) => {
+                    panel.dispose();
+                }
+            }
+        ]);
+    }
 }

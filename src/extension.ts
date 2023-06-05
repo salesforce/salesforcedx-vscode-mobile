@@ -21,23 +21,6 @@ enum OnboardingWizardState {
     projectCreated
 }
 
-export function showInstructionWebView(
-    extensionUri: vscode.Uri,
-    tabName: string,
-    htmlPath: string
-) {
-    const provider: InstructionsWebviewProvider =
-        new InstructionsWebviewProvider(extensionUri);
-    provider.showInstructionWebview(tabName, htmlPath, [
-        {
-            buttonId: 'okButton',
-            action: (panel) => {
-                panel.dispose();
-            }
-        }
-    ]);
-}
-
 export function activate(context: vscode.ExtensionContext) {
     // If activation is coming as the result of the project being created and newly
     // loaded into the workspace, pick up with the next step of the wizard.
@@ -56,8 +39,8 @@ export function activate(context: vscode.ExtensionContext) {
                 await OnboardingCommands.setupBriefcase(context.extensionUri);
                 await LandingPageCommand.execute();
 
-                showInstructionWebView(
-                    context.extension.extensionUri,
+                InstructionsWebviewProvider.showDismissableInstructions(
+                    context.extensionUri,
                     messages.getMessage('salesforce_mobile_app_instruction'),
                     'src/instructions/salesforcemobileapp.html'
                 );
