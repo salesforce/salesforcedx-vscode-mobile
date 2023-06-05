@@ -14,32 +14,32 @@ export class UEMBuilder {
     private cards: any[] = [];
 
     static readonly valueTypes = [
-        "Int",
-        "String",
-        "Boolean",
-        "ID",
-        "DateTime",
-        "Time",
-        "Date",
-        "TextArea",
-        "LongTextArea",
-        "RichTextArea",
-        "PhoneNumber",
-        "Email",
-        "Url",
-        "EncryptedString",
-        "Currency",
-        "Longitude",
-        "Latitude",
-        "Picklist",
-        "MultiPicklist",
-        "Long",
-        "Double",
-        "Percent",
-        "Base64",
+        'Int',
+        'String',
+        'Boolean',
+        'ID',
+        'DateTime',
+        'Time',
+        'Date',
+        'TextArea',
+        'LongTextArea',
+        'RichTextArea',
+        'PhoneNumber',
+        'Email',
+        'Url',
+        'EncryptedString',
+        'Currency',
+        'Longitude',
+        'Latitude',
+        'Picklist',
+        'MultiPicklist',
+        'Long',
+        'Double',
+        'Percent',
+        'Base64'
     ];
 
-    static readonly defaultValueType = "StringValue";
+    static readonly defaultValueType = 'StringValue';
 
     private getFieldType(field: Field): string {
         const t = UEMBuilder.valueTypes.find(
@@ -47,7 +47,7 @@ export class UEMBuilder {
         );
 
         if (t !== undefined) {
-            return t + "Value";
+            return t + 'Value';
         }
 
         // default
@@ -73,26 +73,30 @@ export class UEMBuilder {
         return this;
     }
 
-    // TODO: This defaults the name field to "Name" but not all sobjects have a "Name" field. We need 
+    // TODO: This defaults the name field to "Name" but not all sobjects have a "Name" field. We need
     // to iterate over all fields and actually LOOK for isNameField=true and use that. ie, ServiceApptName.
     // BUT, what are the product requirements here? Do we really want to force Name field?
     addRecordListCard(
         objectApiName: string,
         labelPlural: string,
         nameField: Field = {
-            name: "Name",
-            type: "String"
+            name: 'Name',
+            type: 'String'
         },
         primaryField: Field | undefined = undefined,
         secondaryField: Field | undefined = undefined,
-        orderByField: string = "Name",
+        orderByField: string = 'Name',
         isAscending: boolean = true,
         size = 3
     ): UEMBuilder {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const fields: { [key: string]: string } = { Name: this.getFieldType(nameField) };
+        const fields: { [key: string]: string } = {
+            Name: this.getFieldType(nameField)
+        };
 
-        const fieldMap: { [key: string]: string } = { mainField: nameField.name };
+        const fieldMap: { [key: string]: string } = {
+            mainField: nameField.name
+        };
 
         if (primaryField !== undefined) {
             fields[primaryField.name] = this.getFieldType(primaryField);
@@ -105,39 +109,41 @@ export class UEMBuilder {
         }
 
         const listUEM = {
-            definition: "mcf/list",
+            definition: 'mcf/list',
             name: `${objectApiName.toLowerCase()}_list`,
             label: labelPlural,
             properties: {
                 size,
                 objectApiName,
-                orderBy: [
-                    { [orderByField]: isAscending ? "ASC" : "DESC" },
-                ],
+                orderBy: [{ [orderByField]: isAscending ? 'ASC' : 'DESC' }],
                 fields,
-                fieldMap,
+                fieldMap
             },
             regions: {
                 components: {
-                    name: "components",
+                    name: 'components',
                     components: [
                         {
-                            definition: "mcf/recordRow",
+                            definition: 'mcf/recordRow',
                             name: `${objectApiName.toLowerCase()}_row`,
                             label: `${objectApiName} Row`,
                             properties: {},
-                            regions: {},
-                        },
-                    ],
-                },
-            },
+                            regions: {}
+                        }
+                    ]
+                }
+            }
         };
 
         this.cards.push(this.cardUEM(labelPlural, labelPlural, listUEM));
         return this;
     }
 
-    addTimedListCard(sobject: string = "Account", size: number = 5, isAscending: boolean = true): UEMBuilder {
+    addTimedListCard(
+        sobject: string = 'Account',
+        size: number = 5,
+        isAscending: boolean = true
+    ): UEMBuilder {
         return this;
     }
 

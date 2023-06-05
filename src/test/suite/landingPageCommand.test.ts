@@ -9,64 +9,88 @@ import { UIUtils } from '../../landingPage/uiUtils';
 import { UEMBuilder } from '../../landingPage/uemBuilder';
 
 suite('Landing Page Command Test Suite', () => {
-
-    beforeEach(function () {
-    });
+    beforeEach(function () {});
 
     afterEach(function () {
         sinon.restore();
     });
 
     test('Returns default with no cards', async () => {
-        const showQuickPickStub: SinonStub = sinon.stub(vscode.window, 'showQuickPick');
-        showQuickPickStub.resolves({ label: LandingPageCommand.FINISHED_LABEL });
+        const showQuickPickStub: SinonStub = sinon.stub(
+            vscode.window,
+            'showQuickPick'
+        );
+        showQuickPickStub.resolves({
+            label: LandingPageCommand.FINISHED_LABEL
+        });
 
         const json = await LandingPageCommand.buildLandingPage();
 
-        const cards = json.view.regions.components.components[0].regions.components.components;
+        const cards =
+            json.view.regions.components.components[0].regions.components
+                .components;
         assert.equal(cards.length, 0);
     });
 
     test('Adds global actions card', async () => {
-        const showQuickPickStub: SinonStub = sinon.stub(vscode.window, 'showQuickPick');
-        showQuickPickStub.onCall(0).returns({ label: LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL });
-        showQuickPickStub.onCall(1).returns({ label: LandingPageCommand.FINISHED_LABEL });
+        const showQuickPickStub: SinonStub = sinon.stub(
+            vscode.window,
+            'showQuickPick'
+        );
+        showQuickPickStub
+            .onCall(0)
+            .returns({ label: LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL });
+        showQuickPickStub
+            .onCall(1)
+            .returns({ label: LandingPageCommand.FINISHED_LABEL });
 
         const json = await LandingPageCommand.buildLandingPage();
 
-        const globalCard = json.view.regions.components.components[0].regions.components.components[0];
-        assert.equal(globalCard.name, "global_actions");
+        const globalCard =
+            json.view.regions.components.components[0].regions.components
+                .components[0];
+        assert.equal(globalCard.name, 'global_actions');
     });
 
     test('Adds record list card', async () => {
-        const showQuickPickStub: SinonStub = sinon.stub(UIUtils, 'showQuickPick');
+        const showQuickPickStub: SinonStub = sinon.stub(
+            UIUtils,
+            'showQuickPick'
+        );
         const sobject: SObject = {
             apiName: 'SomeApiName',
             label: 'SomeObject',
             labelPlural: 'SomeObjects'
         };
-        showQuickPickStub.onCall(0).returns({ label: sobject.labelPlural, detail: sobject.apiName });
+        showQuickPickStub
+            .onCall(0)
+            .returns({ label: sobject.labelPlural, detail: sobject.apiName });
 
         let uem = new UEMBuilder();
         uem = await LandingPageCommand.configureRecordListCard(uem);
         const json = uem.build();
 
-        const recordListCard = json.view.regions.components.components[0].regions.components.components[0];
+        const recordListCard =
+            json.view.regions.components.components[0].regions.components
+                .components[0];
         const recordListUEM = recordListCard.regions.components.components[0];
         // ensure we added a card with a list component
-        assert.equal(recordListUEM.definition, "mcf/list");
-        assert.equal(recordListUEM.name, `${sobject.apiName.toLowerCase()}_list`);
+        assert.equal(recordListUEM.definition, 'mcf/list');
+        assert.equal(
+            recordListUEM.name,
+            `${sobject.apiName.toLowerCase()}_list`
+        );
         assert.equal(recordListUEM.label, sobject.labelPlural);
         assert.equal(recordListUEM.properties.size, 3);
         assert.equal(recordListUEM.properties.objectApiName, sobject.apiName);
 
         const fields = recordListUEM.properties.fields;
         const fieldMap = recordListUEM.properties.fieldMap;
-        assert.equal(fields.Name, "StringValue");
-        assert.equal(fieldMap.mainField, "Name");
+        assert.equal(fields.Name, 'StringValue');
+        assert.equal(fieldMap.mainField, 'Name');
 
         const rowMap = recordListUEM.regions.components.components[0];
-        assert.equal(rowMap.definition, "mcf/recordRow");
+        assert.equal(rowMap.definition, 'mcf/recordRow');
         assert.equal(rowMap.name, `${sobject.apiName.toLowerCase()}_row`);
         assert.equal(rowMap.label, `${sobject.apiName} Row`);
     });

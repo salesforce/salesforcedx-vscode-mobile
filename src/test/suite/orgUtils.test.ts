@@ -4,13 +4,17 @@ import * as vscode from 'vscode';
 import { OrgUtils } from '../../landingPage/orgUtils';
 import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
-import { ConfigAggregator, ConfigInfo, Connection, Org, OrgConfigProperties } from '@salesforce/core';
+import {
+    ConfigAggregator,
+    ConfigInfo,
+    Connection,
+    Org,
+    OrgConfigProperties
+} from '@salesforce/core';
 import { DescribeGlobalResult } from 'jsforce';
 
 suite('Org Utils Test Suite', () => {
-
-    beforeEach(function () {
-    });
+    beforeEach(function () {});
 
     afterEach(function () {
         sinon.restore();
@@ -23,16 +27,17 @@ suite('Org Utils Test Suite', () => {
                 switch (key) {
                     case OrgConfigProperties.TARGET_ORG:
                         return {
-                            value: "username"
+                            value: 'username'
                         };
-                    default: return "BAD";
+                    default:
+                        return 'BAD';
                 }
             }
         });
 
         const defaultUser = await OrgUtils.getDefaultUser();
 
-        assert.equal(defaultUser, "username");
+        assert.equal(defaultUser, 'username');
     });
 
     test('Returns list of sobjects', async () => {
@@ -68,21 +73,20 @@ suite('Org Utils Test Suite', () => {
                     updateable: true,
                     urls: {}
                 }
-            ],
-
+            ]
         };
 
         const orgStub: SinonStub = sinon.stub(Org, 'create');
         const stubConnection = sinon.createStubInstance(Connection);
-        stubConnection.describeGlobal.returns(Promise.resolve(describeGlobalResult));
-
-        orgStub.returns(
-            {
-                getConnection: () => {
-                    return stubConnection;
-                }
-            }
+        stubConnection.describeGlobal.returns(
+            Promise.resolve(describeGlobalResult)
         );
+
+        orgStub.returns({
+            getConnection: () => {
+                return stubConnection;
+            }
+        });
 
         const sobjects = await OrgUtils.getSobjects();
 
@@ -93,5 +97,4 @@ suite('Org Utils Test Suite', () => {
         assert.equal(sobject.label, 'Label');
         assert.equal(sobject.labelPlural, 'Labels');
     });
-
 });
