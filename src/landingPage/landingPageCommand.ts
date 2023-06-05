@@ -4,6 +4,8 @@ import { messages } from "../messages/messages";
 import { OrgUtils } from "./orgUtils";
 
 export class LandingPageCommand {
+
+  // TODO: Decide how to handle these eslint exceptions below -- either disable check line-by-line, or change naming conventions
   // eslint-disable-next-line @typescript-eslint/naming-convention
   public static readonly GLOBAL_ACTIONS_CARD_LABEL = messages.getMessage('card_name_global_actions');
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -18,10 +20,10 @@ export class LandingPageCommand {
    * Prompts user, in a loop, for cards to include on the landing page. Each card has different parameters
    * which we will need to collect as well.
    */
-  public static async execute() {
-    var selectedCardType: vscode.QuickPickItem | undefined;
+  public static async buildLandingPage() {
+    let selectedCardType: vscode.QuickPickItem | undefined;
 
-    var uem = new UEMBuilder();
+    let uem = new UEMBuilder();
 
     while (selectedCardType?.label !== LandingPageCommand.FINISHED_LABEL) {
       selectedCardType = await vscode.window.showQuickPick(cardTypes, {
@@ -30,21 +32,20 @@ export class LandingPageCommand {
         ignoreFocusOut: true
       });
 
-      if (selectedCardType === undefined) {
+      if (!selectedCardType) {
         return;
       }
 
       // add the card to UEM
-      if (selectedCardType!.label === LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL) {
+      if (selectedCardType.label === LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL) {
         uem = LandingPageCommand.configureGlobalActionsCard(uem);
-      } else if (selectedCardType!.label === LandingPageCommand.RECORD_LIST_CARD_LABEL) {
+      } else if (selectedCardType.label === LandingPageCommand.RECORD_LIST_CARD_LABEL) {
         uem = await LandingPageCommand.configureRecordListCard(uem);
-      } else if (selectedCardType!.label === LandingPageCommand.TIMED_LIST_CARD_LABEL) {
+      } else if (selectedCardType.label === LandingPageCommand.TIMED_LIST_CARD_LABEL) {
         uem = await LandingPageCommand.configureTimedListCard(uem);
       }
 
       // TODO: Show progress somehow
-
     }
 
     return uem.build();

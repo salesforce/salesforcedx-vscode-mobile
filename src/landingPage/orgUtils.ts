@@ -8,7 +8,6 @@ export interface SObject {
 
 export class OrgUtils {
 
-
     public static async getSobjects(): Promise<SObject[]> {
         try {
             const org = await Org.create();
@@ -16,7 +15,7 @@ export class OrgUtils {
             const result = await conn.describeGlobal();
 
             const sobjects = result.sobjects.map((sobject) => {
-                  const so: SObject = {
+                const so: SObject = {
                     apiName: sobject.name,
                     label: sobject.label,
                     labelPlural: sobject.labelPlural

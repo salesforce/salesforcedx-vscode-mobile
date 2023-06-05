@@ -19,7 +19,7 @@ suite('Landing Page Command Test Suite', () => {
         const showQuickPickStub: SinonStub = sinon.stub(vscode.window, 'showQuickPick');
         showQuickPickStub.resolves({ label: LandingPageCommand.FINISHED_LABEL });
 
-        const json = await LandingPageCommand.execute();
+        const json = await LandingPageCommand.buildLandingPage();
 
         const cards = json.view.regions.components.components[0].regions.components.components;
         assert.equal(cards.length, 0);
@@ -30,7 +30,7 @@ suite('Landing Page Command Test Suite', () => {
         showQuickPickStub.onCall(0).returns({ label: LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL });
         showQuickPickStub.onCall(1).returns({ label: LandingPageCommand.FINISHED_LABEL });
 
-        const json = await LandingPageCommand.execute();
+        const json = await LandingPageCommand.buildLandingPage();
 
         const globalCard = json.view.regions.components.components[0].regions.components.components[0];
         assert.equal(globalCard.name, "global_actions");
@@ -47,7 +47,7 @@ suite('Landing Page Command Test Suite', () => {
         showQuickPickStub.onCall(1).returns({ label: sobject.apiName, sobject: sobject });
         showQuickPickStub.onCall(2).returns({ label: LandingPageCommand.FINISHED_LABEL });
 
-        const json = await LandingPageCommand.execute();
+        const json = await LandingPageCommand.buildLandingPage();
 
         const recordListCard = json.view.regions.components.components[0].regions.components.components[0];
         const recordListUEM = recordListCard.regions.components.components[0];
