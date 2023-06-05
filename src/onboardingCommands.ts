@@ -8,7 +8,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
-import { showInstructionWebView } from './extension';
+import { InstructionsWebviewProvider } from './webviews';
 import { messages } from './messages/messages';
 
 export class OnboardingCommands {
@@ -147,7 +147,7 @@ export class OnboardingCommands {
             }
         );
 
-        showInstructionWebView(
+        InstructionsWebviewProvider.showDismissableInstructions(
             extensionUri,
             messages.getMessage('briefcase_setup_instruction'),
             'src/instructions/briefcase.html'
