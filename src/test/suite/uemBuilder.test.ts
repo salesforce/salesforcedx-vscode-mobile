@@ -2,13 +2,14 @@ import * as assert from 'assert';
 import { UEMBuilder } from '../../landingPage/uemBuilder';
 
 suite('UEM Builder Test Suite', () => {
-
     test('Build returns default with no cards', async () => {
         const builder = new UEMBuilder();
 
         const uem = builder.build();
 
-        let cards = uem.view.regions.components.components[0].regions.components.components;
+        let cards =
+            uem.view.regions.components.components[0].regions.components
+                .components;
         assert.equal(cards.length, 0);
     });
 
@@ -17,8 +18,10 @@ suite('UEM Builder Test Suite', () => {
 
         builder.addGlobalActionCard();
         const uem = builder.build();
-        let cards = uem.view.regions.components.components[0].regions.components.components;
+        let cards =
+            uem.view.regions.components.components[0].regions.components
+                .components;
         assert.equal(cards.length, 1);
-        assert.equal(cards[0].name, "global_actions");
+        assert.equal(cards[0].name, 'global_actions');
     });
 });
