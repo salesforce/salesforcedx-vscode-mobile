@@ -32,7 +32,7 @@ export class OrgUtils {
             return Promise.resolve(sobjects);
         } catch (error) {
             console.log(error);
-            return Promise.reject();
+            return Promise.reject(error);
         }
     }
 

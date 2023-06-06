@@ -11,6 +11,7 @@ export class UEMBuilder {
         'card_name_global_actions'
     );
 
+    // TODO: Create a typed data structure for this instead of any
     private cards: any[] = [];
 
     static readonly valueTypes = [

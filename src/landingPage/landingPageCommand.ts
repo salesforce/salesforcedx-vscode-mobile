@@ -104,7 +104,7 @@ export class LandingPageCommand {
         );
 
         if (!selectedItem) {
-            return uem;
+            return Promise.resolve(uem);
         }
 
         const apiName = selectedItem.detail!;
