@@ -37,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
             if (fromPostProjectCreation) {
                 await OnboardingCommands.deployToOrg();
                 await OnboardingCommands.setupBriefcase(context.extensionUri);
-                await LandingPageCommand.execute();
+                await LandingPageCommand.buildLandingPage();
 
                 InstructionsWebviewProvider.showDismissableInstructions(
                     context.extensionUri,

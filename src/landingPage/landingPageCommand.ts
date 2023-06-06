@@ -1,8 +1,11 @@
-import * as vscode from 'vscode';
+import { window, QuickPickItem, QuickPickItemKind } from 'vscode';
 import { UEMBuilder } from './uemBuilder';
 import { messages } from '../messages/messages';
+import { OrgUtils } from './orgUtils';
+import { UIUtils } from './uiUtils';
 
 export class LandingPageCommand {
+    // TODO: Decide how to handle these eslint exceptions below -- either disable check line-by-line, or change naming conventions
     // eslint-disable-next-line @typescript-eslint/naming-convention
     public static readonly GLOBAL_ACTIONS_CARD_LABEL = messages.getMessage(
         'card_name_global_actions'
@@ -22,39 +25,41 @@ export class LandingPageCommand {
      * Prompts user, in a loop, for cards to include on the landing page. Each card has different parameters
      * which we will need to collect as well.
      */
-    public static async execute() {
-        var selectedCardTypes: vscode.QuickPickItem[] = [];
-        var selectedCardType: vscode.QuickPickItem | undefined;
+    public static async buildLandingPage() {
+        let selectedCardType: QuickPickItem | undefined;
+
+        let uem = new UEMBuilder();
 
         while (selectedCardType?.label !== LandingPageCommand.FINISHED_LABEL) {
-            selectedCardType = await vscode.window.showQuickPick(cardTypes, {
+            selectedCardType = await window.showQuickPick(cardTypes, {
                 placeHolder: messages.getMessage('quickpick_card_placeholder'),
                 canPickMany: false,
                 ignoreFocusOut: true
             });
 
-            if (selectedCardType === undefined) {
+            if (!selectedCardType) {
                 return;
             }
 
-            if (selectedCardType!.label !== LandingPageCommand.FINISHED_LABEL) {
-                selectedCardTypes.push(selectedCardType);
-            }
-        }
-
-        var uem = new UEMBuilder();
-        for (var card of selectedCardTypes) {
-            if (card.label === LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL) {
+            // add the card to UEM
+            if (
+                selectedCardType.label ===
+                LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL
+            ) {
                 uem = LandingPageCommand.configureGlobalActionsCard(uem);
             } else if (
-                card.label === LandingPageCommand.RECORD_LIST_CARD_LABEL
+                selectedCardType.label ===
+                LandingPageCommand.RECORD_LIST_CARD_LABEL
             ) {
-                uem = LandingPageCommand.configureRecordListCard(uem);
+                uem = await LandingPageCommand.configureRecordListCard(uem);
             } else if (
-                card.label === LandingPageCommand.TIMED_LIST_CARD_LABEL
+                selectedCardType.label ===
+                LandingPageCommand.TIMED_LIST_CARD_LABEL
             ) {
-                uem = LandingPageCommand.configureTimedListCard(uem);
+                uem = await LandingPageCommand.configureTimedListCard(uem);
             }
+
+            // TODO: Show progress somehow
         }
 
         return uem.build();
@@ -69,12 +74,50 @@ export class LandingPageCommand {
     }
 
     /**
-     *
+     * A Record List card shows a customized card for a particular SObject. It needs the following params from the user:
+     * - SObject Name
+     * - Primary field
+     * - Secondary field
+     * - OrderBy field
+     * - OrderBy direction (Ascending or Descending)
+     * - MaxItems (number from 3-8)
+     * - SwipeActions
      * @returns json representation of a record list card.
      */
-    static configureRecordListCard(uem: UEMBuilder): UEMBuilder {
-        // TODO
-        return uem;
+    static async configureRecordListCard(uem: UEMBuilder): Promise<UEMBuilder> {
+        const selectedItem = await UIUtils.showQuickPick(
+            messages.getMessage('quickpick_sobject_record_list'),
+            messages.getMessage('progress_message_retrieving_sobjects'),
+            () => {
+                return new Promise<QuickPickItem[]>(async (resolve, reject) => {
+                    const sobjectQuickPickItems = (
+                        await OrgUtils.getSobjects()
+                    ).map((sobject) => {
+                        return {
+                            label: sobject.labelPlural,
+                            detail: sobject.apiName
+                        };
+                    });
+                    resolve(sobjectQuickPickItems);
+                });
+            }
+        );
+
+        if (!selectedItem) {
+            return Promise.resolve(uem);
+        }
+
+        const apiName = selectedItem.detail!;
+        const labelPlural = selectedItem.label;
+
+        // TODO: Get Primary field
+        // TODO: Get Secondary field
+        // TODO: Get OrderBy field
+        // TODO: Get OrderBy direction
+        // TODO: Get MaxItems
+        // TODO: Swipe Actions
+
+        return Promise.resolve(uem.addRecordListCard(apiName, labelPlural));
     }
 
     /**
@@ -88,13 +131,12 @@ export class LandingPageCommand {
      * - nbrRecords - the max number of records to show on the card
      * @returns json representation of a timed and sorted list card.
      */
-    static configureTimedListCard(uem: UEMBuilder): UEMBuilder {
-        // TODO
-        return uem;
+    static async configureTimedListCard(uem: UEMBuilder): Promise<UEMBuilder> {
+        return Promise.resolve(uem.addTimedListCard());
     }
 }
 
-const cardTypes: vscode.QuickPickItem[] = [
+const cardTypes: QuickPickItem[] = [
     {
         label: `${LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL}`,
         description: messages.getMessage('desc_global_action_card')
@@ -109,7 +151,7 @@ const cardTypes: vscode.QuickPickItem[] = [
     },
     {
         label: '',
-        kind: vscode.QuickPickItemKind.Separator
+        kind: QuickPickItemKind.Separator
     },
     {
         label: `${LandingPageCommand.FINISHED_LABEL}`,

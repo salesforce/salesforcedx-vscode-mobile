@@ -9,5 +9,7 @@
     "desc_timed_list_card": "A card showing a list of records filtered and sorted by a date/time range.",
     "desc_finished": "Finish and generate the landing page.",
     "salesforce_mobile_app_instruction": "Salesforce Mobile App Instructions",
-    "briefcase_setup_instruction": "Briefcase Setup Instruction"
+    "briefcase_setup_instruction": "Briefcase Setup Instruction",
+    "quickpick_sobject_record_list": "Select which sObject you want to display on the Record List.",
+    "progress_message_retrieving_sobjects": "Retrieving sObjects from your org, please wait..."
 }
