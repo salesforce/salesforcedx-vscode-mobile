@@ -53,7 +53,8 @@ export class OrgUtils {
                     const f: Field = {
                         apiName: field.name,
                         label: field.label,
-                        type: field.type                    };
+                        type: field.type
+                    };
                     return f;
                 })
                 .sort((a, b) => a.apiName.localeCompare(b.apiName));

@@ -89,7 +89,9 @@ export class UEMBuilder {
         const fieldMap: any = {};
 
         // add primary field (require at least 1 field)
-        fields[fieldsToDisplay[0].apiName] = this.getFieldType(fieldsToDisplay[0]);
+        fields[fieldsToDisplay[0].apiName] = this.getFieldType(
+            fieldsToDisplay[0]
+        );
         fieldMap.mainField = fieldsToDisplay[0].apiName;
 
         // add secondary field
