@@ -3,7 +3,7 @@ import { window, QuickPickItem, QuickPickItemKind, QuickPick } from 'vscode';
 export class UIUtils {
     static async showQuickPick(
         placeholderMessage: string,
-        progressMessage: string | undefined,
+        progressMessage: string | undefined = undefined,
         optionsCallback: () => Promise<QuickPickItem[]>
     ): Promise<QuickPickItem> {
         return new Promise<QuickPickItem>(async (resolve, reject) => {

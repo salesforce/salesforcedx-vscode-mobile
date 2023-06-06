@@ -1,9 +1,5 @@
 import { messages } from '../messages/messages';
-
-interface Field {
-    name: string;
-    type: string;
-}
+import { Field } from './orgUtils';
 
 export class UEMBuilder {
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -74,39 +70,35 @@ export class UEMBuilder {
         return this;
     }
 
-    // TODO: This defaults the name field to "Name" but not all sobjects have a "Name" field. We need
-    // to iterate over all fields and actually LOOK for isNameField=true and use that. ie, ServiceApptName.
-    // BUT, what are the product requirements here? Do we really want to force Name field?
     addRecordListCard(
         objectApiName: string,
         labelPlural: string,
-        nameField: Field = {
-            name: 'Name',
-            type: 'String'
-        },
-        primaryField: Field | undefined = undefined,
-        secondaryField: Field | undefined = undefined,
+        fieldsToDisplay: Field[],
         orderByField: string = 'Name',
         isAscending: boolean = true,
         size = 3
     ): UEMBuilder {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const fields: { [key: string]: string } = {
-            Name: this.getFieldType(nameField)
-        };
+        const fields: any = {};
+        const fieldMap: any = {};
 
-        const fieldMap: { [key: string]: string } = {
-            mainField: nameField.name
-        };
+        // add primary field (require at least 1 field)
+        fields[fieldsToDisplay[0].apiName] = this.getFieldType(fieldsToDisplay[0]);
+        fieldMap.mainField = fieldsToDisplay[0].apiName;
 
-        if (primaryField !== undefined) {
-            fields[primaryField.name] = this.getFieldType(primaryField);
-            fieldMap.subField1 = primaryField.name;
+        // add secondary field
+        if (fieldsToDisplay.length > 1) {
+            fields[fieldsToDisplay[1].apiName] = this.getFieldType(
+                fieldsToDisplay[1]
+            );
+            fieldMap.subField1 = fieldsToDisplay[1].apiName;
         }
 
-        if (secondaryField !== undefined) {
-            fields[secondaryField.name] = this.getFieldType(secondaryField);
-            fieldMap.subField2 = secondaryField.name;
+        // add tertiary field
+        if (fieldsToDisplay.length > 2) {
+            fields[fieldsToDisplay[2].apiName] = this.getFieldType(
+                fieldsToDisplay[2]
+            );
+            fieldMap.subField2 = fieldsToDisplay[2].apiName;
         }
 
         const listUEM = {

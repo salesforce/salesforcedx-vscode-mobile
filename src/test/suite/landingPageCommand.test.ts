@@ -2,7 +2,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { LandingPageCommand } from '../../landingPage/landingPageCommand';
-import { SObject } from '../../landingPage/orgUtils';
+import { OrgUtils, SObject } from '../../landingPage/orgUtils';
 import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
 import { UIUtils } from '../../landingPage/uiUtils';
@@ -57,6 +57,8 @@ suite('Landing Page Command Test Suite', () => {
             UIUtils,
             'showQuickPick'
         );
+
+        // set up sobject picker
         const sobject: SObject = {
             apiName: 'SomeApiName',
             label: 'SomeObject',
@@ -66,32 +68,43 @@ suite('Landing Page Command Test Suite', () => {
             .onCall(0)
             .returns({ label: sobject.labelPlural, detail: sobject.apiName });
 
+        // set up 3 field pickers
+        // stub the orgutils call to get list of fields
+        const orgUtilsStub = sinon.stub(OrgUtils, 'getFieldsForSObject');
+        const sobjectFields = [
+            {
+                apiName: 'City',
+                label: 'City',
+                type: 'string'
+            },
+            {
+                apiName: 'State',
+                label: 'State',
+                type: 'string'
+            },
+            {
+                apiName: 'Zip',
+                label: 'Zip',
+                type: 'string'
+            }
+        ];
+        orgUtilsStub.returns(Promise.resolve(sobjectFields));
+        showQuickPickStub.onCall(1).returns({ label: 'City', detail: 'City' });
+        showQuickPickStub
+            .onCall(2)
+            .returns({ label: 'State', detail: 'State' });
+        showQuickPickStub.onCall(3).returns({ label: 'Zip', detail: 'Zip' });
+
         let uem = new UEMBuilder();
+        const fakeAddRecordListCard = sinon.fake();
+        uem.addRecordListCard = fakeAddRecordListCard;
         uem = await LandingPageCommand.configureRecordListCard(uem);
-        const json = uem.build();
 
-        const recordListCard =
-            json.view.regions.components.components[0].regions.components
-                .components[0];
-        const recordListUEM = recordListCard.regions.components.components[0];
-        // ensure we added a card with a list component
-        assert.equal(recordListUEM.definition, 'mcf/list');
-        assert.equal(
-            recordListUEM.name,
-            `${sobject.apiName.toLowerCase()}_list`
-        );
-        assert.equal(recordListUEM.label, sobject.labelPlural);
-        assert.equal(recordListUEM.properties.size, 3);
-        assert.equal(recordListUEM.properties.objectApiName, sobject.apiName);
-
-        const fields = recordListUEM.properties.fields;
-        const fieldMap = recordListUEM.properties.fieldMap;
-        assert.equal(fields.Name, 'StringValue');
-        assert.equal(fieldMap.mainField, 'Name');
-
-        const rowMap = recordListUEM.regions.components.components[0];
-        assert.equal(rowMap.definition, 'mcf/recordRow');
-        assert.equal(rowMap.name, `${sobject.apiName.toLowerCase()}_row`);
-        assert.equal(rowMap.label, `${sobject.apiName} Row`);
+        const apiNameArg = fakeAddRecordListCard.args[0][0];
+        const labelPluralArg = fakeAddRecordListCard.args[0][1];
+        const selectedFieldsArg = fakeAddRecordListCard.args[0][2];
+        assert.equal(apiNameArg, sobject.apiName);
+        assert.equal(labelPluralArg, sobject.labelPlural);
+        assert.deepStrictEqual(selectedFieldsArg.sort(), sobjectFields.sort());
     });
 });
