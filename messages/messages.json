@@ -16,5 +16,22 @@
     "quickpick_field_2_list": "Select which field you want to display as the second field (or Finished to skip).",
     "quickpick_field_3_list": "Select which field you want to display as the third field (or Finished to skip).",
     "progress_message_retrieving_fields": "Retrieving fields for sObject.",
-    "picklist_option_finished_detail": "I don't want any more fields to be displayed."
+    "picklist_option_finished_detail": "I don't want any more fields to be displayed.",
+    "quickpick_template_select": "Select which template to copy to landing_page.json.",
+    "template_chooser_default_label": "Default",
+    "template_chooser_default_description": "A default option.",
+    "template_chooser_default_detail": "Recently viewed contacts, Accounts, and Opportunities.",
+    "template_chooser_default_filename": "landing_page_default.json",
+    "template_chooser_case_label": "Case Management",
+    "template_chooser_case_description": "Tailored for case management.",
+    "template_chooser_case_detail": "New Case action and the 5 most recent Cases, Accounts, and Contacts.",
+    "template_chooser_case_filename": "landing_page_case_management.json",
+    "template_chooser_healthcare_label": "Healthcare",
+    "template_chooser_healthcare_description": "Tailored for health care.",
+    "template_chooser_healthcare_detail": "Global quick actions with Barcode Scanner, New Visitor/Visit, and more.",
+    "template_chooser_healthcare_filename": "landing_page_healthcare.json",
+    "template_chooser_retail_label": "Retail Execution",
+    "template_chooser_retail_description": "Tailored for retail.",
+    "template_chooser_retail_detail": "Global quick actions with New Oppty/Lead/Account, and more.",
+    "template_chooser_retail_filename": "landing_page_retail_execution.json"
 }
