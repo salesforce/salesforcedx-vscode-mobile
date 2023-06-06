@@ -18,7 +18,7 @@ import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
 import { UIUtils } from '../../landingPage/uiUtils';
 
-suite('Landing Page Command Test Suite', () => {
+suite('Template Chooser Command Test Suite', () => {
     beforeEach(function () {});
 
     afterEach(function () {
