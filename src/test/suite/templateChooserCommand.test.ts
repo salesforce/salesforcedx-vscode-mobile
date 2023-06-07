@@ -78,7 +78,7 @@ suite('Template Chooser Command Test Suite', () => {
 
         showQuickPickStub.onCall(0).returns(undefined);
 
-        // execute our command and get the promise to ensure expected value is received
+        // execute our command and get the promise to ensure expected value is received.
         let promise = TemplateChooserCommand.chooseTemplate();
         let result = await promise;
         assert.equal(result, undefined);
