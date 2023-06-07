@@ -37,15 +37,17 @@ export function activate(context: vscode.ExtensionContext) {
         wizardCommand,
         async (fromPostProjectCreation: boolean = false) => {
             if (fromPostProjectCreation) {
-                await DeployToOrgCommand.deployToOrg();
-                await BriefcaseCommand.setupBriefcase(context.extensionUri);
-                await TemplateChooserCommand.chooseTemplate();
+                await OnboardingCommands.deployToOrg();
+                await OnboardingCommands.setupBriefcase(context.extensionUri);
+                await LandingPageCommand.buildLandingPage();
+                // await OnboardingCommands.deploy();
 
                 InstructionsWebviewProvider.showDismissableInstructions(
                     context.extensionUri,
                     messages.getMessage('salesforce_mobile_app_instruction'),
                     'src/instructions/salesforcemobileapp.html'
                 );
+
             } else {
                 const projectDir =
                     await ConfigureProjectCommand.configureProject(true);
