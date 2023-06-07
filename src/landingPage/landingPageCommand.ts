@@ -113,11 +113,11 @@ export class LandingPageCommand {
 
         const apiName = selectedItem.detail!;
         const labelPlural = selectedItem.label;
-        let fieldsPromise: Promise<Field[]> =
-            OrgUtils.getFieldsForSObject(apiName);
-        let selectedFields: Field[] = [];
 
+        let selectedFields: Field[] = [];
+        let fields: Field[] = [];
         let fieldsPickList: QuickPickItem[] = [];
+
         const finishedOption: QuickPickItem = {
             label: messages.getMessage('finished'),
             detail: messages.getMessage('picklist_option_finished_detail')
@@ -130,7 +130,7 @@ export class LandingPageCommand {
             messages.getMessage('progress_message_retrieving_fields'),
             () => {
                 return new Promise<QuickPickItem[]>(async (resolve, reject) => {
-                    const fields = await fieldsPromise;
+                    fields = await OrgUtils.getFieldsForSObject(apiName);
                     fieldsPickList = fields.map((field) => {
                         return {
                             label: field.label,
@@ -142,11 +142,6 @@ export class LandingPageCommand {
                 });
             }
         );
-
-        // Ensure we have a list of fields from here (this is more of a test approach because the block above is not invoked)
-        // during testing, so it is more difficult to stub out results. This approach allows us to stub the OrgUtils calls to
-        // retrieve the fields.
-        const fields = await fieldsPromise;
 
         const selectedField1 = fields.find(
             (field) => field.apiName === selectedFieldPickItem1.detail
@@ -190,7 +185,6 @@ export class LandingPageCommand {
                                     item.detail !== selectedField1?.apiName &&
                                     item.detail !== selectedField2?.apiName
                             );
-                            items.unshift(finishedOption);
                             resolve(items);
                         }
                     );

@@ -14,11 +14,22 @@ import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
 import { UIUtils } from '../../landingPage/uiUtils';
 import { UEMBuilder } from '../../landingPage/uemBuilder';
+import { QuickPickItem } from 'vscode';
 
 suite('Landing Page Command Test Suite', () => {
-    beforeEach(function () {});
+    let originalShowQuickPickFunction: (
+        placeholderMessage: string,
+        progressMessage: string,
+        optionsCallback: () => Promise<QuickPickItem[]>
+    ) => Promise<QuickPickItem>;
+
+    beforeEach(function () {
+        // we are stubbing the UIUtils.showQuickPick() function for testing, so we need to set it back after each test case.
+        originalShowQuickPickFunction = UIUtils.showQuickPick;
+    });
 
     afterEach(function () {
+        UIUtils.showQuickPick = originalShowQuickPickFunction;
         sinon.restore();
     });
 
@@ -60,24 +71,49 @@ suite('Landing Page Command Test Suite', () => {
     });
 
     test('Adds record list card', async () => {
-        const showQuickPickStub: SinonStub = sinon.stub(
-            UIUtils,
-            'showQuickPick'
-        );
-
-        // set up sobject picker
         const sobject: SObject = {
             apiName: 'SomeApiName',
             label: 'SomeObject',
             labelPlural: 'SomeObjects'
         };
-        showQuickPickStub
-            .onCall(0)
-            .returns({ label: sobject.labelPlural, detail: sobject.apiName });
 
-        // set up 3 field pickers
-        // stub the orgutils call to get list of fields
-        const orgUtilsStub = sinon.stub(OrgUtils, 'getFieldsForSObject');
+        // Set up a stubbed function that invokes the passed in callback and returns stubbed values for testing.
+        // This ensures the callback() is invoked giving more code coverage during testing. This is effectively
+        // mocking out UIUtils functions.
+        let callCount = 0;
+        const mockUIUtilsShowQuickPick = async function (
+            placeholderMessage: string,
+            progressMessage: string,
+            callback: () => Promise<QuickPickItem[]>
+        ): Promise<QuickPickItem> {
+            // we need to execute the callback and wait
+            await callback();
+
+            // now simulate what the user picked as part of the Promise.
+            switch (callCount++) {
+                case 0:
+                    return Promise.resolve({
+                        label: sobject.labelPlural,
+                        detail: sobject.apiName
+                    });
+                case 1:
+                    return Promise.resolve({ label: 'City', detail: 'City' });
+                case 2:
+                    return Promise.resolve({ label: 'State', detail: 'State' });
+                case 3:
+                    return Promise.resolve({ label: 'Zip', detail: 'Zip' });
+            }
+
+            assert.fail('Should never reach here.');
+        };
+        UIUtils.showQuickPick = mockUIUtilsShowQuickPick;
+
+        // set up the sobject and 3 field pickers
+        const orgUtilsStubSobjects = sinon.stub(OrgUtils, 'getSobjects');
+        const sobjects = [sobject];
+        orgUtilsStubSobjects.returns(Promise.resolve(sobjects));
+
+        const orgUtilsStubFields = sinon.stub(OrgUtils, 'getFieldsForSObject');
         const sobjectFields = [
             {
                 apiName: 'City',
@@ -95,21 +131,17 @@ suite('Landing Page Command Test Suite', () => {
                 type: 'string'
             }
         ];
-        orgUtilsStub.returns(Promise.resolve(sobjectFields));
-        showQuickPickStub.onCall(1).returns({ label: 'City', detail: 'City' });
-        showQuickPickStub
-            .onCall(2)
-            .returns({ label: 'State', detail: 'State' });
-        showQuickPickStub.onCall(3).returns({ label: 'Zip', detail: 'Zip' });
+        orgUtilsStubFields.returns(Promise.resolve(sobjectFields));
 
         let uem = new UEMBuilder();
         const fakeAddRecordListCard = sinon.fake();
         uem.addRecordListCard = fakeAddRecordListCard;
         uem = await LandingPageCommand.configureRecordListCard(uem);
 
-        const apiNameArg = fakeAddRecordListCard.args[0][0];
-        const labelPluralArg = fakeAddRecordListCard.args[0][1];
-        const selectedFieldsArg = fakeAddRecordListCard.args[0][2];
+        // check that we passed in the expected params to UEMBuilder.addRecordListCard()
+        const apiNameArg = fakeAddRecordListCard.args[0][0]; // apiName
+        const labelPluralArg = fakeAddRecordListCard.args[0][1]; // plural label
+        const selectedFieldsArg = fakeAddRecordListCard.args[0][2]; // list of selected fields
         assert.equal(apiNameArg, sobject.apiName);
         assert.equal(labelPluralArg, sobject.labelPlural);
         assert.deepStrictEqual(selectedFieldsArg.sort(), sobjectFields.sort());
