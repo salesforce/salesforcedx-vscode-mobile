@@ -1,5 +1,5 @@
 {
-    "quickpick_card_placeholder": "Select a card type to add to the landing page:",
+    "quickpick_card_placeholder": "Select a card type to add to the landing page.",
     "card_name_global_actions": "Global Actions",
     "card_name_timed_list": "Timed List",
     "card_name_record_list": "Record List",
@@ -15,7 +15,7 @@
     "quickpick_field_1_list": "Select which field you want to display as the primary field.",
     "quickpick_field_2_list": "Select which field you want to display as the second field (or Finished to skip).",
     "quickpick_field_3_list": "Select which field you want to display as the third field (or Finished to skip).",
-    "progress_message_retrieving_fields": "Retrieving fields for sObject.",
+    "progress_message_retrieving_fields": "Retrieving list of fields for sObject.",
     "picklist_option_finished_detail": "I don't want any more fields to be displayed.",
     "quickpick_template_select": "Select which template to copy to landing_page.json.",
     "template_chooser_default_label": "Default",
