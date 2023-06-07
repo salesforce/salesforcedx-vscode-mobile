@@ -12,6 +12,7 @@ import { OnboardingCommands } from './onboardingCommands';
 import { LandingPageCommand } from './landingPage/landingPageCommand';
 import { InstructionsWebviewProvider } from './webviews';
 import { messages } from './messages/messages';
+import { TemplateChooserCommand } from './landingPage/templateChooserCommand';
 
 const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
 const onboardingWizardStateKey =
@@ -31,13 +32,13 @@ export function activate(context: vscode.ExtensionContext) {
         context.globalState.update(onboardingWizardStateKey, undefined);
         vscode.commands.executeCommand(wizardCommand, true);
     }
-    let disposable = vscode.commands.registerCommand(
+    vscode.commands.registerCommand(
         wizardCommand,
         async (fromPostProjectCreation: boolean = false) => {
             if (fromPostProjectCreation) {
                 await OnboardingCommands.deployToOrg();
                 await OnboardingCommands.setupBriefcase(context.extensionUri);
-                await LandingPageCommand.buildLandingPage();
+                await TemplateChooserCommand.chooseTemplate();
 
                 InstructionsWebviewProvider.showDismissableInstructions(
                     context.extensionUri,
@@ -59,44 +60,6 @@ export function activate(context: vscode.ExtensionContext) {
             }
         }
     );
-
-    disposable = vscode.commands.registerCommand(
-        'com.salesforce.sandbox.starterkit.configureProject',
-        () => {
-            OnboardingCommands.configureProject();
-        }
-    );
-    context.subscriptions.push(disposable);
-
-    disposable = vscode.commands.registerCommand(
-        'com.salesforce.sandbox.starterkit.deployProject',
-        () => {
-            // The code you place here will be executed every time your command is executed
-            // Display a message box to the user
-            vscode.window.showInformationMessage('Hello VSCode!');
-        }
-    );
-    context.subscriptions.push(disposable);
-
-    disposable = vscode.commands.registerCommand(
-        'com.salesforce.sandbox.starterkit.landingPage',
-        () => {
-            // The code you place here will be executed every time your command is executed
-            // Display a message box to the user
-            vscode.window.showInformationMessage('Hello VSCode!');
-        }
-    );
-    context.subscriptions.push(disposable);
-
-    disposable = vscode.commands.registerCommand(
-        'com.salesforce.sandbox.starterkit.sObjectSetup',
-        () => {
-            // The code you place here will be executed every time your command is executed
-            // Display a message box to the user
-            vscode.window.showInformationMessage('Hello VSCode!');
-        }
-    );
-    context.subscriptions.push(disposable);
 }
 
 // This method is called when your extension is deactivated
