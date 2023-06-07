@@ -69,4 +69,18 @@ suite('Template Chooser Command Test Suite', () => {
             )
         );
     });
+
+    test('Nothing is selected', async () => {
+        const showQuickPickStub: SinonStub = sinon.stub(
+            UIUtils,
+            'showQuickPick'
+        );
+
+        showQuickPickStub.onCall(0).returns(undefined);
+
+        // execute our command and get the promise to ensure expected value is received
+        let promise = TemplateChooserCommand.chooseTemplate();
+        let result = await promise;
+        assert.equal(result, undefined);
+    });
 });
