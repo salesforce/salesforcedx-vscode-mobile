@@ -1,17 +1,35 @@
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
+ */
+
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
 import { LandingPageCommand } from '../../landingPage/landingPageCommand';
-import { SObject } from '../../landingPage/orgUtils';
+import { OrgUtils, SObject } from '../../landingPage/orgUtils';
 import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
 import { UIUtils } from '../../landingPage/uiUtils';
 import { UEMBuilder } from '../../landingPage/uemBuilder';
+import { QuickPickItem } from 'vscode';
 
 suite('Landing Page Command Test Suite', () => {
-    beforeEach(function () {});
+    let originalShowQuickPickFunction: (
+        placeholderMessage: string,
+        progressMessage: string,
+        optionsCallback: () => Promise<QuickPickItem[]>
+    ) => Promise<QuickPickItem>;
+
+    beforeEach(function () {
+        // we are stubbing the UIUtils.showQuickPick() function for testing, so we need to set it back after each test case.
+        originalShowQuickPickFunction = UIUtils.showQuickPick;
+    });
 
     afterEach(function () {
+        UIUtils.showQuickPick = originalShowQuickPickFunction;
         sinon.restore();
     });
 
@@ -53,45 +71,79 @@ suite('Landing Page Command Test Suite', () => {
     });
 
     test('Adds record list card', async () => {
-        const showQuickPickStub: SinonStub = sinon.stub(
-            UIUtils,
-            'showQuickPick'
-        );
         const sobject: SObject = {
             apiName: 'SomeApiName',
             label: 'SomeObject',
             labelPlural: 'SomeObjects'
         };
-        showQuickPickStub
-            .onCall(0)
-            .returns({ label: sobject.labelPlural, detail: sobject.apiName });
+
+        // Set up a stubbed function that invokes the passed in callback and returns stubbed values for testing.
+        // This ensures the callback() is invoked giving more code coverage during testing. This is effectively
+        // mocking out UIUtils functions.
+        let callCount = 0;
+        const mockUIUtilsShowQuickPick = async function (
+            placeholderMessage: string,
+            progressMessage: string,
+            callback: () => Promise<QuickPickItem[]>
+        ): Promise<QuickPickItem> {
+            // we need to execute the callback and wait
+            await callback();
+
+            // now simulate what the user picked as part of the Promise.
+            switch (callCount++) {
+                case 0:
+                    return Promise.resolve({
+                        label: sobject.labelPlural,
+                        detail: sobject.apiName
+                    });
+                case 1:
+                    return Promise.resolve({ label: 'City', detail: 'City' });
+                case 2:
+                    return Promise.resolve({ label: 'State', detail: 'State' });
+                case 3:
+                    return Promise.resolve({ label: 'Zip', detail: 'Zip' });
+            }
+
+            assert.fail('Should never reach here.');
+        };
+        UIUtils.showQuickPick = mockUIUtilsShowQuickPick;
+
+        // set up the sobject and 3 field pickers
+        const orgUtilsStubSobjects = sinon.stub(OrgUtils, 'getSobjects');
+        const sobjects = [sobject];
+        orgUtilsStubSobjects.returns(Promise.resolve(sobjects));
+
+        const orgUtilsStubFields = sinon.stub(OrgUtils, 'getFieldsForSObject');
+        const sobjectFields = [
+            {
+                apiName: 'City',
+                label: 'City',
+                type: 'string'
+            },
+            {
+                apiName: 'State',
+                label: 'State',
+                type: 'string'
+            },
+            {
+                apiName: 'Zip',
+                label: 'Zip',
+                type: 'string'
+            }
+        ];
+        orgUtilsStubFields.returns(Promise.resolve(sobjectFields));
 
         let uem = new UEMBuilder();
+        const fakeAddRecordListCard = sinon.fake();
+        uem.addRecordListCard = fakeAddRecordListCard;
         uem = await LandingPageCommand.configureRecordListCard(uem);
-        const json = uem.build();
 
-        const recordListCard =
-            json.view.regions.components.components[0].regions.components
-                .components[0];
-        const recordListUEM = recordListCard.regions.components.components[0];
-        // ensure we added a card with a list component
-        assert.equal(recordListUEM.definition, 'mcf/list');
-        assert.equal(
-            recordListUEM.name,
-            `${sobject.apiName.toLowerCase()}_list`
-        );
-        assert.equal(recordListUEM.label, sobject.labelPlural);
-        assert.equal(recordListUEM.properties.size, 3);
-        assert.equal(recordListUEM.properties.objectApiName, sobject.apiName);
-
-        const fields = recordListUEM.properties.fields;
-        const fieldMap = recordListUEM.properties.fieldMap;
-        assert.equal(fields.Name, 'StringValue');
-        assert.equal(fieldMap.mainField, 'Name');
-
-        const rowMap = recordListUEM.regions.components.components[0];
-        assert.equal(rowMap.definition, 'mcf/recordRow');
-        assert.equal(rowMap.name, `${sobject.apiName.toLowerCase()}_row`);
-        assert.equal(rowMap.label, `${sobject.apiName} Row`);
+        // check that we passed in the expected params to UEMBuilder.addRecordListCard()
+        const apiNameArg = fakeAddRecordListCard.args[0][0]; // apiName
+        const labelPluralArg = fakeAddRecordListCard.args[0][1]; // plural label
+        const selectedFieldsArg = fakeAddRecordListCard.args[0][2]; // list of selected fields
+        assert.equal(apiNameArg, sobject.apiName);
+        assert.equal(labelPluralArg, sobject.labelPlural);
+        assert.deepStrictEqual(selectedFieldsArg.sort(), sobjectFields.sort());
     });
 });

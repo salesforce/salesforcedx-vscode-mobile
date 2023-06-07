@@ -3,7 +3,7 @@
     "card_name_global_actions": "Global Actions",
     "card_name_timed_list": "Timed List",
     "card_name_record_list": "Record List",
-    "finished": "Finished",
+    "finished": "-- Finished --",
     "desc_global_action_card": "A card showing the LWC Global Quick Actions defined in the org.",
     "desc_record_list_card": "A card showing a list of records.",
     "desc_timed_list_card": "A card showing a list of records filtered and sorted by a date/time range.",
@@ -11,5 +11,10 @@
     "salesforce_mobile_app_instruction": "Salesforce Mobile App Instructions",
     "briefcase_setup_instruction": "Briefcase Setup Instruction",
     "quickpick_sobject_record_list": "Select which sObject you want to display on the Record List.",
-    "progress_message_retrieving_sobjects": "Retrieving sObjects from your org, please wait..."
+    "progress_message_retrieving_sobjects": "Retrieving sObjects from your org, please wait...",
+    "quickpick_field_1_list": "Select which field you want to display as the primary field.",
+    "quickpick_field_2_list": "Select which field you want to display as the second field (or Finished to skip).",
+    "quickpick_field_3_list": "Select which field you want to display as the third field (or Finished to skip).",
+    "progress_message_retrieving_fields": "Retrieving fields for sObject.",
+    "picklist_option_finished_detail": "I don't want any more fields to be displayed."
 }
