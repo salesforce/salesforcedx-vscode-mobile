@@ -10,6 +10,7 @@ import * as path from 'path';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from './webviews';
 import { messages } from './messages/messages';
+import { OrgUtils } from './utils';
 
 export class OnboardingCommands {
     public static async configureProject(
@@ -97,9 +98,12 @@ export class OnboardingCommands {
         if (result) {
             if (result.title === 'Deploy') {
 
+                const user = await OrgUtils.getDefaultUser();
+
                 // Check if authorized
-                if (true) {
-                    const workspaceFolderPath = currentWorkspace.workspaceFolders[0].uri.fsPath;
+                if (user !== 'undefined') {
+                    const aaa = currentWorkspace.workspaceFolders!;
+                    const workspaceFolderPath = aaa[0].uri.fsPath;
                     const forceAppPath = path.join(workspaceFolderPath, 'force-app');
                     const forceAppUri = vscode.Uri.file(forceAppPath);
                     await vscode.commands.executeCommand(
@@ -108,13 +112,29 @@ export class OnboardingCommands {
                     );
                     console.log('foo');
                 } else {
-                    await vscode.commands.executeCommand(
-                        'sfdx.force.auth.web.login'
-                    );
-                    await vscode.window.showInformationMessage(
-                        "Once you've authorized your Org, click here to continue.",
-                        { title: 'OK' }
-                    );
+                    OnboardingCommands.authorizeOrg()
+                        .then(async ()=>{
+                            const aaa = currentWorkspace.workspaceFolders!;
+                    const workspaceFolderPath = aaa[0].uri.fsPath;
+                            //const workspaceFolderPath = currentWorkspace.workspaceFolders[0].uri.fsPath;
+                            const forceAppPath = path.join(workspaceFolderPath, 'force-app');
+                            const forceAppUri = vscode.Uri.file(forceAppPath);
+                            await vscode.commands.executeCommand(
+                                'sfdx.force.source.deploy.source.path',
+                                forceAppUri
+                            );
+                            console.log('bar');
+                        })
+                        .catch(()=>{
+
+                        });
+                    // await vscode.commands.executeCommand(
+                    //     'sfdx.force.auth.web.login'
+                    // );
+                    // await vscode.window.showInformationMessage(
+                    //     "Once you've authorized your Org, click here to continue.",
+                    //     { title: 'OK' }
+                    // );
                 }
                 
             }
@@ -131,19 +151,17 @@ export class OnboardingCommands {
             ,{ title: 'Skip' }
         );
 
-        if (result) {
-            if (result.title === 'Authorize') {
-                await vscode.commands.executeCommand(
-                    'sfdx.force.auth.web.login'
-                );
-                await vscode.window.showInformationMessage(
-                    "Once you've authorized your Org, click here to continue.",
-                    { title: 'OK' }
-                );
-            }
+        if (result && result.title === 'Authorize') {
+            await vscode.commands.executeCommand(
+                'sfdx.force.auth.web.login'
+            );
+            await vscode.window.showInformationMessage(
+                "Once you've authorized your Org, click here to continue.",
+                { title: 'OK' }
+            );
             return Promise.resolve();
         } else {
-            return Promise.resolve();
+            return Promise.reject();
         }
     }
 
@@ -156,23 +174,60 @@ export class OnboardingCommands {
             { title: 'OK' }
         );
 
-        // TODO: this `withProgress` call probably needs tweaking on UX.
-        await vscode.window.withProgress(
-            {
-                location: vscode.ProgressLocation.Notification,
-                title: 'Launching Briefcase Builder...'
-            },
-            async (progress, token) => {
-                await CommonUtils.executeCommandAsync(
-                    "sfdx org open -p '/lightning/setup/Briefcase/home'"
-                );
-            }
-        );
+        // // TODO: this `withProgress` call probably needs tweaking on UX.
+        // await vscode.window.withProgress(
+        //     {
+        //         location: vscode.ProgressLocation.Notification,
+        //         title: 'Launching Briefcase Builder...'
+        //     },
+        //     async (progress, token) => {
+        //         await CommonUtils.executeCommandAsync(
+        //             "sfdx org open -p '/lightning/setup/Briefcase/home'"
+        //         );
+        //     }
+        // );
 
-        InstructionsWebviewProvider.showDismissableInstructions(
-            extensionUri,
-            messages.getMessage('briefcase_setup_instruction'),
-            'src/instructions/briefcase.html'
-        );
+        // InstructionsWebviewProvider.showDismissableInstructions(
+        //     extensionUri,
+        //     messages.getMessage('briefcase_setup_instruction'),
+        //     'src/instructions/briefcase.html'
+        // );
+
+        const user = await OrgUtils.getDefaultUser();
+
+        // Check if authorized
+        if (user !== 'undefined') {
+            InstructionsWebviewProvider.showDismissableInstructions(
+                extensionUri,
+                messages.getMessage('briefcase_setup_instruction'),
+                'src/instructions/briefcase.html'
+            );
+        } else {
+            OnboardingCommands.authorizeOrg()
+                .then(async ()=>{
+                    // TODO: this `withProgress` call probably needs tweaking on UX.
+                    await vscode.window.withProgress(
+                        {
+                            location: vscode.ProgressLocation.Notification,
+                            title: 'Launching Briefcase Builder...'
+                        },
+                        async (progress, token) => {
+                            await CommonUtils.executeCommandAsync(
+                                "sfdx org open -p '/lightning/setup/Briefcase/home'"
+                            );
+                        }
+                    );
+
+                    InstructionsWebviewProvider.showDismissableInstructions(
+                        extensionUri,
+                        messages.getMessage('briefcase_setup_instruction'),
+                        'src/instructions/briefcase.html'
+                    );
+                })
+                .catch(()=>{
+                    console.error('aaa');
+                });
+            
+        }
     }
 }

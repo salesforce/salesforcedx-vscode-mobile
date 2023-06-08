@@ -38,10 +38,12 @@ export function activate(context: vscode.ExtensionContext) {
         async (fromPostProjectCreation: boolean = false) => {
             if (fromPostProjectCreation) {
                 await OnboardingCommands.deployToOrg();
+                await OnboardingCommands.authorizeOrg();
                 await OnboardingCommands.setupBriefcase(context.extensionUri);
+
                 await LandingPageCommand.buildLandingPage();
                 // await OnboardingCommands.deploy();
-
+                
                 InstructionsWebviewProvider.showDismissableInstructions(
                     context.extensionUri,
                     messages.getMessage('salesforce_mobile_app_instruction'),
@@ -49,12 +51,14 @@ export function activate(context: vscode.ExtensionContext) {
                 );
 
             } else {
-                const projectDir =
-                    await ConfigureProjectCommand.configureProject(true);
+                const projectDir = await ConfigureProjectCommand.configureProject(
+                    true
+                );
                 if (projectDir === '') {
                     // No directory selected.
                     return Promise.resolve();
                 }
+
                 context.globalState.update(
                     onboardingWizardStateKey,
                     OnboardingWizardState.projectCreated
