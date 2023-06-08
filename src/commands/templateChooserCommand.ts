@@ -7,7 +7,7 @@
 
 import { QuickPickItem } from 'vscode';
 import { messages } from '../messages/messages';
-import { UIUtils } from './uiUtils';
+import { UIUtils } from '../utils/uiUtils';
 import { workspace } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -21,13 +21,10 @@ export interface TemplateQuickPickItem extends QuickPickItem {
  * When the project is deployed to the user's org, this file will also be copied into static resources and picked up by SApp+.
  */
 export class TemplateChooserCommand {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     static readonly STATIC_RESOURCES_PATH =
         '/force-app/main/default/staticresources';
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     static readonly LANDING_PAGE_FILENAME = 'landing_page.json';
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     static readonly TEMPLATE_LIST_ITEMS: TemplateQuickPickItem[] = [
         {
             label: messages.getMessage('template_chooser_default_label'),

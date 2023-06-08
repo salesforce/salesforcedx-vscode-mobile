@@ -8,11 +8,12 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { OnboardingCommands } from './onboardingCommands';
-import { LandingPageCommand } from './landingPage/landingPageCommand';
+import { TemplateChooserCommand } from './commands/templateChooserCommand';
+import { BriefcaseCommand } from './commands/briefcaseCommand';
+import { DeployToOrgCommand } from './commands/deployToOrgCommand';
+import { ConfigureProjectCommand } from './commands/configureProjectCommand';
 import { InstructionsWebviewProvider } from './webviews';
 import { messages } from './messages/messages';
-import { TemplateChooserCommand } from './landingPage/templateChooserCommand';
 
 const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
 const onboardingWizardStateKey =
@@ -36,8 +37,8 @@ export function activate(context: vscode.ExtensionContext) {
         wizardCommand,
         async (fromPostProjectCreation: boolean = false) => {
             if (fromPostProjectCreation) {
-                await OnboardingCommands.deployToOrg();
-                await OnboardingCommands.setupBriefcase(context.extensionUri);
+                await DeployToOrgCommand.deployToOrg();
+                await BriefcaseCommand.setupBriefcase(context.extensionUri);
                 await TemplateChooserCommand.chooseTemplate();
 
                 InstructionsWebviewProvider.showDismissableInstructions(
@@ -46,9 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
                     'src/instructions/salesforcemobileapp.html'
                 );
             } else {
-                const projectDir = await OnboardingCommands.configureProject(
-                    true
-                );
+                const projectDir =
+                    await ConfigureProjectCommand.configureProject(true);
                 if (projectDir === '') {
                     // No directory selected.
                     return Promise.resolve();

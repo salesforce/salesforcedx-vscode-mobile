@@ -6,26 +6,21 @@
  */
 
 import { window, QuickPickItem, QuickPickItemKind } from 'vscode';
-import { UEMBuilder } from './uemBuilder';
 import { messages } from '../messages/messages';
-import { Field, OrgUtils } from './orgUtils';
-import { UIUtils } from './uiUtils';
+import { Field, OrgUtils } from '../utils/orgUtils';
+import { UIUtils } from '../utils/uiUtils';
+import { UEMBuilder } from '../utils/uemBuilder';
 
 export class LandingPageCommand {
-    // TODO: Decide how to handle these eslint exceptions below -- either disable check line-by-line, or change naming conventions
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     public static readonly GLOBAL_ACTIONS_CARD_LABEL = messages.getMessage(
         'card_name_global_actions'
     );
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     public static readonly TIMED_LIST_CARD_LABEL = messages.getMessage(
         'card_name_timed_list'
     );
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     public static readonly RECORD_LIST_CARD_LABEL = messages.getMessage(
         'card_name_record_list'
     );
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     public static readonly FINISHED_LABEL = messages.getMessage('finished');
 
     /**

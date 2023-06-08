@@ -8,13 +8,13 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as vscode from 'vscode';
-import { LandingPageCommand } from '../../landingPage/landingPageCommand';
-import { OrgUtils, SObject } from '../../landingPage/orgUtils';
+import { OrgUtils, SObject } from '../../../utils/orgUtils';
 import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
-import { UIUtils } from '../../landingPage/uiUtils';
-import { UEMBuilder } from '../../landingPage/uemBuilder';
+import { UIUtils } from '../../../utils/uiUtils';
+import { UEMBuilder } from '../../../utils/uemBuilder';
 import { QuickPickItem } from 'vscode';
+import { LandingPageCommand } from '../../../commands/landingPageCommand';
 
 suite('Landing Page Command Test Suite', () => {
     let originalShowQuickPickFunction: (
