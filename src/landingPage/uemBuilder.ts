@@ -9,7 +9,6 @@ import { messages } from '../messages/messages';
 import { Field } from './orgUtils';
 
 export class UEMBuilder {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
     static readonly GLOBAL_ACTIONS_LABEL = messages.getMessage(
         'card_name_global_actions'
     );

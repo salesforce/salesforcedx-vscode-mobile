@@ -9,7 +9,32 @@
         "@typescript-eslint"
     ],
     "rules": {
-        "@typescript-eslint/naming-convention": "warn",
+        "@typescript-eslint/naming-convention": [
+            "warn",
+            {
+                "selector": "variable",
+                "format": [
+                    "camelCase",
+                    "UPPER_CASE"
+                ]
+            },
+            {
+                "selector": "property",
+                "modifiers": [
+                    "static",
+                    "readonly"
+                ],
+                "format": [
+                    "UPPER_CASE"
+                ]
+            },
+            {
+                "selector": "property",
+                "format": [
+                    "camelCase"
+                ]
+            }
+        ],
         "@typescript-eslint/semi": "warn",
         "curly": "warn",
         "eqeqeq": "warn",
