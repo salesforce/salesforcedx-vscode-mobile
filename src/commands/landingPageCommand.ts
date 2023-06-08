@@ -6,10 +6,10 @@
  */
 
 import { window, QuickPickItem, QuickPickItemKind } from 'vscode';
-import { UEMBuilder } from './uemBuilder';
 import { messages } from '../messages/messages';
-import { Field, OrgUtils } from './orgUtils';
-import { UIUtils } from './uiUtils';
+import { Field, OrgUtils } from '../utils/orgUtils';
+import { UIUtils } from '../utils/uiUtils';
+import { UEMBuilder } from '../utils/uemBuilder';
 
 export class LandingPageCommand {
     public static readonly GLOBAL_ACTIONS_CARD_LABEL = messages.getMessage(

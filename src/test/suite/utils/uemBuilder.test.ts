@@ -6,8 +6,8 @@
  */
 
 import * as assert from 'assert';
-import { UEMBuilder } from '../../landingPage/uemBuilder';
-import { Field } from '../../landingPage/orgUtils';
+import { UEMBuilder } from '../../../utils/uemBuilder';
+import { Field } from '../../../utils/orgUtils';
 
 suite('UEM Builder Test Suite', () => {
     test('Build returns default with no cards', async () => {

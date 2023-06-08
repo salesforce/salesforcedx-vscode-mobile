@@ -6,7 +6,7 @@
  */
 
 import * as assert from 'assert';
-import { UIUtils } from '../../landingPage/uiUtils';
+import { UIUtils } from '../../../utils/uiUtils';
 import { QuickPickItem, window } from 'vscode';
 import { SinonStub } from 'sinon';
 import sinon = require('sinon');

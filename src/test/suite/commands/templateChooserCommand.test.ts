@@ -10,13 +10,13 @@ import * as sinon from 'sinon';
 import * as fs from 'fs';
 import * as path from 'path';
 import { workspace, Uri } from 'vscode';
+import { SinonStub } from 'sinon';
+import { afterEach, beforeEach } from 'mocha';
+import { UIUtils } from '../../../utils/uiUtils';
 import {
     TemplateChooserCommand,
     TemplateQuickPickItem
-} from '../../landingPage/templateChooserCommand';
-import { SinonStub } from 'sinon';
-import { afterEach, beforeEach } from 'mocha';
-import { UIUtils } from '../../landingPage/uiUtils';
+} from '../../../commands/templateChooserCommand';
 
 suite('Template Chooser Command Test Suite', () => {
     beforeEach(function () {});

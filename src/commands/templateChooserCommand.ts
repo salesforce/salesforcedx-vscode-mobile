@@ -7,7 +7,7 @@
 
 import { QuickPickItem } from 'vscode';
 import { messages } from '../messages/messages';
-import { UIUtils } from './uiUtils';
+import { UIUtils } from '../utils/uiUtils';
 import { workspace } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
