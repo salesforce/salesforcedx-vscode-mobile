@@ -28,25 +28,16 @@ export class TemplateChooserCommand {
     static readonly TEMPLATE_LIST_ITEMS: TemplateQuickPickItem[] = [
         {
             label: messages.getMessage('template_chooser_default_label'),
-            description: messages.getMessage(
-                'template_chooser_default_description'
-            ),
             detail: messages.getMessage('template_chooser_default_detail'),
             filename: messages.getMessage('template_chooser_default_filename')
         },
         {
             label: messages.getMessage('template_chooser_case_label'),
-            description: messages.getMessage(
-                'template_chooser_case_description'
-            ),
             detail: messages.getMessage('template_chooser_case_detail'),
             filename: messages.getMessage('template_chooser_case_filename')
         },
         {
             label: messages.getMessage('template_chooser_healthcare_label'),
-            description: messages.getMessage(
-                'template_chooser_healthcare_description'
-            ),
             detail: messages.getMessage('template_chooser_healthcare_detail'),
             filename: messages.getMessage(
                 'template_chooser_healthcare_filename'
@@ -54,9 +45,6 @@ export class TemplateChooserCommand {
         },
         {
             label: messages.getMessage('template_chooser_retail_label'),
-            description: messages.getMessage(
-                'template_chooser_retail_description'
-            ),
             detail: messages.getMessage('template_chooser_retail_detail'),
             filename: messages.getMessage('template_chooser_retail_filename')
         }
@@ -64,7 +52,7 @@ export class TemplateChooserCommand {
 
     public static async chooseTemplate() {
         const selectedItem = await UIUtils.showQuickPick(
-            messages.getMessage('quickpick_template_select'),
+            messages.getMessage('template_quickpick_placeholder'),
             undefined,
             () => {
                 return new Promise<QuickPickItem[]>(async (resolve, reject) => {
