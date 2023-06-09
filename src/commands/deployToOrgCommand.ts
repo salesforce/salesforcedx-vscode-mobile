@@ -26,7 +26,7 @@ export class DeployToOrgCommand {
         );
 
         if (!result || result.title === 'Cancel') {
-            return Promise.reject(false);
+            return Promise.resolve(false);
         }
 
         const workspaceFolderPath =
