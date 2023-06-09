@@ -31,11 +31,11 @@ export class AuthorizeCommand {
                     );
                     return Promise.resolve(true);
                 }
+            } else {
+                return Promise.resolve(false);
             }
         } else {
             return Promise.resolve(true);
         }
-
-        return Promise.resolve(false);
     }
 }
