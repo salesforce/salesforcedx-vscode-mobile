@@ -6,17 +6,10 @@
  */
 
 import path = require('path');
-import { ExtensionContext, Uri, commands, window, workspace } from 'vscode';
+import { Uri, commands, window, workspace } from 'vscode';
 
 export class DeployToOrgCommand {
     static async deployToOrg(): Promise<boolean> {
-        // TODO: Check to see if the Salesforce Extension Pack is installed.
-        // The commented code below starts the process.
-        // const extension = vscode.extensions.getExtension(
-        //   "salesforce.salesforcedx-vscode"
-        // );
-        // console.log(`Extension: ${extension}`);
-
         const currentWorkspace = workspace;
         if (!currentWorkspace.workspaceFolders) {
             await window.showErrorMessage(
@@ -27,22 +20,15 @@ export class DeployToOrgCommand {
         }
 
         const result = await window.showInformationMessage(
-            'Do you want to authorize an Org, or deploy to an already-authorized Org?',
-            { title: 'Authorize' },
-            { title: 'Deploy' }
+            'Do you want to deploy to an already-authorized Org?',
+            { title: 'Deploy' },
+            { title: 'Cancel' }
         );
 
-        if (!result) {
-            return Promise.resolve(false);
+        if (!result || result.title === 'Cancel') {
+            return Promise.reject(false);
         }
 
-        if (result.title === 'Authorize') {
-            await commands.executeCommand('sfdx.force.auth.web.login');
-            await window.showInformationMessage(
-                "Once you've authorized your Org, click here to continue.",
-                { title: 'OK' }
-            );
-        }
         const workspaceFolderPath =
             currentWorkspace.workspaceFolders[0].uri.fsPath;
         const forceAppPath = path.join(workspaceFolderPath, 'force-app');

@@ -67,12 +67,18 @@ export class OrgUtils {
 
     public static async getDefaultUser(): Promise<string> {
         const aggregator = await ConfigAggregator.create();
-        const currentUserConfig = aggregator.getInfo(
-            OrgConfigProperties.TARGET_ORG
-        );
-        const currentUser = currentUserConfig.value
-            ? currentUserConfig.value
-            : 'undefined';
+
+        // When VSCode re-opens itself for a new project aggregator needs a
+        // forced reload in order to get the currently authorized user.
+        await aggregator.reload();
+
+        const currentUser = aggregator
+            .getLocalConfig()
+            ?.get(OrgConfigProperties.TARGET_ORG);
+        if (!currentUser) {
+            console.error("Can't determine user. Local config is empty.");
+            return 'undefined';
+        }
         return Promise.resolve(currentUser.toString());
     }
 }

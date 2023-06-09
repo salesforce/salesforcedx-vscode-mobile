@@ -5,14 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import {
-    ProgressLocation,
-    QuickPickItem,
-    QuickPickOptions,
-    Uri,
-    commands,
-    window
-} from 'vscode';
+import { QuickPickItem, QuickPickOptions, commands, window } from 'vscode';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../webviews';
 import { messages } from '../messages/messages';

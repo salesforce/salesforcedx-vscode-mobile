@@ -12,8 +12,10 @@ import { TemplateChooserCommand } from './commands/templateChooserCommand';
 import { BriefcaseCommand } from './commands/briefcaseCommand';
 import { DeployToOrgCommand } from './commands/deployToOrgCommand';
 import { ConfigureProjectCommand } from './commands/configureProjectCommand';
+import { AuthorizeCommand } from './commands/authorizeCommand';
 import { InstructionsWebviewProvider } from './webviews';
 import { messages } from './messages/messages';
+import { OrgUtils } from './utils/orgUtils';
 
 const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
 const onboardingWizardStateKey =
@@ -37,23 +39,24 @@ export function activate(context: vscode.ExtensionContext) {
         wizardCommand,
         async (fromPostProjectCreation: boolean = false) => {
             if (fromPostProjectCreation) {
-                await OnboardingCommands.deployToOrg();
-                await OnboardingCommands.authorizeOrg();
-                await OnboardingCommands.setupBriefcase(context.extensionUri);
+                await AuthorizeCommand.authorizeToOrg().then(async () => {
+                    await BriefcaseCommand.setupBriefcase(context.extensionUri);
+                });
 
-                await LandingPageCommand.buildLandingPage();
-                // await OnboardingCommands.deploy();
-                
+                await TemplateChooserCommand.chooseTemplate();
+
+                await AuthorizeCommand.authorizeToOrg().then(async () => {
+                    await DeployToOrgCommand.deployToOrg();
+                });
+
                 InstructionsWebviewProvider.showDismissableInstructions(
                     context.extensionUri,
                     messages.getMessage('salesforce_mobile_app_instruction'),
                     'src/instructions/salesforcemobileapp.html'
                 );
-
             } else {
-                const projectDir = await ConfigureProjectCommand.configureProject(
-                    true
-                );
+                const projectDir =
+                    await ConfigureProjectCommand.configureProject(true);
                 if (projectDir === '') {
                     // No directory selected.
                     return Promise.resolve();
