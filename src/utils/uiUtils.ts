@@ -18,6 +18,7 @@ export class UIUtils {
      * @param progressMessage Message shown while the quick pick is shown, but is not yet enabled due 
      *                      to building a list of options via the callback.
      * @param optionsCallback Callback used to provide an array of QuickPickItems.
+     * @param ignoreFocusOut Boolean for the ignoreFocusOut option on QuickPick.
      * @returns Promise<QuickPickItem> containing what was chosen by the user, or undefined.
      */
     static async showQuickPick(
