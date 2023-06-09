@@ -77,7 +77,9 @@ suite('Org Utils Test Suite', () => {
                         return 'BAD';
                 }
             },
-            reload: () => { return Promise.resolve; }
+            reload: () => {
+                return Promise.resolve;
+            }
         });
 
         const defaultUser = await OrgUtils.getDefaultUser();
