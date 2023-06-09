@@ -36,7 +36,8 @@ suite('UIUtils Test Suite', () => {
                 return new Promise<QuickPickItem[]>(async (resolve, reject) => {
                     resolve([quickPickItem]);
                 });
-            }
+            },
+            true
         );
 
         const quickPick = showQuickPickSpy.returnValues[0]; // the actual quick pick that was returned
@@ -51,6 +52,9 @@ suite('UIUtils Test Suite', () => {
 
         // verify the quickpick show() and dispose() was invoked
         assert.equal(quickPickSpy.show.callCount > 0, true); // ensure it was shown
+
+        // ensure ignore focus out was set to what we passed in
+        assert.equal(quickPickSpy.ignoreFocusOut, true);
     });
 
     test('When quick pick is dismissed without selecting a value, ensure it is rejected', async () => {

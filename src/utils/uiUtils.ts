@@ -23,12 +23,13 @@ export class UIUtils {
     static async showQuickPick(
         placeholderMessage: string,
         progressMessage: string | undefined = undefined,
-        optionsCallback: () => Promise<QuickPickItem[]>
+        optionsCallback: () => Promise<QuickPickItem[]>,
+        ignoreFocusOut: boolean = true
     ): Promise<QuickPickItem> {
         return new Promise<QuickPickItem>(async (resolve, reject) => {
             let selectedItem: QuickPickItem | undefined;
             const quickPick = window.createQuickPick();
-            quickPick.ignoreFocusOut = true;
+            quickPick.ignoreFocusOut = ignoreFocusOut;
 
             quickPick.onDidChangeSelection((selectedItems) => {
                 if (selectedItems && selectedItems.length > 0) {
