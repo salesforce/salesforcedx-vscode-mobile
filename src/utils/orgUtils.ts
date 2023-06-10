@@ -67,6 +67,11 @@ export class OrgUtils {
 
     public static async getDefaultUser(): Promise<string> {
         const aggregator = await ConfigAggregator.create();
+
+        // When VSCode re-opens itself for a new project aggregator needs a
+        // forced reload in order to get the currently authorized user.
+        await aggregator.reload();
+
         const currentUserConfig = aggregator.getInfo(
             OrgConfigProperties.TARGET_ORG
         );

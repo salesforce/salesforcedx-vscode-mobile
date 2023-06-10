@@ -65,6 +65,10 @@ suite('Org Utils Test Suite', () => {
     });
 
     test('Default username is retrieved', async () => {
+        const reloadSpy = sinon.spy(() => {
+            return Promise.resolve;
+        });
+        
         const config: SinonStub = sinon.stub(ConfigAggregator, 'create');
         config.returns({
             getInfo: (key: OrgConfigProperties) => {
@@ -76,12 +80,14 @@ suite('Org Utils Test Suite', () => {
                     default:
                         return 'BAD';
                 }
-            }
+            },
+            reload: reloadSpy
         });
 
         const defaultUser = await OrgUtils.getDefaultUser();
 
         assert.equal(defaultUser, 'username');
+        assert.equal(reloadSpy.called, true, "reload should be invoked");
     });
 
     test('Returns list of sobjects', async () => {

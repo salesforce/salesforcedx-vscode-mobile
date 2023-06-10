@@ -12,8 +12,10 @@ import { TemplateChooserCommand } from './commands/templateChooserCommand';
 import { BriefcaseCommand } from './commands/briefcaseCommand';
 import { DeployToOrgCommand } from './commands/deployToOrgCommand';
 import { ConfigureProjectCommand } from './commands/configureProjectCommand';
+import { AuthorizeCommand } from './commands/authorizeCommand';
 import { InstructionsWebviewProvider } from './webviews';
 import { messages } from './messages/messages';
+import { OrgUtils } from './utils/orgUtils';
 
 const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
 const onboardingWizardStateKey =
@@ -37,9 +39,15 @@ export function activate(context: vscode.ExtensionContext) {
         wizardCommand,
         async (fromPostProjectCreation: boolean = false) => {
             if (fromPostProjectCreation) {
-                await DeployToOrgCommand.deployToOrg();
-                await BriefcaseCommand.setupBriefcase(context.extensionUri);
+                await AuthorizeCommand.authorizeToOrg().then(async () => {
+                    await BriefcaseCommand.setupBriefcase(context.extensionUri);
+                });
+
                 await TemplateChooserCommand.chooseTemplate();
+
+                await AuthorizeCommand.authorizeToOrg().then(async () => {
+                    await DeployToOrgCommand.deployToOrg();
+                });
 
                 InstructionsWebviewProvider.showDismissableInstructions(
                     context.extensionUri,
@@ -53,6 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
                     // No directory selected.
                     return Promise.resolve();
                 }
+
                 context.globalState.update(
                     onboardingWizardStateKey,
                     OnboardingWizardState.projectCreated
