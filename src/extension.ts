@@ -55,9 +55,10 @@ export function activate(context: vscode.ExtensionContext) {
                     'src/instructions/salesforcemobileapp.html'
                 );
             } else {
-                const projectDir =
-                    await ConfigureProjectCommand.configureProject(true);
-                if (projectDir === '') {
+                const projectDir = await new ConfigureProjectCommand(
+                    context.extensionUri
+                ).configureProject();
+                if (!projectDir) {
                     // No directory selected.
                     return Promise.resolve();
                 }
