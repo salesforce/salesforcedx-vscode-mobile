@@ -44,7 +44,7 @@
     "test": "node ./out/test/runTest.js",
     "prettier:write": "prettier --write \"src/**/*.{ts, js}\"",
     "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\"",
-    "genl10n": "npx @vscode/l10n-dev export -o ./l10n ./src"
+    "genl10n": "vscode-l10n-dev export ./src"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
