@@ -7,7 +7,7 @@
 
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import { Field, OrgUtils } from '../../../utils/orgUtils';
+import { OrgUtils } from '../../../utils/orgUtils';
 import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
 import {
