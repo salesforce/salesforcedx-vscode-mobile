@@ -49,7 +49,11 @@ export class InstructionsWebviewProvider {
             }
         });
 
-        const htmlPath = vscode.Uri.joinPath(this.extensionUri, contentPath);
+        const localeContentPath = this.getLocaleContentPath(
+            this.extensionUri,
+            contentPath
+        );
+        const htmlPath = vscode.Uri.joinPath(this.extensionUri, localeContentPath);
         const messagingJsPath = vscode.Uri.joinPath(
             this.extensionUri,
             MESSAGING_JS_PATH
@@ -80,5 +84,33 @@ export class InstructionsWebviewProvider {
                 }
             }
         ]);
+    }
+
+    /**
+     * Check to see if a locale-specific file exists, otherwise return the default.
+     * @param extensionUri Uri representing the path to this extension, supplied by vscode.
+     * @param contentPath The relative path (and filename) of the content to display.
+     */
+    getLocaleContentPath(
+        extensionUri: vscode.Uri,
+        contentPath: string
+    ): string {
+        const language = vscode.env.language;
+
+        // check to see if a file exists for this locale.
+        const localeContentPath = contentPath.replace(
+            /\.html$/,
+            `.${language}.html`
+        );
+
+        const fullPath = vscode.Uri.joinPath(extensionUri, localeContentPath);
+
+        if (fs.existsSync(fullPath.fsPath)) {
+            // a file exists for this locale, so return it instead.
+            return localeContentPath;
+        } else {
+            // fall back
+            return contentPath;
+        }
     }
 }

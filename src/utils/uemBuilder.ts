@@ -5,13 +5,11 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { messages } from '../messages/messages';
+import { l10n } from 'vscode';
 import { Field } from './orgUtils';
 
 export class UEMBuilder {
-    static readonly GLOBAL_ACTIONS_LABEL = messages.getMessage(
-        'card_name_global_actions'
-    );
+    static readonly GLOBAL_ACTIONS_LABEL = l10n.t('Global Actions');
 
     // TODO: Create a typed data structure for this instead of any
     private cards: any[] = [];

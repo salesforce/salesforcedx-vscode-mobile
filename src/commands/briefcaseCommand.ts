@@ -5,10 +5,9 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { ProgressLocation, Uri, window } from 'vscode';
+import { ProgressLocation, Uri, window, l10n } from 'vscode';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../webviews';
-import { messages } from '../messages/messages';
 
 export class BriefcaseCommand {
     static async setupBriefcase(extensionUri: Uri): Promise<boolean> {
@@ -33,7 +32,7 @@ export class BriefcaseCommand {
 
         InstructionsWebviewProvider.showDismissableInstructions(
             extensionUri,
-            messages.getMessage('briefcase_setup_instruction'),
+            l10n.t('Briefcase Setup Instruction'),
             'src/instructions/briefcase.html'
         );
 

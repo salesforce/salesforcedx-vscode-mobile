@@ -5,23 +5,16 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { window, QuickPickItem, QuickPickItemKind } from 'vscode';
-import { messages } from '../messages/messages';
+import { window, QuickPickItem, QuickPickItemKind, l10n } from 'vscode';
 import { Field, OrgUtils } from '../utils/orgUtils';
 import { UIUtils } from '../utils/uiUtils';
 import { UEMBuilder } from '../utils/uemBuilder';
 
 export class LandingPageCommand {
-    public static readonly GLOBAL_ACTIONS_CARD_LABEL = messages.getMessage(
-        'card_name_global_actions'
-    );
-    public static readonly TIMED_LIST_CARD_LABEL = messages.getMessage(
-        'card_name_timed_list'
-    );
-    public static readonly RECORD_LIST_CARD_LABEL = messages.getMessage(
-        'card_name_record_list'
-    );
-    public static readonly FINISHED_LABEL = messages.getMessage('finished');
+    public static readonly GLOBAL_ACTIONS_CARD_LABEL = l10n.t('Global Actions');
+    public static readonly TIMED_LIST_CARD_LABEL = l10n.t('Timed List');
+    public static readonly RECORD_LIST_CARD_LABEL = l10n.t('Record list');
+    public static readonly FINISHED_LABEL = l10n.t('-- Finished --');
 
     /**
      * Prompts user, in a loop, for cards to include on the landing page. Each card has different parameters
@@ -34,7 +27,9 @@ export class LandingPageCommand {
 
         while (selectedCardType?.label !== LandingPageCommand.FINISHED_LABEL) {
             selectedCardType = await window.showQuickPick(cardTypes, {
-                placeHolder: messages.getMessage('quickpick_card_placeholder'),
+                placeHolder: l10n.t(
+                    'Select a card type to add to the landing page.'
+                ),
                 canPickMany: false,
                 ignoreFocusOut: true
             });
@@ -85,8 +80,8 @@ export class LandingPageCommand {
      */
     static async configureRecordListCard(uem: UEMBuilder): Promise<UEMBuilder> {
         const selectedItem = await UIUtils.showQuickPick(
-            messages.getMessage('quickpick_sobject_record_list'),
-            messages.getMessage('progress_message_retrieving_sobjects'),
+            l10n.t('Select which sObject you want to display on the Record List.'),
+            l10n.t('Retrieving sObjects from your org, please wait...'),
             () => {
                 return new Promise<QuickPickItem[]>(async (resolve, reject) => {
                     const items = (await OrgUtils.getSobjects()).map(
@@ -114,15 +109,15 @@ export class LandingPageCommand {
         let fieldsPickList: QuickPickItem[] = [];
 
         const finishedOption: QuickPickItem = {
-            label: messages.getMessage('finished'),
-            detail: messages.getMessage('picklist_option_finished_detail')
+            label: l10n.t('-- Finished --'),
+            detail: l10n.t('I don\'t want any more fields to be displayed.')
         };
 
         // Prompt user for up to 3 fields. The first request we will retrieve the fields and show a progress
         // message
         const selectedFieldPickItem1 = await UIUtils.showQuickPick(
-            messages.getMessage('quickpick_field_1_list'),
-            messages.getMessage('progress_message_retrieving_fields'),
+            l10n.t('Select which field you want to display as the primary field.'),
+            l10n.t('Retrieving list of fields for sObject.'),
             () => {
                 return new Promise<QuickPickItem[]>(async (resolve, reject) => {
                     fields = await OrgUtils.getFieldsForSObject(apiName);
@@ -147,7 +142,7 @@ export class LandingPageCommand {
 
         // get optional field 2 -- do not show a progress message.
         const selectedFieldPickItem2 = await UIUtils.showQuickPick(
-            messages.getMessage('quickpick_field_2_list'),
+            l10n.t('Select which field you want to display as the second field (or Finished to skip).'),
             undefined,
             () => {
                 return new Promise<QuickPickItem[]>(async (resolve, reject) => {
@@ -170,7 +165,7 @@ export class LandingPageCommand {
         let selectedFieldPickItem3: QuickPickItem;
         if (selectedFieldPickItem2.label !== finishedOption.label) {
             selectedFieldPickItem3 = await UIUtils.showQuickPick(
-                messages.getMessage('quickpick_field_3_list'),
+                l10n.t('Select which field you want to display as the third field (or Finished to skip).'),
                 undefined,
                 () => {
                     return new Promise<QuickPickItem[]>(
@@ -223,15 +218,15 @@ export class LandingPageCommand {
 const cardTypes: QuickPickItem[] = [
     {
         label: `${LandingPageCommand.GLOBAL_ACTIONS_CARD_LABEL}`,
-        description: messages.getMessage('desc_global_action_card')
+        description: l10n.t('A card showing the LWC Global Quick Actions defined in the org.')
     },
     {
         label: `${LandingPageCommand.RECORD_LIST_CARD_LABEL}`,
-        description: messages.getMessage('desc_record_list_card')
+        description: l10n.t('A card showing a list of records.')
     },
     {
         label: `${LandingPageCommand.TIMED_LIST_CARD_LABEL}`,
-        description: messages.getMessage('desc_timed_list_card')
+        description: l10n.t('A card showing a list of records filtered and sorted by a date/time range.')
     },
     {
         label: '',
@@ -239,6 +234,6 @@ const cardTypes: QuickPickItem[] = [
     },
     {
         label: `${LandingPageCommand.FINISHED_LABEL}`,
-        description: messages.getMessage('desc_finished')
+        description: l10n.t('Finish and generate the landing page.')
     }
 ];
