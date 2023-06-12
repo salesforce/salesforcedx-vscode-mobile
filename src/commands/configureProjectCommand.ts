@@ -8,7 +8,6 @@
 import { QuickPickItem, QuickPickOptions, commands, window } from 'vscode';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../webviews';
-import { messages } from '../messages/messages';
 
 export class ConfigureProjectCommand {
     static async configureProject(

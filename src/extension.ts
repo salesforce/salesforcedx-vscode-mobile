@@ -14,8 +14,6 @@ import { DeployToOrgCommand } from './commands/deployToOrgCommand';
 import { ConfigureProjectCommand } from './commands/configureProjectCommand';
 import { AuthorizeCommand } from './commands/authorizeCommand';
 import { InstructionsWebviewProvider } from './webviews';
-import { messages } from './messages/messages';
-import { OrgUtils } from './utils/orgUtils';
 
 const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
 const onboardingWizardStateKey =
@@ -51,7 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
 
                 InstructionsWebviewProvider.showDismissableInstructions(
                     context.extensionUri,
-                    messages.getMessage('salesforce_mobile_app_instruction'),
+                    vscode.l10n.t('Salesforce Mobile App Instructions'),
                     'src/instructions/salesforcemobileapp.html'
                 );
             } else {

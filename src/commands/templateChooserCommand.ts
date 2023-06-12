@@ -5,8 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { QuickPickItem } from 'vscode';
-import { messages } from '../messages/messages';
+import { QuickPickItem, l10n } from 'vscode';
 import { UIUtils } from '../utils/uiUtils';
 import { workspace } from 'vscode';
 import * as path from 'path';
@@ -27,32 +26,36 @@ export class TemplateChooserCommand {
 
     static readonly TEMPLATE_LIST_ITEMS: TemplateQuickPickItem[] = [
         {
-            label: messages.getMessage('template_chooser_default_label'),
-            detail: messages.getMessage('template_chooser_default_detail'),
-            filename: messages.getMessage('template_chooser_default_filename')
+            label: l10n.t('Default'),
+            detail: l10n.t(
+                'Recently viewed Contacts, Accounts, and Opportunities.'
+            ),
+            filename: 'landing_page_default.json'
         },
         {
-            label: messages.getMessage('template_chooser_case_label'),
-            detail: messages.getMessage('template_chooser_case_detail'),
-            filename: messages.getMessage('template_chooser_case_filename')
+            label: l10n.t('Case Management'),
+            detail: l10n.t(
+                'New Case action and the 5 most recent Cases, Accounts, and Contacts.'
+            ),
+            filename: 'landing_page_case_management.json'
         },
         {
-            label: messages.getMessage('template_chooser_healthcare_label'),
-            detail: messages.getMessage('template_chooser_healthcare_detail'),
-            filename: messages.getMessage(
-                'template_chooser_healthcare_filename'
-            )
+            label: l10n.t('Healthcare'),
+            detail: l10n.t(
+                'Global quick actions with BarcodeScanner, new Visitor, and more.'
+            ),
+            filename: 'landing_page_healthcare.json'
         },
         {
-            label: messages.getMessage('template_chooser_retail_label'),
-            detail: messages.getMessage('template_chooser_retail_detail'),
-            filename: messages.getMessage('template_chooser_retail_filename')
+            label: l10n.t('Retail Execution'),
+            detail: l10n.t('Global quick actions with new Opportunity, new Lead, and more.'),
+            filename: 'landing_page_retail_execution.json'
         }
     ];
 
     public static async chooseTemplate() {
         const selectedItem = await UIUtils.showQuickPick(
-            messages.getMessage('template_quickpick_placeholder'),
+            l10n.t('Select a template...'),
             undefined,
             () => {
                 return new Promise<QuickPickItem[]>(async (resolve, reject) => {
