@@ -6,26 +6,26 @@
  */
 
 import path = require('path');
-import { Uri, commands, window, workspace } from 'vscode';
+import { Uri, commands, window, workspace, l10n } from 'vscode';
 
 export class DeployToOrgCommand {
     static async deployToOrg(): Promise<boolean> {
         const currentWorkspace = workspace;
         if (!currentWorkspace.workspaceFolders) {
             await window.showErrorMessage(
-                'There are no workspace folders defined in your project.',
-                { title: 'OK' }
+                l10n.t('There are no workspace folders defined in your project.'),
+                { title: l10n.t('OK') }
             );
             return Promise.resolve(false);
         }
 
         const result = await window.showInformationMessage(
-            'Do you want to deploy to an already-authorized Org?',
-            { title: 'Deploy' },
-            { title: 'Cancel' }
+            l10n.t('Do you want to deploy to an already-authorized Org?'),
+            { title: l10n.t('Deploy') },
+            { title: l10n.t('Cancel') }
         );
 
-        if (!result || result.title === 'Cancel') {
+        if (!result || result.title === l10n.t('Cancel')) {
             return Promise.resolve(false);
         }
 
