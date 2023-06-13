@@ -13,9 +13,9 @@ import { window, QuickPickItem, QuickPickItemKind, QuickPick } from 'vscode';
 export class UIUtils {
     /**
      * Wraps the ability to ask user for a selection from a quick pick list.
-     * 
+     *
      * @param placeholderMessage Message shown to user in the quick pick text entry box.
-     * @param progressMessage Message shown while the quick pick is shown, but is not yet enabled due 
+     * @param progressMessage Message shown while the quick pick is shown, but is not yet enabled due
      *                      to building a list of options via the callback.
      * @param optionsCallback Callback used to provide an array of QuickPickItems.
      * @param ignoreFocusOut Boolean for the ignoreFocusOut option on QuickPick.
@@ -40,13 +40,13 @@ export class UIUtils {
                 if (selectedItem) {
                     resolve(selectedItem);
                 } else {
-                    reject("Nothing selected");
+                    reject('Nothing selected');
                 }
             });
 
             quickPick.onDidHide((e) => {
                 quickPick.dispose();
-                reject("Hiding");
+                reject('Hiding');
             });
 
             if (progressMessage) {
