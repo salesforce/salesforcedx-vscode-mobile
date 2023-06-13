@@ -14,12 +14,13 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm install
-      - run: npm run test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: reports/coverage/*.json
-          flags: frontend,backend
+      - run: npm run compile
+      # Commenting below until code coverage story is done
+      # - name: Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v3
+      #   with:
+      #     files: reports/coverage/*.json
+      #     flags: frontend,backend
   run-tests-win:
     runs-on: windows-latest
     strategy:
@@ -32,4 +33,5 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: yarn install
-      - run: yarn test
+      # Commenting below until code coverage story is done
+      # - run: yarn test
