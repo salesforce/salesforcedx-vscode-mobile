@@ -79,6 +79,6 @@ export class OrgUtils {
         if (currentUserConfig && currentUserConfig.value) {
             return Promise.resolve(currentUserConfig.value.toString());
         }
-        return Promise.reject("no user");
+        return Promise.reject('no user');
     }
 }

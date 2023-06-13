@@ -13,7 +13,9 @@ export class DeployToOrgCommand {
         const currentWorkspace = workspace;
         if (!currentWorkspace.workspaceFolders) {
             await window.showErrorMessage(
-                l10n.t('There are no workspace folders defined in your project.'),
+                l10n.t(
+                    'There are no workspace folders defined in your project.'
+                ),
                 { title: l10n.t('OK') }
             );
             return Promise.resolve(false);

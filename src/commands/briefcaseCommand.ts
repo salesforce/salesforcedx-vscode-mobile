@@ -12,8 +12,10 @@ import { InstructionsWebviewProvider } from '../webviews';
 export class BriefcaseCommand {
     static async setupBriefcase(extensionUri: Uri): Promise<boolean> {
         await window.showInformationMessage(
-            l10n.t('Click OK to launch your org to the Briefcase Builder page. After ' +
-                'launching, return here for instructions to set up a Briefcase rule.'),
+            l10n.t(
+                'Click OK to launch your org to the Briefcase Builder page. After ' +
+                    'launching, return here for instructions to set up a Briefcase rule.'
+            ),
             { title: l10n.t('OK') }
         );
 

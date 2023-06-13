@@ -94,7 +94,7 @@ suite('Org Utils Test Suite', () => {
         const reloadSpy = sinon.spy(() => {
             return Promise.resolve;
         });
-        
+
         const config: SinonStub = sinon.stub(ConfigAggregator, 'create');
         config.returns({
             getInfo: (key: OrgConfigProperties) => {
@@ -109,14 +109,12 @@ suite('Org Utils Test Suite', () => {
         });
 
         let expectedConditionReached = false;
-        const defaultUser = await OrgUtils.getDefaultUser()
-        .catch((err) => {
+        const defaultUser = await OrgUtils.getDefaultUser().catch((err) => {
             expectedConditionReached = true;
         });
 
         assert.equal(expectedConditionReached, true);
     });
-
 
     test('Returns list of sobjects', async () => {
         const orgStub: SinonStub = sinon.stub(Org, 'create');
