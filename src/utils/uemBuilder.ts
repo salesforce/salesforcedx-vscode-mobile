@@ -14,7 +14,7 @@ export class UEMBuilder {
     // TODO: Create a typed data structure for this instead of any
     private cards: any[] = [];
 
-    static readonly valueTypes = [
+    static readonly VALUE_TYPES = [
         'Int',
         'String',
         'Boolean',
@@ -40,10 +40,10 @@ export class UEMBuilder {
         'Base64'
     ];
 
-    static readonly defaultValueType = 'StringValue';
+    static readonly DEFAULT_VALUE_TYPE = 'StringValue';
 
     private getFieldType(field: Field): string {
-        const t = UEMBuilder.valueTypes.find(
+        const t = UEMBuilder.VALUE_TYPES.find(
             (t) => t.toLowerCase() === field.type.toLowerCase()
         );
 
@@ -52,7 +52,7 @@ export class UEMBuilder {
         }
 
         // default
-        return UEMBuilder.defaultValueType;
+        return UEMBuilder.DEFAULT_VALUE_TYPE;
     }
 
     addGlobalActionCard(): UEMBuilder {
