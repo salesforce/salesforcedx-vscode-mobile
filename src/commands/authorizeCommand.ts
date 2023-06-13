@@ -5,37 +5,37 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { commands, window } from 'vscode';
+import { commands, window, l10n } from 'vscode';
 import { OrgUtils } from '../utils/orgUtils';
 
 export class AuthorizeCommand {
     static async authorizeToOrg(): Promise<boolean> {
-        const user = await OrgUtils.getDefaultUser();
+        let userAuthorized = false;
+        await OrgUtils.getDefaultUser()
+            .then(() => {
+                userAuthorized = true;
+            })
+            .catch(async (err) => {
+                // Ask user to authorize to an org now only if not authorized yet.
+                const result = await window.showInformationMessage(
+                    l10n.t('Do you want to authorize an Org now?'),
+                    { title: l10n.t('Authorize') },
+                    { title: l10n.t('No') }
+                );
 
-        // Ask user to authorize to an org now only if not authorized yet.
-        if (user === 'undefined') {
-            const result = await window.showInformationMessage(
-                'Do you want to authorize an Org now?',
-                { title: 'Authorize' },
-                { title: 'No' }
-            );
-
-            if (result) {
-                if (result.title === 'No') {
-                    return Promise.resolve(false);
+                if (!result || result.title === l10n.t('No')) {
+                    userAuthorized = false;
                 } else {
                     await commands.executeCommand('sfdx.force.auth.web.login');
                     await window.showInformationMessage(
-                        "Once you've authorized your Org, click here to continue.",
-                        { title: 'OK' }
+                        l10n.t(
+                            "Once you've authorized your Org, click here to continue."
+                        ),
+                        { title: l10n.t('OK') }
                     );
-                    return Promise.resolve(true);
+                    userAuthorized = true;
                 }
-            } else {
-                return Promise.resolve(false);
-            }
-        } else {
-            return Promise.resolve(true);
-        }
+            });
+        return Promise.resolve(userAuthorized);
     }
 }

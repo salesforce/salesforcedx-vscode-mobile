@@ -90,6 +90,34 @@ suite('Org Utils Test Suite', () => {
         assert.equal(reloadSpy.called, true, 'reload should be invoked');
     });
 
+    test('Username is not determined.', async () => {
+        const reloadSpy = sinon.spy(() => {
+            return Promise.resolve;
+        });
+        
+        const config: SinonStub = sinon.stub(ConfigAggregator, 'create');
+        config.returns({
+            getInfo: (key: OrgConfigProperties) => {
+                switch (key) {
+                    case OrgConfigProperties.TARGET_ORG:
+                        return undefined;
+                    default:
+                        return 'BAD';
+                }
+            },
+            reload: reloadSpy
+        });
+
+        let expectedConditionReached = false;
+        const defaultUser = await OrgUtils.getDefaultUser()
+        .catch((err) => {
+            expectedConditionReached = true;
+        });
+
+        assert.equal(expectedConditionReached, true);
+    });
+
+
     test('Returns list of sobjects', async () => {
         const orgStub: SinonStub = sinon.stub(Org, 'create');
         const stubConnection = sinon.createStubInstance(Connection);

@@ -75,9 +75,10 @@ export class OrgUtils {
         const currentUserConfig = aggregator.getInfo(
             OrgConfigProperties.TARGET_ORG
         );
-        const currentUser = currentUserConfig.value
-            ? currentUserConfig.value
-            : 'undefined';
-        return Promise.resolve(currentUser.toString());
+
+        if (currentUserConfig && currentUserConfig.value) {
+            return Promise.resolve(currentUserConfig.value.toString());
+        }
+        return Promise.reject("no user");
     }
 }
