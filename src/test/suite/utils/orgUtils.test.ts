@@ -68,7 +68,7 @@ suite('Org Utils Test Suite', () => {
         const reloadSpy = sinon.spy(() => {
             return Promise.resolve;
         });
-        
+
         const config: SinonStub = sinon.stub(ConfigAggregator, 'create');
         config.returns({
             getInfo: (key: OrgConfigProperties) => {
@@ -87,7 +87,7 @@ suite('Org Utils Test Suite', () => {
         const defaultUser = await OrgUtils.getDefaultUser();
 
         assert.equal(defaultUser, 'username');
-        assert.equal(reloadSpy.called, true, "reload should be invoked");
+        assert.equal(reloadSpy.called, true, 'reload should be invoked');
     });
 
     test('Returns list of sobjects', async () => {

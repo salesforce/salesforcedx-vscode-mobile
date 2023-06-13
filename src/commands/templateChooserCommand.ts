@@ -48,7 +48,9 @@ export class TemplateChooserCommand {
         },
         {
             label: l10n.t('Retail Execution'),
-            detail: l10n.t('Global quick actions with new Opportunity, new Lead, and more.'),
+            detail: l10n.t(
+                'Global quick actions with new Opportunity, new Lead, and more.'
+            ),
             filename: 'landing_page_retail_execution.json'
         }
     ];

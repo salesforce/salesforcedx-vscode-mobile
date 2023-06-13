@@ -53,7 +53,10 @@ export class InstructionsWebviewProvider {
             this.extensionUri,
             contentPath
         );
-        const htmlPath = vscode.Uri.joinPath(this.extensionUri, localeContentPath);
+        const htmlPath = vscode.Uri.joinPath(
+            this.extensionUri,
+            localeContentPath
+        );
         const messagingJsPath = vscode.Uri.joinPath(
             this.extensionUri,
             MESSAGING_JS_PATH
