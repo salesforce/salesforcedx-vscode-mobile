@@ -5,13 +5,9 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import {
-    QuickPickItem,
-    QuickPickOptions,
-    commands,
-    window,
-    l10n
-} from 'vscode';
+import { QuickPickItem, QuickPickOptions, commands, window } from 'vscode';
+import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
+import { InstructionsWebviewProvider } from '../webviews';
 
 export class ConfigureProjectCommand {
     static async configureProject(
@@ -19,22 +15,18 @@ export class ConfigureProjectCommand {
     ): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const header: QuickPickOptions = {
-                placeHolder: l10n.t(
-                    'Create a new project, or open an existing project'
-                )
+                placeHolder: 'Create a new project, or open an existing project'
             };
             const items: QuickPickItem[] = [
                 {
-                    label: l10n.t('Create New Project...'),
-                    description: l10n.t(
+                    label: 'Create New Project...',
+                    description:
                         'Creates a new local project configured with the Offline Starter Kit'
-                    )
                 },
                 {
-                    label: l10n.t('Open Existing Project...'),
-                    description: l10n.t(
+                    label: 'Open Existing Project...',
+                    description:
                         'Opens an existing local project configured with the Offline Starter Kit'
-                    )
                 }
             ];
             const selected = await window.showQuickPick(items, header);
@@ -42,9 +34,9 @@ export class ConfigureProjectCommand {
                 return resolve('');
             }
 
-            if (selected.label === l10n.t('Create New Project...')) {
+            if (selected.label === 'Create New Project...') {
                 const folderUri = await window.showOpenDialog({
-                    openLabel: l10n.t('Select project folder'),
+                    openLabel: 'Select project folder',
                     canSelectFolders: true,
                     canSelectFiles: false,
                     canSelectMany: false
@@ -53,16 +45,14 @@ export class ConfigureProjectCommand {
                     return resolve('');
                 }
 
-                let infoMessage = l10n.t(
-                    'Follow the prompts to configure the project.'
-                );
+                let infoMessage =
+                    'Follow the prompts to configure the project.';
                 if (fromWizard) {
-                    infoMessage += l10n.t(
-                        ' NOTE: after the project is loaded, please be patient while the wizard resumes.'
-                    );
+                    infoMessage +=
+                        ' NOTE: after the project is loaded, please be patient while the wizard resumes.';
                 }
                 await window.showInformationMessage(infoMessage, {
-                    title: l10n.t('OK')
+                    title: 'OK'
                 });
                 const githubRepoUri: string =
                     'https://github.com/salesforce/offline-app-developer-starter-kit.git';
@@ -74,10 +64,10 @@ export class ConfigureProjectCommand {
                     );
                     return resolve(folderUri[0].fsPath);
                 } catch (error) {
-                    window.showErrorMessage(l10n.t('Failed to clone: {error}', [error]));
+                    window.showErrorMessage(`Failed to clone: ${error}`);
                     return reject(error);
                 }
-            } else if (selected.label === l10n.t('Open Existing Project...')) {
+            } else if (selected.label === 'Open Existing Project...') {
                 console.log('Open existing project');
                 return resolve('');
             } else {
