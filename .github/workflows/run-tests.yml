@@ -15,12 +15,6 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm install
       - run: npm run compile
-      # Commenting below until code coverage story is done
-      # - name: Upload coverage to Codecov
-      #   uses: codecov/codecov-action@v3
-      #   with:
-      #     files: reports/coverage/*.json
-      #     flags: frontend,backend
   run-tests-win:
     runs-on: windows-latest
     strategy:
@@ -33,5 +27,3 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm install
-      # Commenting below until code coverage story is done
-      # - run: npm run test
