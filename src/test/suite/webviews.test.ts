@@ -13,7 +13,7 @@ import { afterEach, beforeEach } from 'mocha';
 import * as fs from 'fs';
 
 suite('InstructionsWebviewProvider Test Suite', () => {
-    const extensionUri = Uri.parse("file:///tmp/testdir");
+    const extensionUri = Uri.parse('file:///tmp/testdir');
 
     beforeEach(function () {});
 
@@ -22,29 +22,28 @@ suite('InstructionsWebviewProvider Test Suite', () => {
     });
 
     test('Locale-specific file is returned if it exists', async () => {
-        const languageStub = sinon.stub(env, "language");
-        languageStub.value("es");
+        const languageStub = sinon.stub(env, 'language');
+        languageStub.value('es');
 
-        const fsExistStub = sinon.stub(fs, "existsSync");
+        const fsExistStub = sinon.stub(fs, 'existsSync');
         fsExistStub.returns(true);
 
         const provider = new InstructionsWebviewProvider(extensionUri);
-        const path = provider.getLocaleContentPath(extensionUri, "test.html");
+        const path = provider.getLocaleContentPath(extensionUri, 'test.html');
 
-        assert.equal(path, "test.es.html");
+        assert.equal(path, 'test.es.html');
     });
 
     test('Defaults to english file if locale-specific file does not exist.', async () => {
-        const languageStub = sinon.stub(env, "language");
-        languageStub.value("es");
+        const languageStub = sinon.stub(env, 'language');
+        languageStub.value('es');
 
-        const fsExistStub = sinon.stub(fs, "existsSync");
+        const fsExistStub = sinon.stub(fs, 'existsSync');
         fsExistStub.returns(false);
 
         const provider = new InstructionsWebviewProvider(extensionUri);
-        const path = provider.getLocaleContentPath(extensionUri, "test.html");
+        const path = provider.getLocaleContentPath(extensionUri, 'test.html');
 
-        assert.equal(path, "test.html");
+        assert.equal(path, 'test.html');
     });
-
 });

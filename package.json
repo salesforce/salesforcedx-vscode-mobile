@@ -43,7 +43,7 @@
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
     "prettier:write": "prettier --write \"src/**/*.{ts, js}\"",
-    "prettier:verify": "prettier --check \"src/**/*.{ts, js}\""
+    "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\""
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
