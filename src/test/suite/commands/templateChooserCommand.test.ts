@@ -36,7 +36,7 @@ suite('Template Chooser Command Test Suite', () => {
             label: 'Case Management',
             description: 'This is the description',
             detail: 'Contains a new case quick action, along with the 5 most recent cases, accounts, and contacts.',
-            filename: 'somefile.json'
+            filenamePrefix: 'somefile'
         };
 
         showQuickPickStub.onCall(0).returns(chosenItem);
@@ -51,23 +51,29 @@ suite('Template Chooser Command Test Suite', () => {
         // execute our command
         await TemplateChooserCommand.chooseTemplate();
 
-        // ensure copy was performed
-        const expectedSourcePath = path.join(
-            testPath,
-            TemplateChooserCommand.STATIC_RESOURCES_PATH,
-            'somefile.json'
-        );
-        const expectedDestinationPath = path.join(
-            testPath,
-            TemplateChooserCommand.STATIC_RESOURCES_PATH,
-            TemplateChooserCommand.LANDING_PAGE_FILENAME
-        );
-        assert.ok(
-            copyFileSyncStub.calledWith(
-                expectedSourcePath,
-                expectedDestinationPath
-            )
-        );
+        // ensure copy was performed for both json and metadata files
+        for (const fileExtension of [
+            TemplateChooserCommand.JSON_FILE_EXTENSION,
+            TemplateChooserCommand.METADATA_FILE_EXTENSION
+        ]) {
+            const expectedSourcePath = path.join(
+                testPath,
+                TemplateChooserCommand.STATIC_RESOURCES_PATH,
+                `somefile${fileExtension}`
+            );
+            const expectedDestinationPath = path.join(
+                testPath,
+                TemplateChooserCommand.STATIC_RESOURCES_PATH,
+                `${TemplateChooserCommand.LANDING_PAGE_DESTINATION_FILENAME_PREFIX}${fileExtension}`
+            );
+            assert.ok(
+                copyFileSyncStub.calledWith(
+                    expectedSourcePath,
+                    expectedDestinationPath
+                ),
+                `Should attempt to copy ${expectedSourcePath} to ${expectedDestinationPath}`
+            );
+        }
     });
 
     test('Nothing is selected', async () => {
