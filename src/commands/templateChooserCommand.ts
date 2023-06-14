@@ -5,11 +5,12 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { QuickPickItem, l10n } from 'vscode';
+import { QuickPickItem, l10n, context } from 'vscode';
 import { UIUtils } from '../utils/uiUtils';
 import { workspace } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { InstructionsWebviewProvider } from '../webviews';
 
 export interface TemplateQuickPickItem extends QuickPickItem {
     filenamePrefix: string;
@@ -74,6 +75,18 @@ export class TemplateChooserCommand {
 
         await TemplateChooserCommand.copySelectedFiles(
             (selectedItem as TemplateQuickPickItem).filenamePrefix
+        );
+    }
+
+    public static async copyDefaultTemplate() {
+        await TemplateChooserCommand.copySelectedFiles(
+            TemplateChooserCommand.TEMPLATE_LIST_ITEMS[0].filenamePrefix
+        );
+
+        InstructionsWebviewProvider.showDismissableInstructions(
+            context.extensionUri,
+            l10n.t('Landing Page Customization'),
+            'src/instructions/landingpage.html'
         );
     }
 
