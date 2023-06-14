@@ -12,16 +12,17 @@ import { InstructionsWebviewProvider } from '../webviews';
 export class BriefcaseCommand {
     static async setupBriefcase(extensionUri: Uri): Promise<boolean> {
         await window.showInformationMessage(
-            'Click OK to launch your org to the Briefcase Builder page. After ' +
-                'launching, return here for instructions to set up a Briefcase rule.',
-            { title: 'OK' }
+            l10n.t(
+                'Click OK to launch your org to the Briefcase Builder page. After launching, return here for instructions to set up a Briefcase rule.'
+            ),
+            { title: l10n.t('OK') }
         );
 
         // TODO: this `withProgress` call probably needs tweaking on UX.
         await window.withProgress(
             {
                 location: ProgressLocation.Notification,
-                title: 'Launching Briefcase Builder...'
+                title: l10n.t('Launching Briefcase Builder...')
             },
             async (progress, token) => {
                 await CommonUtils.executeCommandAsync(

@@ -5,37 +5,34 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { commands, window } from 'vscode';
+import { commands, window, l10n } from 'vscode';
 import { OrgUtils } from '../utils/orgUtils';
 
 export class AuthorizeCommand {
     static async authorizeToOrg(): Promise<boolean> {
-        const user = await OrgUtils.getDefaultUser();
-
-        // Ask user to authorize to an org now only if not authorized yet.
-        if (user === 'undefined') {
+        try {
+            await OrgUtils.getDefaultUser();
+            return Promise.resolve(true);
+        } catch {
+            // Ask user to authorize to an org now only if not authorized yet.
             const result = await window.showInformationMessage(
-                'Do you want to authorize an Org now?',
-                { title: 'Authorize' },
-                { title: 'No' }
+                l10n.t('Do you want to authorize an Org now?'),
+                { title: l10n.t('Authorize') },
+                { title: l10n.t('No') }
             );
 
-            if (result) {
-                if (result.title === 'No') {
-                    return Promise.resolve(false);
-                } else {
-                    await commands.executeCommand('sfdx.force.auth.web.login');
-                    await window.showInformationMessage(
-                        "Once you've authorized your Org, click here to continue.",
-                        { title: 'OK' }
-                    );
-                    return Promise.resolve(true);
-                }
-            } else {
+            if (!result || result.title === l10n.t('No')) {
                 return Promise.resolve(false);
+            } else {
+                await commands.executeCommand('sfdx.force.auth.web.login');
+                await window.showInformationMessage(
+                    l10n.t(
+                        "Once you've authorized your Org, click here to continue."
+                    ),
+                    { title: l10n.t('OK') }
+                );
+                return Promise.resolve(true);
             }
-        } else {
-            return Promise.resolve(true);
         }
     }
 }

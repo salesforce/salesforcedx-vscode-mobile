@@ -30,7 +30,7 @@ suite('Authorize Org Command Test Suite', () => {
     test('Authorization cancelled by the user', async () => {
         // setup up so that org is not authorized yet
         const getDefaultUserStub = sinon.stub(OrgUtils, 'getDefaultUser');
-        getDefaultUserStub.onCall(0).resolves('undefined');
+        getDefaultUserStub.onCall(0).rejects(false);
 
         // simulate user choosing not to authorize
         const showInformationMessageStub = sinon.stub(
