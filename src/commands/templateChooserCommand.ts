@@ -23,7 +23,7 @@ export interface TemplateQuickPickItem extends QuickPickItem {
 export class TemplateChooserCommand {
     static readonly STATIC_RESOURCES_PATH =
         '/force-app/main/default/staticresources';
-    static readonly LANDING_PAGE_FILENAME_PREFIX = 'landing_page';
+    static readonly LANDING_PAGE_DESTINATION_FILENAME_PREFIX = 'landing_page';
     static readonly JSON_FILE_EXTENSION = '.json';
     static readonly METADATA_FILE_EXTENSION = '.resource-meta.xml';
 
@@ -106,7 +106,7 @@ export class TemplateChooserCommand {
                 TemplateChooserCommand.METADATA_FILE_EXTENSION
             ]) {
                 const fileName = `${fileNamePrefix}${fileExtension}`;
-                const destinationFileName = `${TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIX}${fileExtension}`;
+                const destinationFileName = `${TemplateChooserCommand.LANDING_PAGE_DESTINATION_FILENAME_PREFIX}${fileExtension}`;
                 console.log(`Copying ${fileName} to ${destinationFileName}`);
 
                 const sourcePath = path.join(

@@ -64,7 +64,7 @@ suite('Template Chooser Command Test Suite', () => {
             const expectedDestinationPath = path.join(
                 testPath,
                 TemplateChooserCommand.STATIC_RESOURCES_PATH,
-                `${TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIX}${fileExtension}`
+                `${TemplateChooserCommand.LANDING_PAGE_DESTINATION_FILENAME_PREFIX}${fileExtension}`
             );
             assert.ok(
                 copyFileSyncStub.calledWith(
