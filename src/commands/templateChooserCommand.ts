@@ -12,7 +12,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export interface TemplateQuickPickItem extends QuickPickItem {
-    filename: string;
+    filenamePrefix: string;
 }
 
 /**
@@ -22,7 +22,9 @@ export interface TemplateQuickPickItem extends QuickPickItem {
 export class TemplateChooserCommand {
     static readonly STATIC_RESOURCES_PATH =
         '/force-app/main/default/staticresources';
-    static readonly LANDING_PAGE_FILENAME = 'landing_page.json';
+    static readonly LANDING_PAGE_FILENAME_PREFIX = 'landing_page';
+    static readonly JSON_FILE_EXTENSION = '.json';
+    static readonly METADATA_FILE_EXTENSION = '.resource-meta.xml';
 
     static readonly TEMPLATE_LIST_ITEMS: TemplateQuickPickItem[] = [
         {
@@ -30,28 +32,28 @@ export class TemplateChooserCommand {
             detail: l10n.t(
                 'Recently viewed Contacts, Accounts, and Opportunities.'
             ),
-            filename: 'landing_page_default.json'
+            filenamePrefix: 'landing_page_default'
         },
         {
             label: l10n.t('Case Management'),
             detail: l10n.t(
                 'New Case action and the 5 most recent Cases, Accounts, and Contacts.'
             ),
-            filename: 'landing_page_case_management.json'
+            filenamePrefix: 'landing_page_case_management'
         },
         {
             label: l10n.t('Healthcare'),
             detail: l10n.t(
                 'Global quick actions with BarcodeScanner, new Visitor, and more.'
             ),
-            filename: 'landing_page_healthcare.json'
+            filenamePrefix: 'landing_page_healthcare'
         },
         {
             label: l10n.t('Retail Execution'),
             detail: l10n.t(
                 'Global quick actions with new Opportunity, new Lead, and more.'
             ),
-            filename: 'landing_page_retail_execution.json'
+            filenamePrefix: 'landing_page_retail_execution'
         }
     ];
 
@@ -70,31 +72,43 @@ export class TemplateChooserCommand {
             return Promise.resolve();
         }
 
-        await TemplateChooserCommand.copySelectedFile(
-            (selectedItem as TemplateQuickPickItem).filename
+        await TemplateChooserCommand.copySelectedFiles(
+            (selectedItem as TemplateQuickPickItem).filenamePrefix
         );
     }
 
     /**
-     * This will copy the given template filename over to the staticresources/landing_page.json location.
-     * @param fileName name of the template file to copy.
+     * This will copy the given template files over to the staticresources/landing_page.* locations, including
+     * the .json and .resource-meta.xml file.
+     * @param fileNamePrefix filename prefix of the template file to copy.
      */
-    static async copySelectedFile(fileName: string): Promise<boolean> {
+    static async copySelectedFiles(fileNamePrefix: string): Promise<boolean> {
         const workspaceFolders = workspace.workspaceFolders;
         if (workspaceFolders && workspaceFolders.length > 0) {
             const rootPath = workspaceFolders[0].uri.fsPath;
-            const sourcePath = path.join(
-                rootPath,
-                TemplateChooserCommand.STATIC_RESOURCES_PATH,
-                fileName
-            );
-            const destinationPath = path.join(
-                rootPath,
-                TemplateChooserCommand.STATIC_RESOURCES_PATH,
-                TemplateChooserCommand.LANDING_PAGE_FILENAME
-            );
 
-            fs.copyFileSync(sourcePath, destinationPath);
+            // copy both the json and metadata files.
+            for (const fileExtension of [
+                TemplateChooserCommand.JSON_FILE_EXTENSION,
+                TemplateChooserCommand.METADATA_FILE_EXTENSION
+            ]) {
+                const fileName = `${fileNamePrefix}${fileExtension}`;
+                const destinationFileName = `${TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIX}${fileExtension}`;
+                console.log(`Copying ${fileName} to ${destinationFileName}`);
+
+                const sourcePath = path.join(
+                    rootPath,
+                    TemplateChooserCommand.STATIC_RESOURCES_PATH,
+                    fileName
+                );
+                const destinationPath = path.join(
+                    rootPath,
+                    TemplateChooserCommand.STATIC_RESOURCES_PATH,
+                    destinationFileName
+                );
+
+                fs.copyFileSync(sourcePath, destinationPath);
+            }
             return Promise.resolve(true);
         }
         return Promise.reject('Could not determine workspace folder.');
