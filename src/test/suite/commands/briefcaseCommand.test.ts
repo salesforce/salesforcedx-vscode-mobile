@@ -50,7 +50,7 @@ suite('Briefcase Command Test Suite', () => {
         assert.ok(message); // too brittle to check exact message, so just ensure it is not null
         assert.equal(title, l10n.t('OK'));
 
-        // obtain the command arg and manually execute it by invoking the argument passed to window.withProgress()
+        // obtain the command argument passed to window.withProgress() and execute it
         const executeCommand = windowWithProgressStub.args[0][1];
         const progressStub: Progress<{ message?: string; increment?: number }> =
             {
