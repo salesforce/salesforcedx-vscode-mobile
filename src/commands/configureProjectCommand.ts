@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { Uri, WebviewPanel, commands, window } from 'vscode';
+import { Uri, WebviewPanel, commands, l10n, window } from 'vscode';
 import * as process from 'process';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../webviews';
@@ -22,7 +22,7 @@ export class ConfigureProjectCommand {
             const webview = new InstructionsWebviewProvider(
                 this.extensionUri
             ).showInstructionWebview(
-                'Offline Starter Kit: Create or Open Project',
+                l10n.t('Offline Starter Kit: Create or Open Project'),
                 'src/instructions/projectBootstrapChoice.html',
                 [
                     {
@@ -59,7 +59,7 @@ export class ConfigureProjectCommand {
     private async createNewProject(panel: WebviewPanel): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const folderUri = await window.showOpenDialog({
-                openLabel: 'Select project folder',
+                openLabel: l10n.t('Select project folder'),
                 canSelectFolders: true,
                 canSelectFiles: false,
                 canSelectMany: false
@@ -72,7 +72,7 @@ export class ConfigureProjectCommand {
             new InstructionsWebviewProvider(
                 this.extensionUri
             ).showInstructionWebview(
-                'Offline Starter Kit: Follow the Prompts',
+                l10n.t('Offline Starter Kit: Follow the Prompts'),
                 'src/instructions/projectBootstrapAcknowledgment.html',
                 [
                     {
@@ -97,7 +97,7 @@ export class ConfigureProjectCommand {
     private async openExistingProject(panel: WebviewPanel): Promise<string> {
         return new Promise(async (resolve) => {
             const folderUri = await window.showOpenDialog({
-                openLabel: 'Select project folder',
+                openLabel: l10n.t('Select project folder'),
                 canSelectFolders: true,
                 canSelectFiles: false,
                 canSelectMany: false
@@ -117,7 +117,7 @@ export class ConfigureProjectCommand {
             new InstructionsWebviewProvider(
                 this.extensionUri
             ).showInstructionWebview(
-                'Offline Starter Kit: Follow the Prompts',
+                l10n.t('Offline Starter Kit: Follow the Prompts'),
                 'src/instructions/projectBootstrapAcknowledgment.html',
                 [
                     {
@@ -138,20 +138,15 @@ export class ConfigureProjectCommand {
     }
 
     private async executeProjectCreation(folderUri: Uri): Promise<string> {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             const githubRepoUri: string =
                 'https://github.com/salesforce/offline-app-developer-starter-kit.git';
-            try {
-                await commands.executeCommand(
-                    'git.clone',
-                    githubRepoUri,
-                    folderUri.fsPath
-                );
-                return resolve(folderUri.fsPath);
-            } catch (error) {
-                window.showErrorMessage(`Failed to clone: ${error}`);
-                return reject(error);
-            }
+            await commands.executeCommand(
+                'git.clone',
+                githubRepoUri,
+                folderUri.fsPath
+            );
+            return resolve(folderUri.fsPath);
         });
     }
 
@@ -165,7 +160,10 @@ export class ConfigureProjectCommand {
                 } catch (error) {
                     return reject(
                         new Error(
-                            `Could not access the project folder at '${projectFolderUri.fsPath}'.`
+                            l10n.t(
+                                "Could not access the project folder at '{0}'.",
+                                projectFolderUri.fsPath
+                            )
                         )
                     );
                 }
@@ -177,7 +175,7 @@ export class ConfigureProjectCommand {
                     // Cf. https://github.com/microsoft/vscode/blob/89ec834df20d597ff96f7d303e7e0f2f055d2a4e/extensions/git/src/git.ts#L145-L165
                     await CommonUtils.executeCommandAsync('git --version');
                 } catch (error) {
-                    return reject(new Error('git is not installed.'));
+                    return reject(new Error(l10n.t('git is not installed.')));
                 }
 
                 // Is this a git repo?
@@ -186,7 +184,10 @@ export class ConfigureProjectCommand {
                 } catch (error) {
                     return reject(
                         new Error(
-                            `Folder '${projectFolderUri.fsPath}' does not contain a git repository.`
+                            l10n.t(
+                                "Folder '{0}' does not contain a git repository.",
+                                projectFolderUri.fsPath
+                            )
                         )
                     );
                 }
@@ -201,7 +202,10 @@ export class ConfigureProjectCommand {
                 } catch (error) {
                     return reject(
                         new Error(
-                            'This git repository does not share history with the Offline Starter Kit.'
+                            l10n.t(
+                                "The git repository at '{0}' does not share history with the Offline Starter Kit.",
+                                projectFolderUri.fsPath
+                            )
                         )
                     );
                 }
