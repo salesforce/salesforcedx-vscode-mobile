@@ -10,65 +10,27 @@ import * as process from 'process';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../webviews';
 
-export class ConfigureProjectCommand {
-    extensionUri: Uri;
+export type ProjectManagementChoiceAction = (panel?: WebviewPanel) => void;
 
+export interface ProjectConfigurationProcessor {
+    getProjectManagementChoice(
+        createChoice: ProjectManagementChoiceAction,
+        openChoice: ProjectManagementChoiceAction
+    ): void;
+    getProjectFolderPath(): Promise<Uri[] | undefined>;
+    preActionUserAcknowledgment(): Promise<void>;
+}
+
+class DefaultProjectConfigurationProcessor
+    implements ProjectConfigurationProcessor
+{
+    extensionUri: Uri;
     constructor(extensionUri: Uri) {
         this.extensionUri = extensionUri;
     }
 
-    async configureProject(): Promise<string | undefined> {
-        return new Promise((resolve, reject) => {
-            const webview = new InstructionsWebviewProvider(
-                this.extensionUri
-            ).showInstructionWebview(
-                l10n.t('Offline Starter Kit: Create or Open Project'),
-                'src/instructions/projectBootstrapChoice.html',
-                [
-                    {
-                        buttonId: 'createNewButton',
-                        action: async (panel) => {
-                            try {
-                                // It's actually important to run this async,
-                                // because createNewProject() will not resolve
-                                // its Promise until a path is selected,
-                                // allowing the user to cancel the open dialog
-                                // and re-initiate it as many times as they want.
-                                this.createNewProject(panel).then((path) => {
-                                    return resolve(path);
-                                });
-                            } catch (error) {
-                                return reject(error);
-                            }
-                        }
-                    },
-                    {
-                        buttonId: 'openExistingButton',
-                        action: async (panel) => {
-                            // See above for rationale for running this async.
-                            this.openExistingProject(panel).then((path) => {
-                                return resolve(path);
-                            });
-                        }
-                    }
-                ]
-            );
-        });
-    }
-
-    private async createNewProject(panel: WebviewPanel): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            const folderUri = await window.showOpenDialog({
-                openLabel: l10n.t('Select project folder'),
-                canSelectFolders: true,
-                canSelectFiles: false,
-                canSelectMany: false
-            });
-            if (!folderUri || folderUri.length === 0) {
-                return;
-            }
-
-            panel.dispose();
+    async preActionUserAcknowledgment(): Promise<void> {
+        return new Promise((resolve) => {
             new InstructionsWebviewProvider(
                 this.extensionUri
             ).showInstructionWebview(
@@ -79,14 +41,7 @@ export class ConfigureProjectCommand {
                         buttonId: 'okButton',
                         action: async (panel) => {
                             panel.dispose();
-                            try {
-                                const path = await this.executeProjectCreation(
-                                    folderUri[0]
-                                );
-                                return resolve(path);
-                            } catch (error) {
-                                return reject(error);
-                            }
+                            return resolve();
                         }
                     }
                 ]
@@ -94,14 +49,116 @@ export class ConfigureProjectCommand {
         });
     }
 
-    private async openExistingProject(panel: WebviewPanel): Promise<string> {
+    async getProjectFolderPath(): Promise<Uri[] | undefined> {
+        return new Promise((resolve) => {
+            window
+                .showOpenDialog({
+                    openLabel: l10n.t('Select project folder'),
+                    canSelectFolders: true,
+                    canSelectFiles: false,
+                    canSelectMany: false
+                })
+                .then((result) => {
+                    return resolve(result);
+                });
+        });
+    }
+
+    getProjectManagementChoice(
+        createChoice: ProjectManagementChoiceAction,
+        openChoice: ProjectManagementChoiceAction
+    ): void {
+        new InstructionsWebviewProvider(
+            this.extensionUri
+        ).showInstructionWebview(
+            l10n.t('Offline Starter Kit: Create or Open Project'),
+            'src/instructions/projectBootstrapChoice.html',
+            [
+                {
+                    buttonId: 'createNewButton',
+                    action: (panel) => {
+                        createChoice(panel);
+                    }
+                },
+                {
+                    buttonId: 'openExistingButton',
+                    action: (panel) => {
+                        openChoice(panel);
+                    }
+                }
+            ]
+        );
+    }
+}
+
+export class ConfigureProjectCommand {
+    extensionUri: Uri;
+    projectConfigurationProcessor: ProjectConfigurationProcessor;
+
+    constructor(
+        extensionUri: Uri,
+        projectConfigurationProcessor?: ProjectConfigurationProcessor
+    ) {
+        this.extensionUri = extensionUri;
+        this.projectConfigurationProcessor =
+            projectConfigurationProcessor ??
+            new DefaultProjectConfigurationProcessor(extensionUri);
+    }
+
+    async configureProject(): Promise<string | undefined> {
         return new Promise(async (resolve) => {
-            const folderUri = await window.showOpenDialog({
-                openLabel: l10n.t('Select project folder'),
-                canSelectFolders: true,
-                canSelectFiles: false,
-                canSelectMany: false
-            });
+            this.projectConfigurationProcessor.getProjectManagementChoice(
+                (panel) => {
+                    // It's actually important to run this async, because
+                    // createNewProject() will not resolve its Promise
+                    // until a path is selected, allowing the user to
+                    // cancel the open dialog and re-initiate it as many
+                    // times as they want.
+                    this.createNewProject(panel).then((path) => {
+                        return resolve(path);
+                    });
+                },
+                (panel) => {
+                    // See above for rationale for running this async.
+                    this.openExistingProject(panel).then((path) => {
+                        return resolve(path);
+                    });
+                }
+            );
+        });
+    }
+
+    private async createNewProject(panel?: WebviewPanel): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            const folderUri =
+                await this.projectConfigurationProcessor.getProjectFolderPath();
+            if (!folderUri || folderUri.length === 0) {
+                return;
+            }
+
+            if (panel) {
+                panel.dispose();
+            }
+
+            this.projectConfigurationProcessor
+                .preActionUserAcknowledgment()
+                .then(async () => {
+                    try {
+                        const path = await this.executeProjectCreation(
+                            folderUri[0]
+                        );
+                        return resolve(path);
+                    } catch (error) {
+                        return reject(error);
+                    }
+                });
+        });
+    }
+
+    private async openExistingProject(panel?: WebviewPanel): Promise<string> {
+        return new Promise(async (resolve) => {
+            const folderUri =
+                await this.projectConfigurationProcessor.getProjectFolderPath();
             if (!folderUri || folderUri.length === 0) {
                 return;
             }
@@ -113,27 +170,20 @@ export class ConfigureProjectCommand {
                 return;
             }
 
-            panel.dispose();
-            new InstructionsWebviewProvider(
-                this.extensionUri
-            ).showInstructionWebview(
-                l10n.t('Offline Starter Kit: Follow the Prompts'),
-                'src/instructions/projectBootstrapAcknowledgment.html',
-                [
-                    {
-                        buttonId: 'okButton',
-                        action: async (panel) => {
-                            panel.dispose();
-                            await commands.executeCommand(
-                                'vscode.openFolder',
-                                folderUri[0],
-                                { forceReuseWindow: true }
-                            );
-                            return resolve(folderUri[0].fsPath);
-                        }
-                    }
-                ]
-            );
+            if (panel) {
+                panel.dispose();
+            }
+
+            this.projectConfigurationProcessor
+                .preActionUserAcknowledgment()
+                .then(async () => {
+                    await commands.executeCommand(
+                        'vscode.openFolder',
+                        folderUri[0],
+                        { forceReuseWindow: true }
+                    );
+                    return resolve(folderUri[0].fsPath);
+                });
         });
     }
 
