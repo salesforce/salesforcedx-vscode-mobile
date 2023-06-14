@@ -41,7 +41,9 @@ export function activate(context: vscode.ExtensionContext) {
                     await BriefcaseCommand.setupBriefcase(context.extensionUri);
                 });
 
-                await TemplateChooserCommand.copyDefaultTemplate();
+                await TemplateChooserCommand.copyDefaultTemplate(
+                    context.extensionUri
+                );
 
                 await AuthorizeCommand.authorizeToOrg().then(async () => {
                     await DeployToOrgCommand.deployToOrg();
