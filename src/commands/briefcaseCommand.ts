@@ -10,6 +10,9 @@ import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUt
 import { InstructionsWebviewProvider } from '../webviews';
 
 export class BriefcaseCommand {
+    static readonly OPEN_ORG_BRIEFCASE_PAGE_CMD =
+        "sfdx org open -p '/lightning/setup/Briefcase/home'";
+
     static async setupBriefcase(extensionUri: Uri): Promise<boolean> {
         await window.showInformationMessage(
             l10n.t(
@@ -24,9 +27,9 @@ export class BriefcaseCommand {
                 location: ProgressLocation.Notification,
                 title: l10n.t('Launching Briefcase Builder...')
             },
-            async (progress, token) => {
+            async (_progress, _token) => {
                 await CommonUtils.executeCommandAsync(
-                    "sfdx org open -p '/lightning/setup/Briefcase/home'"
+                    BriefcaseCommand.OPEN_ORG_BRIEFCASE_PAGE_CMD
                 );
             }
         );
