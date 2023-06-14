@@ -51,7 +51,7 @@ suite('Briefcase Command Test Suite', () => {
         assert.equal(title, l10n.t('OK'));
 
         // obtain the command argument passed to window.withProgress() and execute it
-        const executeCommand = windowWithProgressStub.args[0][1];
+        const taskArg = windowWithProgressStub.args[0][1];
         const progressStub: Progress<{ message?: string; increment?: number }> =
             {
                 report: sinon.stub()
@@ -60,7 +60,7 @@ suite('Briefcase Command Test Suite', () => {
             isCancellationRequested: false,
             onCancellationRequested: sinon.stub()
         };
-        await executeCommand(progressStub, cancellationTokenStub);
+        await taskArg(progressStub, cancellationTokenStub);
         const commandExecuted = cmdStub.args[0][0];
         assert.equal(
             commandExecuted,
