@@ -20,7 +20,7 @@ suite('Briefcase Command Test Suite', () => {
         sinon.restore();
     });
 
-    test('Shows informational messages', async () => {
+    test('Shows informational messages and excutes the open-to-briefcase command', async () => {
         // stub for showInformationMessage
         const showInfoMsgStub = sinon.stub(window, 'showInformationMessage');
         showInfoMsgStub.onCall(0).resolves();
