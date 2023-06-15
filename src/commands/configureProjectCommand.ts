@@ -128,7 +128,7 @@ export class ConfigureProjectCommand {
         });
     }
 
-    private async createNewProject(panel?: WebviewPanel): Promise<string> {
+    async createNewProject(panel?: WebviewPanel): Promise<string> {
         return new Promise(async (resolve, reject) => {
             const folderUri =
                 await this.projectConfigurationProcessor.getProjectFolderPath();
@@ -155,7 +155,7 @@ export class ConfigureProjectCommand {
         });
     }
 
-    private async openExistingProject(panel?: WebviewPanel): Promise<string> {
+    async openExistingProject(panel?: WebviewPanel): Promise<string> {
         return new Promise(async (resolve) => {
             const folderUri =
                 await this.projectConfigurationProcessor.getProjectFolderPath();
@@ -187,7 +187,7 @@ export class ConfigureProjectCommand {
         });
     }
 
-    private async executeProjectCreation(folderUri: Uri): Promise<string> {
+    async executeProjectCreation(folderUri: Uri): Promise<string> {
         return new Promise(async (resolve) => {
             const githubRepoUri: string =
                 'https://github.com/salesforce/offline-app-developer-starter-kit.git';
@@ -200,7 +200,7 @@ export class ConfigureProjectCommand {
         });
     }
 
-    private async validateProjectFolder(projectFolderUri: Uri): Promise<void> {
+    async validateProjectFolder(projectFolderUri: Uri): Promise<void> {
         return new Promise(async (resolve, reject) => {
             const origWorkingDir = process.cwd();
             try {
