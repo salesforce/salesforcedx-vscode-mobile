@@ -5,73 +5,275 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { QuickPickItem, QuickPickOptions, commands, window } from 'vscode';
+import { Uri, WebviewPanel, commands, l10n, window } from 'vscode';
+import * as process from 'process';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../webviews';
 
-export class ConfigureProjectCommand {
-    static async configureProject(
-        fromWizard: boolean = false
-    ): Promise<string> {
-        return new Promise(async (resolve, reject) => {
-            const header: QuickPickOptions = {
-                placeHolder: 'Create a new project, or open an existing project'
-            };
-            const items: QuickPickItem[] = [
-                {
-                    label: 'Create New Project...',
-                    description:
-                        'Creates a new local project configured with the Offline Starter Kit'
-                },
-                {
-                    label: 'Open Existing Project...',
-                    description:
-                        'Opens an existing local project configured with the Offline Starter Kit'
-                }
-            ];
-            const selected = await window.showQuickPick(items, header);
-            if (!selected) {
-                return resolve('');
-            }
+export type ProjectManagementChoiceAction = (panel?: WebviewPanel) => void;
 
-            if (selected.label === 'Create New Project...') {
-                const folderUri = await window.showOpenDialog({
-                    openLabel: 'Select project folder',
+export interface ProjectConfigurationProcessor {
+    getProjectManagementChoice(
+        createChoice: ProjectManagementChoiceAction,
+        openChoice: ProjectManagementChoiceAction
+    ): void;
+    getProjectFolderPath(): Promise<Uri[] | undefined>;
+    preActionUserAcknowledgment(): Promise<void>;
+}
+
+class DefaultProjectConfigurationProcessor
+    implements ProjectConfigurationProcessor
+{
+    extensionUri: Uri;
+    constructor(extensionUri: Uri) {
+        this.extensionUri = extensionUri;
+    }
+
+    async preActionUserAcknowledgment(): Promise<void> {
+        return new Promise((resolve) => {
+            new InstructionsWebviewProvider(
+                this.extensionUri
+            ).showInstructionWebview(
+                l10n.t('Offline Starter Kit: Follow the Prompts'),
+                'src/instructions/projectBootstrapAcknowledgment.html',
+                [
+                    {
+                        buttonId: 'okButton',
+                        action: async (panel) => {
+                            panel.dispose();
+                            return resolve();
+                        }
+                    }
+                ]
+            );
+        });
+    }
+
+    async getProjectFolderPath(): Promise<Uri[] | undefined> {
+        return new Promise((resolve) => {
+            window
+                .showOpenDialog({
+                    openLabel: l10n.t('Select project folder'),
                     canSelectFolders: true,
                     canSelectFiles: false,
                     canSelectMany: false
+                })
+                .then((result) => {
+                    return resolve(result);
                 });
-                if (!folderUri || folderUri.length === 0) {
-                    return resolve('');
-                }
+        });
+    }
 
-                let infoMessage =
-                    'Follow the prompts to configure the project.';
-                if (fromWizard) {
-                    infoMessage +=
-                        ' NOTE: after the project is loaded, please be patient while the wizard resumes.';
+    getProjectManagementChoice(
+        createChoice: ProjectManagementChoiceAction,
+        openChoice: ProjectManagementChoiceAction
+    ): void {
+        new InstructionsWebviewProvider(
+            this.extensionUri
+        ).showInstructionWebview(
+            l10n.t('Offline Starter Kit: Create or Open Project'),
+            'src/instructions/projectBootstrapChoice.html',
+            [
+                {
+                    buttonId: 'createNewButton',
+                    action: (panel) => {
+                        createChoice(panel);
+                    }
+                },
+                {
+                    buttonId: 'openExistingButton',
+                    action: (panel) => {
+                        openChoice(panel);
+                    }
                 }
-                await window.showInformationMessage(infoMessage, {
-                    title: 'OK'
+            ]
+        );
+    }
+}
+
+export class ConfigureProjectCommand {
+    static readonly STARTER_KIT_INITIAL_COMMIT =
+        '99b1fa9377694beb7918580aab445a2e9981f611';
+    static readonly STARTER_KIT_REPO_URI =
+        'https://github.com/salesforce/offline-app-developer-starter-kit.git';
+
+    extensionUri: Uri;
+    projectConfigurationProcessor: ProjectConfigurationProcessor;
+
+    constructor(
+        extensionUri: Uri,
+        projectConfigurationProcessor?: ProjectConfigurationProcessor
+    ) {
+        this.extensionUri = extensionUri;
+        this.projectConfigurationProcessor =
+            projectConfigurationProcessor ??
+            new DefaultProjectConfigurationProcessor(extensionUri);
+    }
+
+    async configureProject(): Promise<string | undefined> {
+        return new Promise(async (resolve) => {
+            this.projectConfigurationProcessor.getProjectManagementChoice(
+                (panel) => {
+                    // It's actually important to run this async, because
+                    // createNewProject() will not resolve its Promise
+                    // until a path is selected, allowing the user to
+                    // cancel the open dialog and re-initiate it as many
+                    // times as they want.
+                    this.createNewProject(panel).then((path) => {
+                        return resolve(path);
+                    });
+                },
+                (panel) => {
+                    // See above for rationale for running this async.
+                    this.openExistingProject(panel).then((path) => {
+                        return resolve(path);
+                    });
+                }
+            );
+        });
+    }
+
+    async createNewProject(panel?: WebviewPanel): Promise<string> {
+        return new Promise(async (resolve, reject) => {
+            const folderUri =
+                await this.projectConfigurationProcessor.getProjectFolderPath();
+            if (!folderUri || folderUri.length === 0) {
+                // We explicitly do not want to resolve the Promise here, since the
+                // user "canceled", but could retry with the action request dialog
+                // that's still open. Only resolve the Promise when the user makes
+                // a choice.
+                return;
+            }
+
+            if (panel) {
+                panel.dispose();
+            }
+
+            this.projectConfigurationProcessor
+                .preActionUserAcknowledgment()
+                .then(async () => {
+                    try {
+                        const path = await this.executeProjectCreation(
+                            folderUri[0]
+                        );
+                        return resolve(path);
+                    } catch (error) {
+                        return reject(error);
+                    }
                 });
-                const githubRepoUri: string =
-                    'https://github.com/salesforce/offline-app-developer-starter-kit.git';
-                try {
+        });
+    }
+
+    async openExistingProject(panel?: WebviewPanel): Promise<string> {
+        return new Promise(async (resolve) => {
+            const folderUri =
+                await this.projectConfigurationProcessor.getProjectFolderPath();
+            if (!folderUri || folderUri.length === 0) {
+                // We explicitly do not want to resolve the Promise here, since the
+                // user "canceled", but could retry with the action request dialog
+                // that's still open. Only resolve the Promise when the user makes
+                // a choice.
+                return;
+            }
+
+            try {
+                await this.validateProjectFolder(folderUri[0]);
+            } catch (error) {
+                window.showErrorMessage((error as Error).message);
+                // Same as above. If they chose an invalid folder, "soft"-error
+                // and allow them to pick a different choice.
+                return;
+            }
+
+            if (panel) {
+                panel.dispose();
+            }
+
+            this.projectConfigurationProcessor
+                .preActionUserAcknowledgment()
+                .then(async () => {
                     await commands.executeCommand(
-                        'git.clone',
-                        githubRepoUri,
-                        folderUri[0].fsPath
+                        'vscode.openFolder',
+                        folderUri[0],
+                        { forceReuseWindow: true }
                     );
                     return resolve(folderUri[0].fsPath);
+                });
+        });
+    }
+
+    async executeProjectCreation(folderUri: Uri): Promise<string> {
+        return new Promise(async (resolve) => {
+            await commands.executeCommand(
+                'git.clone',
+                ConfigureProjectCommand.STARTER_KIT_REPO_URI,
+                folderUri.fsPath
+            );
+            return resolve(folderUri.fsPath);
+        });
+    }
+
+    async validateProjectFolder(projectFolderUri: Uri): Promise<void> {
+        return new Promise(async (resolve, reject) => {
+            const origWorkingDir = process.cwd();
+            try {
+                // Can we chdir to the selected folder?
+                try {
+                    process.chdir(projectFolderUri.fsPath);
                 } catch (error) {
-                    window.showErrorMessage(`Failed to clone: ${error}`);
-                    return reject(error);
+                    return reject(
+                        new Error(
+                            l10n.t(
+                                "Could not access the project folder at '{0}'.",
+                                projectFolderUri.fsPath
+                            )
+                        )
+                    );
                 }
-            } else if (selected.label === 'Open Existing Project...') {
-                console.log('Open existing project');
-                return resolve('');
-            } else {
-                return resolve('');
+
+                // Is git installed?
+                try {
+                    // TODO: There are a number of complexities to solving
+                    // for this in the general platform case.
+                    // Cf. https://github.com/microsoft/vscode/blob/89ec834df20d597ff96f7d303e7e0f2f055d2a4e/extensions/git/src/git.ts#L145-L165
+                    await CommonUtils.executeCommandAsync('git --version');
+                } catch (error) {
+                    return reject(new Error(l10n.t('git is not installed.')));
+                }
+
+                // Is this a git repo?
+                try {
+                    await CommonUtils.executeCommandAsync('git status');
+                } catch (error) {
+                    return reject(
+                        new Error(
+                            l10n.t(
+                                "Folder '{0}' does not contain a git repository.",
+                                projectFolderUri.fsPath
+                            )
+                        )
+                    );
+                }
+
+                // Is this the Offline Starter Kit repo?
+                try {
+                    await CommonUtils.executeCommandAsync(
+                        `git merge-base HEAD ${ConfigureProjectCommand.STARTER_KIT_INITIAL_COMMIT}`
+                    );
+                } catch (error) {
+                    return reject(
+                        new Error(
+                            l10n.t(
+                                "The git repository at '{0}' does not share history with the Offline Starter Kit.",
+                                projectFolderUri.fsPath
+                            )
+                        )
+                    );
+                }
+
+                return resolve();
+            } finally {
+                process.chdir(origWorkingDir);
             }
         });
     }
