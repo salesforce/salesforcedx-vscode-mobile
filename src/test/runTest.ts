@@ -8,7 +8,6 @@
 import * as path from 'path';
 
 import { runTests } from '@vscode/test-electron';
-import { instrument } from './suite/coverage';
 
 const NYC = require('nyc');
 import * as glob from 'glob';
@@ -30,7 +29,7 @@ async function main() {
 
         // The path to test runner
         // Passed to --extensionTestsPath
-        
+
         //const extensionTestsPath = path.resolve(__dirname, './suite/index');
         let extensionTestsPath = path.resolve(__dirname, './suite/index');
 
@@ -50,17 +49,16 @@ async function main() {
         //         // hookRunInThisContext: true,
         //         include: ['out/**/*.js'],
         //         // exclude: ['out/test/**', 'out/test/*']
-        //         //tempDir: 'foo' 
+        //         //tempDir: 'foo'
         //     });
         //     //await nyc.reset();
         //     await nyc.wrap();
         //     console.error('Glob verification', await nyc.exclude.glob(nyc.cwd));
 
-      
         //     // load the instrumented files
         //     //extensionTestsPath = path.resolve(__dirname, '../out-cov/test/suite/index');
         //     extensionTestsPath = path.resolve(__dirname, '../test/suite/index');
-      
+
         //     // signal that the coverage data should be gathered
         //     process.env['GENERATE_COVERAGE'] = '1';
         // }

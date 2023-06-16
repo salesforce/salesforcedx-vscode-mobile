@@ -36,7 +36,7 @@ export async function run(): Promise<void> {
         hookRequire: true,
         //hookRunInContext: true,
         // hookRunInThisContext: true,
-        include: ['out/**/*.js'],
+        include: ['out/**/*.js']
         // exclude: ['out/test/**', 'out/test/*']
     });
     // await nyc.reset();
@@ -48,8 +48,8 @@ export async function run(): Promise<void> {
     //     require(m);
     //   });
 
-     // Debug which files will be included/excluded
-   console.error('Glob verification', await nyc.exclude.glob(nyc.cwd));
+    // Debug which files will be included/excluded
+    console.error('Glob verification', await nyc.exclude.glob(nyc.cwd));
 
     // Create the mocha test
     const mocha = new Mocha({
@@ -58,7 +58,6 @@ export async function run(): Promise<void> {
         color: true
     });
 
-    
     // return new Promise((c, e) => {
     //     glob('**/**.test.js', { cwd: testsRoot }, async (err, files) => {
     //         if (err) {
@@ -86,7 +85,7 @@ export async function run(): Promise<void> {
     //         } catch (err) {
     //             console.error(err);
     //             e(err);
-    //         } 
+    //         }
     //     });
     // });
 
