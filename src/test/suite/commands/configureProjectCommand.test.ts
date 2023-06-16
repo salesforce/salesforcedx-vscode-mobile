@@ -15,9 +15,8 @@ import * as sinon from 'sinon';
 import { l10n, Uri } from 'vscode';
 import { ConfigureProjectCommand } from '../../../commands/configureProjectCommand';
 import {
-    createTempProjectDir,
-    createNonExistentAbsolutePath,
-    removeTempProjectDir
+    TempProjectDirManager,
+    createNonExistentAbsolutePath
 } from '../../TestHelper';
 
 suite('Configure Project Command Test Suite', () => {
@@ -52,7 +51,9 @@ suite('Configure Project Command Test Suite', () => {
     test('Open Project: No git installed is an error', async () => {
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
-        const projectFolderUri = Uri.file(await createTempProjectDir());
+        const projectFolder =
+            await TempProjectDirManager.createTempProjectDir();
+        const projectFolderUri = Uri.file(projectFolder.projectDir);
         const cmdStub = sinon.stub(CommonUtils, 'executeCommandAsync');
         cmdStub.onCall(0).rejects();
         try {
@@ -68,14 +69,16 @@ suite('Configure Project Command Test Suite', () => {
         } finally {
             cmdStub.restore();
             assert.equal(origCwd, process.cwd());
-            removeTempProjectDir(projectFolderUri.fsPath);
+            projectFolder.removeDir();
         }
     });
 
     test('Open Project: Project is not a git repo', async () => {
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
-        const projectFolderUri = Uri.file(await createTempProjectDir());
+        const projectFolder =
+            await TempProjectDirManager.createTempProjectDir();
+        const projectFolderUri = Uri.file(projectFolder.projectDir);
 
         try {
             await new ConfigureProjectCommand(
@@ -94,14 +97,16 @@ suite('Configure Project Command Test Suite', () => {
             );
         } finally {
             assert.equal(origCwd, process.cwd());
-            removeTempProjectDir(projectFolderUri.fsPath);
+            projectFolder.removeDir();
         }
     });
 
     test('Open Project: Project is not the Starter Kit git repo', async () => {
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
-        const projectFolderUri = Uri.file(await createTempProjectDir());
+        const projectFolder =
+            await TempProjectDirManager.createTempProjectDir();
+        const projectFolderUri = Uri.file(projectFolder.projectDir);
 
         // Create a skeleton git repo
         process.chdir(projectFolderUri.fsPath);
@@ -130,14 +135,16 @@ suite('Configure Project Command Test Suite', () => {
             );
         } finally {
             assert.equal(origCwd, process.cwd());
-            removeTempProjectDir(projectFolderUri.fsPath);
+            projectFolder.removeDir();
         }
     });
 
     test('Open Project: Valid Starter Kit project', async () => {
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
-        const projectFolderUri = Uri.file(await createTempProjectDir());
+        const projectFolder =
+            await TempProjectDirManager.createTempProjectDir();
+        const projectFolderUri = Uri.file(projectFolder.projectDir);
 
         // Clone the Starter Kit repo, as shallowly as possible.
         process.chdir(projectFolderUri.fsPath);
@@ -161,7 +168,7 @@ suite('Configure Project Command Test Suite', () => {
             assert.fail(`Project should have been valid, but wasn't: ${err}`);
         } finally {
             assert.equal(origCwd, process.cwd());
-            removeTempProjectDir(projectFolderUri.fsPath);
+            projectFolder.removeDir();
         }
     }).timeout(60000); // 1 min, just to be safe. This test should ideally land < 10s.
 });
