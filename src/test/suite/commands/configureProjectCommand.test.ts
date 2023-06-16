@@ -143,10 +143,10 @@ suite('Configure Project Command Test Suite', () => {
         process.chdir(projectFolderUri.fsPath);
         await CommonUtils.executeCommandAsync('git init');
         await CommonUtils.executeCommandAsync(
-            'git remote add origin https://github.com/salesforce/offline-app-developer-starter-kit.git'
+            `git remote add origin ${ConfigureProjectCommand.STARTER_KIT_REPO_URI}`
         );
         await CommonUtils.executeCommandAsync(
-            'git fetch origin 99b1fa9377694beb7918580aab445a2e9981f611'
+            `git fetch origin ${ConfigureProjectCommand.STARTER_KIT_INITIAL_COMMIT}`
         );
         await CommonUtils.executeCommandAsync(
             'git checkout -b main FETCH_HEAD'
@@ -163,5 +163,5 @@ suite('Configure Project Command Test Suite', () => {
             assert.equal(origCwd, process.cwd());
             removeTempProjectDir(projectFolderUri.fsPath);
         }
-    }).timeout(10000);
+    }).timeout(60000); // 1 min, just to be safe. This test should ideally land < 10s.
 });

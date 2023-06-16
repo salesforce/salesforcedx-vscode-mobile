@@ -92,6 +92,11 @@ class DefaultProjectConfigurationProcessor
 }
 
 export class ConfigureProjectCommand {
+    static readonly STARTER_KIT_INITIAL_COMMIT =
+        '99b1fa9377694beb7918580aab445a2e9981f611';
+    static readonly STARTER_KIT_REPO_URI =
+        'https://github.com/salesforce/offline-app-developer-starter-kit.git';
+
     extensionUri: Uri;
     projectConfigurationProcessor: ProjectConfigurationProcessor;
 
@@ -133,6 +138,10 @@ export class ConfigureProjectCommand {
             const folderUri =
                 await this.projectConfigurationProcessor.getProjectFolderPath();
             if (!folderUri || folderUri.length === 0) {
+                // We explicitly do not want to resolve the Promise here, since the
+                // user "canceled", but could retry with the action request dialog
+                // that's still open. Only resolve the Promise when the user makes
+                // a choice.
                 return;
             }
 
@@ -160,6 +169,10 @@ export class ConfigureProjectCommand {
             const folderUri =
                 await this.projectConfigurationProcessor.getProjectFolderPath();
             if (!folderUri || folderUri.length === 0) {
+                // We explicitly do not want to resolve the Promise here, since the
+                // user "canceled", but could retry with the action request dialog
+                // that's still open. Only resolve the Promise when the user makes
+                // a choice.
                 return;
             }
 
@@ -167,6 +180,8 @@ export class ConfigureProjectCommand {
                 await this.validateProjectFolder(folderUri[0]);
             } catch (error) {
                 window.showErrorMessage((error as Error).message);
+                // Same as above. If they chose an invalid folder, "soft"-error
+                // and allow them to pick a different choice.
                 return;
             }
 
@@ -189,11 +204,9 @@ export class ConfigureProjectCommand {
 
     async executeProjectCreation(folderUri: Uri): Promise<string> {
         return new Promise(async (resolve) => {
-            const githubRepoUri: string =
-                'https://github.com/salesforce/offline-app-developer-starter-kit.git';
             await commands.executeCommand(
                 'git.clone',
-                githubRepoUri,
+                ConfigureProjectCommand.STARTER_KIT_REPO_URI,
                 folderUri.fsPath
             );
             return resolve(folderUri.fsPath);
@@ -244,10 +257,8 @@ export class ConfigureProjectCommand {
 
                 // Is this the Offline Starter Kit repo?
                 try {
-                    const oskInitialCommit =
-                        '99b1fa9377694beb7918580aab445a2e9981f611';
                     await CommonUtils.executeCommandAsync(
-                        `git merge-base HEAD ${oskInitialCommit}`
+                        `git merge-base HEAD ${ConfigureProjectCommand.STARTER_KIT_INITIAL_COMMIT}`
                     );
                 } catch (error) {
                     return reject(
