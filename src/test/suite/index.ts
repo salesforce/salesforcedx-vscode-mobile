@@ -28,16 +28,11 @@ export async function run(): Promise<void> {
         instrument: true,
         hookRequire: true,
         include: ['out/**/*.js'],
-        exclude: ['out/test/**'],
+        exclude: ['out/test/**']
     });
     await nyc.wrap();
 
-//     const myFilesRegex = /salesforce-offline-vscode\/out/;
-//       const filterFn = myFilesRegex.test.bind(myFilesRegex);
-//   if (Object.keys(require.cache).filter(filterFn).length > 1) {
-//     console.warn('NYC initialized after modules were loaded', Object.keys(require.cache).filter(filterFn));
-//   }
-  await nyc.createTempDirectory();
+    await nyc.createTempDirectory();
 
     // Create the mocha test
     const mocha = new Mocha({
@@ -80,7 +75,7 @@ export async function run(): Promise<void> {
     });
 }
 
-async function pipeNycReport(callback: any):Promise<string> {
+async function pipeNycReport(callback: any): Promise<string> {
     // Preserve original write function
     let oldWriteFunc = process.stdout.write;
 
