@@ -7,19 +7,11 @@
 
 'use strict';
 
-import * as path from 'path';
 import * as Mocha from 'mocha';
-const NYC = require('nyc');
+import * as path from 'path';
 import * as glob from 'glob';
-
-// // Simulates the recommended config option
-// // extends: "@istanbuljs/nyc-config-typescript",
 import * as baseConfig from '@istanbuljs/nyc-config-typescript';
-
-// Recommended modules, loading them here to speed up NYC init
-// and minimize risk of race condition
-import 'ts-node/register';
-import 'source-map-support/register';
+const NYC = require('nyc');
 
 export async function run(): Promise<void> {
     const testsRoot = path.resolve(__dirname, '..');
@@ -34,27 +26,34 @@ export async function run(): Promise<void> {
         silent: false,
         instrument: true,
         hookRequire: true,
-        //hookRunInContext: true,
+        // hookRunInContext: true,
         // hookRunInThisContext: true,
-        include: ['out/**/*.js']
-        // exclude: ['out/test/**', 'out/test/*']
+        // useSpawnWrap: false,
+        include: ['out/**/*.js'],
+        exclude: ['out/test/**'],
     });
-    // await nyc.reset();
     await nyc.wrap();
 
-    // Object.keys(require.cache).filter(f => nyc.exclude.shouldInstrument(f)).forEach(m => {
-    //     console.warn('Module loaded before NYC, invalidating:', m);
-    //     delete require.cache[m];
+    // Object.keys(require.cache)
+    // .filter(f => nyc.exclude.shouldInstrument(f) )
+    // .forEach(m => {
+    //     console.warn('Module loaded before NYC, invalidatingaaa:', m);
+    //     //delete require.cache[m];
+    //     decache(m);
     //     require(m);
     //   });
 
-    // Debug which files will be included/excluded
-    console.error('Glob verification', await nyc.exclude.glob(nyc.cwd));
+    const myFilesRegex = /salesforce-offline-vscode\/out/;
+  const filterFn = myFilesRegex.test.bind(myFilesRegex);
+  if (Object.keys(require.cache).filter(filterFn).length > 1) {
+    console.warn('NYC initialized after modules were loaded', Object.keys(require.cache).filter(filterFn));
+  }
+  await nyc.createTempDirectory();
 
     // Create the mocha test
     const mocha = new Mocha({
         ui: 'tdd',
-        // timeout: 10 * 1000
+        timeout: 10 * 1000,
         color: true
     });
 
