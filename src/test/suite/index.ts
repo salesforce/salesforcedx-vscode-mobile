@@ -10,29 +10,33 @@
 import * as Mocha from 'mocha';
 import * as path from 'path';
 import * as glob from 'glob';
+
+// @ts-ignore
 import * as baseConfig from '@istanbuljs/nyc-config-typescript';
 
 const NYC = require('nyc');
+let nyc: any = undefined;
 
 export async function run(): Promise<void> {
     const testsRoot = path.resolve(__dirname, '..');
 
     // Setup coverage pre-test, including post-test hook to report
 
-    const nyc = new NYC({
-        ...baseConfig,
-        cwd: path.join(__dirname, '..', '..', '..'),
-        reporter: ['text-summary', 'html', 'text'],
-        all: true,
-        silent: false,
-        instrument: true,
-        hookRequire: true,
-        include: ['out/**/*.js'],
-        exclude: ['out/test/**']
-    });
-    await nyc.wrap();
-
-    await nyc.createTempDirectory();
+    if (process.env['CODE_COVERAGE'] === '1') {
+        nyc = new NYC({
+            ...baseConfig,
+            cwd: path.join(__dirname, '..', '..', '..'),
+            reporter: ['text-summary', 'html', 'text'],
+            all: true,
+            silent: false,
+            instrument: true,
+            hookRequire: true,
+            include: ['out/**/*.js'],
+            exclude: ['out/test/**']
+        });
+        await nyc.wrap();
+        await nyc.createTempDirectory();
+    }
 
     // Create the mocha test
     const mocha = new Mocha({
@@ -58,12 +62,17 @@ export async function run(): Promise<void> {
                     if (failures > 0) {
                         e(new Error(`${failures} tests failed.`));
                     } else {
-                        await nyc.writeCoverageFile();
+                        if (process.env['CODE_COVERAGE'] === '1') {
+                            await nyc.writeCoverageFile();
 
-                        // nyc text report is output to process.stdout and using plain console.log
-                        // will not output to terminal. Overriding process.stdout to pipe the output
-                        // to console.log.
-                        console.log(await pipeNycReport(nyc.report.bind(nyc)));
+                            // nyc text report is output to process.stdout and using plain console.log
+                            // will not output to terminal. Overriding process.stdout to pipe the output
+                            // to console.log.
+                            console.log(
+                                await pipeNycReport(nyc.report.bind(nyc))
+                            );
+                        }
+
                         c();
                     }
                 });
@@ -81,7 +90,7 @@ async function pipeNycReport(callback: any): Promise<string> {
 
     // Create a string buffer to stash report output
     let reportText = '';
-    process.stdout.write = (text) => {
+    process.stdout.write = (text: string) => {
         reportText = reportText.concat(text);
         return true;
     };

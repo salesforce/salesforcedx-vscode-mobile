@@ -19,6 +19,11 @@ async function main() {
         // Passed to --extensionTestsPath
         let extensionTestsPath = path.resolve(__dirname, './suite/index');
 
+        if (process.argv.indexOf('--coverage') >= 0) {
+            // Add code coverage
+            process.env['CODE_COVERAGE'] = '1';
+        }
+
         // Download VS Code, unzip it and run the integration test
         await runTests({ extensionDevelopmentPath, extensionTestsPath });
     } catch (err) {
