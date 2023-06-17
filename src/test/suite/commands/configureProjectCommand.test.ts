@@ -114,6 +114,12 @@ suite('Configure Project Command Test Suite', () => {
         await writeFile(path.join(process.cwd(), 'README.txt'), 'Some content');
         await CommonUtils.executeCommandAsync('git add README.txt');
         await CommonUtils.executeCommandAsync(
+            'git config --global user.email "you@example.com"'
+        );
+        await CommonUtils.executeCommandAsync(
+            'git config --global user.name "Your Name"'
+        );
+        await CommonUtils.executeCommandAsync(
             'git commit --no-gpg-sign -m "Initial commit"'
         );
         process.chdir(origCwd);

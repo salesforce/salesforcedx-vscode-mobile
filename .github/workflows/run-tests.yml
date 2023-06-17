@@ -13,9 +13,10 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
+      - uses: pyvista/setup-headless-display-action@v1
       - run: npm install
       - run: npm run compile
-      - run: npm run test-coverage
+      - run: npm run test-coverage          
   run-tests-win:
     runs-on: windows-latest
     strategy:
