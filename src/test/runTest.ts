@@ -17,7 +17,7 @@ async function main() {
 
         // The path to test runner
         // Passed to --extensionTestsPath
-        let extensionTestsPath = path.resolve(__dirname, './suite/index');
+        const extensionTestsPath = path.resolve(__dirname, './suite/index');
 
         if (process.argv.indexOf('--coverage') >= 0) {
             // Add code coverage
