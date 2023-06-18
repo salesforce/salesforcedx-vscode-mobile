@@ -18,15 +18,11 @@ const NYC = require('nyc');
 let nyc: any = undefined;
 
 export async function run(): Promise<void> {
-    const testsRoot = path.resolve(__dirname, '..');
-
-    // Setup coverage pre-test, including post-test hook to report
-
     if (process.env['CODE_COVERAGE'] === '1') {
         nyc = new NYC({
             ...baseConfig,
             cwd: path.join(__dirname, '..', '..', '..'),
-            reporter: ['text-summary', 'html', 'text'],
+            reporter: ['text-summary', 'html', 'text', 'cobertura'],
             all: true,
             silent: false,
             instrument: true,
@@ -44,6 +40,8 @@ export async function run(): Promise<void> {
         timeout: 10 * 1000,
         color: true
     });
+
+    const testsRoot = path.resolve(__dirname, '..');
 
     return new Promise((c, e) => {
         glob('**/**.test.js', { cwd: testsRoot }, async (err, files) => {
