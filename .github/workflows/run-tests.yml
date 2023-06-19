@@ -7,51 +7,34 @@ jobs:
     strategy:
       matrix:
         node: [ 16, 18 ]
-    name: Tests on Ubuntu with Node ${{ matrix.node }}
+    name: Tests with code coverage on Ubuntu with Node ${{ matrix.node }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-      - uses: pyvista/setup-headless-display-action@v1
-      - run: npm install
-      - run: npm run compile
-      - run: npm run test-coverage
-
-      - name: Copy Coverage To Predictable Location
-        run: cp coverage/cobertura-coverage.xml coverage.cobertura.xml
-
-      - name: Code Coverage Summary Report
-        uses: irongut/CodeCoverageSummary@v1.3.0
-        with:
-          filename: coverage.cobertura.xml
-          badge: true
-          fail_below_min: true
-          format: markdown
-          hide_branch_rate: false
-          hide_complexity: true
-          indicators: true
-          output: both
-          thresholds: '60 80'
-
-      - name: Add Coverage PR Comment
-        uses: marocchino/sticky-pull-request-comment@v2
-        if: github.event_name == 'pull_request'
-        with:
-          recreate: true
-          path: code-coverage-results.md
+      - run: |
+          npm install
+          npm run compile
+          # runtTests() which downloads/installs/launches VSCode requires a screen.
+          # Using xvfb-run to attach a virtual screen for CI running on Ubuntu.
+          xvfb-run --server-num=99 --server-args="-screen 0 1024x768x24" npm run test-coverage
+        shell: bash
+      - run: killall Xvfb || true
   run-tests-win:
     runs-on: windows-latest
     strategy:
       matrix:
         node: [ 16, 18 ]
-    name: Tests on Windows with Node ${{ matrix.node }}
+    name: Tests with code coverage on Windows with Node ${{ matrix.node }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
-      - uses: pyvista/setup-headless-display-action@v1    
-      - run: npm install
-      - run: npm run compile
-      - run: npm run test-coverage
+      - run: |
+          # On Windows there no need for a screen for runTests() to run successfully.
+          npm install
+          npm run compile
+          npm run test-coverage
+      - run: taskkill /IM Xvfb.exe /F || true

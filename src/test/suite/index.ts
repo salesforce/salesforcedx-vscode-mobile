@@ -15,6 +15,7 @@ import * as glob from 'glob';
 import * as baseConfig from '@istanbuljs/nyc-config-typescript';
 
 const NYC = require('nyc');
+
 let nyc: any = undefined;
 
 export async function run(): Promise<void> {
@@ -22,7 +23,7 @@ export async function run(): Promise<void> {
         nyc = new NYC({
             ...baseConfig,
             cwd: path.join(__dirname, '..', '..', '..'),
-            reporter: ['text-summary', 'html', 'text', 'cobertura'],
+            reporter: ['text-summary', 'html', 'text', 'lcov'],
             all: true,
             silent: false,
             instrument: true,
