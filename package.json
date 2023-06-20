@@ -1,6 +1,6 @@
 {
-  "name": "salesforcedx-vscode-offline-app",
-  "displayName": "Salesforce Offline App for Visual Studio Code",
+  "name": "salesforcedx-vscode-mobile",
+  "displayName": "Salesforce Mobile Extensions for Visual Studio Code",
   "description": "",
   "version": "0.0.1",
   "publisher": "salesforce",
