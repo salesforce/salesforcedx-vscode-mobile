@@ -83,7 +83,7 @@ export class TemplateChooserCommand {
             TemplateChooserCommand.TEMPLATE_LIST_ITEMS[0].filenamePrefix
         );
 
-        InstructionsWebviewProvider.showDismissableInstructions(
+        await InstructionsWebviewProvider.showDismissableInstructions(
             extensionUri,
             l10n.t('Landing Page Customization'),
             'src/instructions/landingpage.html'

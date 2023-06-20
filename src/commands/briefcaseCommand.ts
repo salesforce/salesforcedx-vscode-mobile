@@ -34,7 +34,7 @@ export class BriefcaseCommand {
             }
         );
 
-        InstructionsWebviewProvider.showDismissableInstructions(
+        await InstructionsWebviewProvider.showDismissableInstructions(
             extensionUri,
             l10n.t('Briefcase Setup Instruction'),
             'src/instructions/briefcase.html'
