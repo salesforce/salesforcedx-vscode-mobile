@@ -37,17 +37,14 @@ export function activate(context: vscode.ExtensionContext) {
         wizardCommand,
         async (fromPostProjectCreation: boolean = false) => {
             if (fromPostProjectCreation) {
-                await AuthorizeCommand.authorizeToOrg().then(async () => {
-                    await BriefcaseCommand.setupBriefcase(context.extensionUri);
-                });
-
+                await AuthorizeCommand.authorizeToOrg();
+                await BriefcaseCommand.setupBriefcase(context.extensionUri);
                 await TemplateChooserCommand.copyDefaultTemplate(
                     context.extensionUri
                 );
 
-                await AuthorizeCommand.authorizeToOrg().then(async () => {
-                    await DeployToOrgCommand.deployToOrg();
-                });
+                await AuthorizeCommand.authorizeToOrg();
+                await DeployToOrgCommand.deployToOrg();
 
                 InstructionsWebviewProvider.showDismissableInstructions(
                     context.extensionUri,

@@ -72,21 +72,24 @@ export class InstructionsWebviewProvider {
         panel.webview.html = webviewContent;
     }
 
-    public static showDismissableInstructions(
+    public static async showDismissableInstructions(
         extensionUri: vscode.Uri,
         title: string,
         contentPath: string
-    ) {
-        const provider: InstructionsWebviewProvider =
-            new InstructionsWebviewProvider(extensionUri);
-        provider.showInstructionWebview(title, contentPath, [
-            {
-                buttonId: 'okButton',
-                action: (panel) => {
-                    panel.dispose();
+    ): Promise<void> {
+        return new Promise((resolve) => {
+            const provider: InstructionsWebviewProvider =
+                new InstructionsWebviewProvider(extensionUri);
+            provider.showInstructionWebview(title, contentPath, [
+                {
+                    buttonId: 'okButton',
+                    action: (panel) => {
+                        panel.dispose();
+                        return resolve();
+                    }
                 }
-            }
-        ]);
+            ]);
+        });
     }
 
     /**
