@@ -18,7 +18,7 @@
     "type": "git",
     "url": "https://github.com/salesforce/salesforce-offline-vscode.git"
   },
-  "icon": "images/salesforce.png",
+  "icon": "images/package-icon.png",
   "galleryBanner": {
     "color": "#ECECEC",
     "theme": "light"
@@ -58,7 +58,7 @@
     "test-coverage": "node ./out/test/runTest.js --coverage",
     "prettier:write": "prettier --write \"src/**/*.{ts, js}\"",
     "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\"",
-    "vscode:prepublish": "npm run pretest && npm run test && npm run compile"
+    "vscode:prepublish": "npm run pretest && npm run test"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
