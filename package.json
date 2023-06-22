@@ -3,7 +3,7 @@
   "displayName": "%extension.displayName%",
   "description": "",
   "version": "0.0.1",
-  "publisher": "Salesforce",
+  "publisher": "salesforce",
   "engines": {
     "vscode": "^1.77.0"
   },
