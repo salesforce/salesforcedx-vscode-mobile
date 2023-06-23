@@ -36,7 +36,7 @@ async function runPostProjectConfigurationSteps(
 
         await InstructionsWebviewProvider.showDismissableInstructions(
             extensionUri,
-            vscode.l10n.t('Salesforce Mobile App Instructions'),
+            vscode.l10n.t('View in the Salesforce Mobile App'),
             'src/instructions/salesforcemobileapp.html'
         );
         return resolve();
