@@ -72,7 +72,7 @@ class DefaultProjectConfigurationProcessor
             this.extensionUri
         ).showInstructionWebview(
             l10n.t('Offline Starter Kit: Create or Open Project'),
-            'src/instructions/projectBootstrapChoice.html',
+            'resources/instructions/projectBootstrapChoice.html',
             [
                 {
                     buttonId: 'createNewButton',

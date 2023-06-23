@@ -9,7 +9,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 
 export const MESSAGING_SCRIPT_PATH_DEMARCATOR = '--- MESSAGING_SCRIPT_SRC ---';
-export const MESSAGING_JS_PATH = 'src/instructions/webviewMessaging.js';
+export const MESSAGING_JS_PATH = 'resources/instructions/webviewMessaging.js';
 const INSTRUCTION_VIEW_TYPE = 'instructionsView';
 
 export type ButtonAction = {
