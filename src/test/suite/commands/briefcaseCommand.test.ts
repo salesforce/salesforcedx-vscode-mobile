@@ -72,7 +72,7 @@ suite('Briefcase Command Test Suite', () => {
         const titleArg = showDismissableInstructionsStub.args[0][1];
         const pathArg = showDismissableInstructionsStub.args[0][2];
         assert.equal(uriArg, extensionUri);
-        assert.equal(titleArg, l10n.t('Briefcase Setup Instruction'));
+        assert.equal(titleArg, l10n.t('Briefcase Setup'));
         assert.equal(pathArg, 'src/instructions/briefcase.html');
     });
 });

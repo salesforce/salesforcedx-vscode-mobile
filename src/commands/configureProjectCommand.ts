@@ -34,7 +34,7 @@ class DefaultProjectConfigurationProcessor
             new InstructionsWebviewProvider(
                 this.extensionUri
             ).showInstructionWebview(
-                l10n.t('Offline Starter Kit: Follow the Prompts'),
+                l10n.t('Offline Starter Kit: Configure Your Project'),
                 'src/instructions/projectBootstrapAcknowledgment.html',
                 [
                     {
