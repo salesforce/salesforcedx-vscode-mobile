@@ -1,4 +1,5 @@
 {
 	"extension.command.title": "Configuration Wizard",
-	"extension.command.category": "Offline Starter Kit"
+	"extension.command.category": "Offline Starter Kit",
+	"extension.displayName": "Salesforce Mobile Extensions for Visual Studio Code"
 }
