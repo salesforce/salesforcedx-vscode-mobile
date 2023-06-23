@@ -9,6 +9,7 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 CODEOWNERS
+RELEASE.md
 coverage/
 .nyc_output/
 .github
