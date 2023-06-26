@@ -35,7 +35,7 @@ class DefaultProjectConfigurationProcessor
                 this.extensionUri
             ).showInstructionWebview(
                 l10n.t('Offline Starter Kit: Configure Your Project'),
-                'src/instructions/projectBootstrapAcknowledgment.html',
+                'resources/instructions/projectBootstrapAcknowledgment.html',
                 [
                     {
                         buttonId: 'okButton',
