@@ -1,7 +1,7 @@
 {
   "name": "salesforcedx-vscode-mobile",
   "displayName": "%extension.displayName%",
-  "description": "",
+  "description": "%extension.description%",
   "version": "0.0.1",
   "publisher": "salesforce",
   "engines": {
@@ -10,14 +10,16 @@
   "categories": [
     "Other"
   ],
-  "qna": "https://github.com/salesforce/salesforce-offline-vscode/issues",
+  "qna": "https://github.com/salesforce/salesforcedx-vscode-mobile/issues",
+  "homepage": "https://github.com/salesforce/salesforcedx-vscode-mobile/blob/main/README.md",
   "bugs": {
-    "url": "https://github.com/salesforce/salesforce-offline-vscode/issues"
+    "url": "https://github.com/salesforce/salesforcedx-vscode-mobile/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/salesforce/salesforce-offline-vscode.git"
+    "url": "https://github.com/salesforce/salesforcedx-vscode-mobile.git"
   },
+  "license": "SEE LICENSE IN LICENSE.txt",
   "icon": "images/package-icon.png",
   "galleryBanner": {
     "color": "#ECECEC",

@@ -1,5 +1,29 @@
-# salesforce-offline-vscode
+# Salesforce Mobile Extensions for Visual Studio Code
 
-With the [Offline App Developer Starter Kit](https://github.com/salesforce/offline-app-developer-starter-kit) serving as the primary entry point for customers to get started using the Offline App in Salesforce App Plus, we want to give them as straightforward of an onboarding process as possible.
+This Visual Studio Code extension provides tools to help developers create their Salesforce Mobile experiences in the VSCode development environment.
 
-Salesforce Offline VSCode is a VSCode extension that asks the user a series of questions targeted at configuring their Org and environment for using the Offline App, then takes their input and automates those configuration items, taking much of the manual labor/configuration off the plate of the user.
+## Offline App Developer Starter Kit
+
+The Mobile Extensions will help you get started with the [Offline App Developer Starter Kit](https://github.com/salesforce/offline-app-developer-starter-kit), providing you with a walkthrough to get your offline experience up and running for Salesforce Mobile App Plus. See the Salesforce Mobile App Plus [docs](https://help.salesforce.com/s/articleView?id=sf.salesforce_app_plus.htm&type=5) for more information on Mobile Offline.
+
+Once you've installed the Mobile Extensions, follow these steps to initiate the Starter Kit walkthrough:
+
+-   Open the Command Palette in VSCode, by going to View > Command Palette...
+-   Type "Offline Starter Kit" to filter to the Starter Kit commands
+-   Choose "Configuration Wizard", and follow the prompts to configure your Starter Kit project.
+
+## Prerequisites
+
+Before you set up the Mobile Extensions, make sure that you have these essential tools installed locally.
+
+### Salesforce CLI
+
+Before you use the Salesforce Mobile Extensions for VSCode, please [set up the Salesforce CLI](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup).
+
+### Salesforce Extensions for VSCode
+
+The Mobile Extensions uses functionality in the [Salesforce Extensions for VSCode](https://marketplace.visualstudio.com/items?itemName=salesforce.salesforcedx-vscode). You can install the extension from this link, or from the Extensions tab of VSCode itself.
+
+### Git
+
+The Mobile Extensions uses the Git version control system to help you set up your projects. You can install Git on your system from the [official site](https://git-scm.com/).

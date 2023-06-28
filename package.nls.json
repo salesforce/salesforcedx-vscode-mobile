@@ -1,5 +1,6 @@
 {
-	"extension.command.title": "Configuration Wizard",
-	"extension.command.category": "Offline Starter Kit",
-	"extension.displayName": "Salesforce Mobile Extensions for Visual Studio Code"
+    "extension.command.title": "Configuration Wizard",
+    "extension.command.category": "Offline Starter Kit",
+    "extension.displayName": "Salesforce Mobile Extensions for Visual Studio Code",
+    "extension.description": "Tools to help developers create their Salesforce Mobile experiences in a VSCode development environment."
 }
