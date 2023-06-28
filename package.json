@@ -50,7 +50,7 @@
     "test-coverage": "node ./out/test/runTest.js --coverage",
     "prettier:write": "prettier --write \"src/**/*.{ts, js}\"",
     "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\"",
-    "bundle:extension": "esbuild ./src/extension.ts  --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@salesforce/lwc-dev-mobile-core --external:@salesforce/sf-plugins-core --minify",
+    "bundle:extension": "esbuild ./src/extension.ts  --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@oclif/core --minify --sourcemap",
     "vscode:prepublish": "npm run clean && npm run bundle:extension && npm prune --omit=dev"
   },
   "devDependencies": {

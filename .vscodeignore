@@ -13,3 +13,5 @@ RELEASE.md
 coverage/
 .nyc_output/
 .github
+out/
+!out/extension.js
