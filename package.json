@@ -30,15 +30,6 @@
   ],
   "main": "./out/extension.js",
   "l10n": "./l10n",
-  "files": [
-    "/out",
-    "./l10n",
-    "./images",
-    "!**/__tests__/",
-    "!**/__mocks__/",
-    "!**/*.test.*",
-    "!**/.DS_Store"
-  ],
   "contributes": {
     "commands": [
       {
@@ -52,6 +43,7 @@
     "node": "16.20.0"
   },
   "scripts": {
+    "clean": "rimraf out",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
@@ -60,7 +52,8 @@
     "test-coverage": "node ./out/test/runTest.js --coverage",
     "prettier:write": "prettier --write \"src/**/*.{ts, js}\"",
     "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\"",
-    "vscode:prepublish": "npm run pretest && npm run test"
+    "bundle:extension": "esbuild ./src/extension.ts  --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@oclif/core --minify --sourcemap",
+    "vscode:prepublish": "npm run clean && npm run bundle:extension && npm prune --omit=dev"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
@@ -74,11 +67,13 @@
     "@typescript-eslint/parser": "^5.56.0",
     "@vscode/l10n-dev": "^0.0.26",
     "@vscode/test-electron": "^2.3.0",
+    "esbuild": "^0.18.6",
     "eslint": "^8.36.0",
     "glob": "^8.1.0",
     "mocha": "^10.2.0",
     "nyc": "^15.1.0",
     "prettier": "^2.8.8",
+    "rimraf": "^5.0.1",
     "sinon": "^15.1.0",
     "typescript": "^4.9.5"
   },

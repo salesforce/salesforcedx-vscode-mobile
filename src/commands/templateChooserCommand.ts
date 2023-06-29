@@ -86,7 +86,7 @@ export class TemplateChooserCommand {
         await InstructionsWebviewProvider.showDismissableInstructions(
             extensionUri,
             l10n.t('Landing Page Customization'),
-            'src/instructions/landingpage.html'
+            'resources/instructions/landingpage.html'
         );
     }
 
