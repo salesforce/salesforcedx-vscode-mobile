@@ -1,25 +1,25 @@
-Instructions to package this as an extension (*.vsix) file:
+# Releasing the Mobile Extension
 
-1. Install vsce
+## Validating the release package locally, before publishing
 
-```
-npm install -g @vscode/vsce
-```
+Before publishing the extension, you'll want to test the "built" extension package locally, as the bundling and packaging workflow creates an extension whose code is structured quite differently from what you work with in a local development environment, and as such unforeseen issues could show up that otherwise wouldn't with local development.
 
-2. Install dependencies
+The following instructions will create the extension package (`salesforcedx-vscode-mobile-<version>.vsix`) locally:
 
-NOTE: The packaging steps prunes the node_modules tree, so running `npm install` will reinstall dev dependencies.
+1.  Install the repository package
 
-```
-npm install
-```
+        npm install
 
-3. Create package
+2.  Create the VSIX package
 
-```
-vsce package
-```
+        npx vsce package
 
-4. Manually install the generated .vsix file and smoke test.
+    **NOTE:** The packaging workflow prunes the dev dependencies out of the `node_modules/` tree, so you'll need to re-run `npm install` to reinstall dev dependencies and continue development work.
 
-TODO: Eventually we can sign and publish it directly to marketplace.
+3.  Install the generated .vsix file and test as you will:
+
+        code --install-extension salesforcedx-vscode-mobile-<version>.vsix
+
+## Publishing the extension package
+
+Publishing of the package will be handled as GitHub Action initiated by a user responsible for publishing the package, once all testing and sign-off has occurred on the generated package.

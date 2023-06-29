@@ -1,0 +1,58 @@
+name: Create GitHub Release for Extension Package
+
+on:
+    workflow_dispatch:
+
+jobs:
+    release:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '16.x'
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Build VSIX Package
+              run: npx vsce package
+
+            - name: Get package version
+              id: get_package_version
+              run: echo "package_version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+            - name: Create release
+              id: create_release
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const fs = require('fs');
+                      const response = await github.rest.repos.createRelease({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        tag_name: 'v${{ steps.get_package_version.outputs.package_version }}',
+                        name: 'Release ${{ steps.get_package_version.outputs.package_version }}',
+                        body: 'Generating release for version ${{ steps.get_package_version.outputs.package_version }}'
+                      });
+                      return response.data.id;
+            - name: Attach VSIX package to release
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const fs = require('fs');
+                      const packageJson = require('./package.json');
+                      const packageName = packageJson.name;
+                      const packageVersion = packageJson.version;
+                      const vsixFilename = `${packageName}-${packageVersion}.vsix`;
+                      const uploadUrl = await github.rest.repos.uploadReleaseAsset({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        release_id: ${{ steps.create_release.outputs.result }},
+                        name: vsixFilename,
+                        data: fs.readFileSync(vsixFilename)
+                      });
