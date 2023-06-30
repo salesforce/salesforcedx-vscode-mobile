@@ -14,8 +14,6 @@ The following instructions will create the extension package (`salesforcedx-vsco
 
         npx vsce package
 
-    **NOTE:** The packaging workflow prunes the dev dependencies out of the `node_modules/` tree, so you'll need to re-run `npm install` to reinstall dev dependencies and continue development work.
-
 3.  Install the generated .vsix file and test as you will:
 
         code --install-extension salesforcedx-vscode-mobile-<version>.vsix
