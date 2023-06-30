@@ -53,7 +53,7 @@
     "prettier:write": "prettier --write \"src/**/*.{ts, js}\"",
     "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\"",
     "bundle:extension": "esbuild ./src/extension.ts  --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@oclif/core --minify --sourcemap",
-    "vscode:prepublish": "npm run clean && npm run bundle:extension && npm prune --omit=dev"
+    "vscode:prepublish": "npm run clean && npm run bundle:extension"
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
