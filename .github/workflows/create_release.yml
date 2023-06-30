@@ -37,6 +37,7 @@ jobs:
                         body: `Generating release for version ${packageVersion}`
                       });
                       return response.data.id;
+
             - name: Attach VSIX package to release
               uses: actions/github-script@v6
               with:
@@ -46,7 +47,7 @@ jobs:
                       const packageName = packageJson.name;
                       const packageVersion = packageJson.version;
                       const vsixFilename = `${packageName}-${packageVersion}.vsix`;
-                      const uploadUrl = await github.rest.repos.uploadReleaseAsset({
+                      await github.rest.repos.uploadReleaseAsset({
                         owner: context.repo.owner,
                         repo: context.repo.repo,
                         release_id: ${{ steps.create_release.outputs.result }},
