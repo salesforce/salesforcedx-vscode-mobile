@@ -1,0 +1,110 @@
+name: Publish Extension Package for GitHub Release
+
+on:
+    workflow_dispatch:
+        inputs:
+            release-tag-name:
+                description: 'Release Tag Name / Version'
+                required: true
+
+jobs:
+    publish-release-extension:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3
+
+            - name: Install Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '16.x'
+
+            - name: Validate tag name
+              id: validate_tag_name
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      let tagNameValue = "${{ github.event.inputs.release-tag-name }}";
+                      console.log(`Input tag name / version: ${tagNameValue}`);
+                      // Take the 'v' off to validate the SemVer version.
+                      if (tagNameValue.startsWith('v')) {
+                          tagNameValue = tagNameValue.slice(1);
+                      }
+
+                      // Officially supported SemVer version syntax regex.
+                      // See https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
+                      const validVersionRegex = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
+                      if (!validVersionRegex.test(tagNameValue)) {
+                          throw new Error(`'${tagNameValue}' is not a valid version string.`);
+                      }
+
+                      // Put the 'v' back on, as our release tags are formatted as 'v'x.y.z.
+                      tagNameValue = `v${tagNameValue}`;
+                      console.log(`Resultant tag name used: ${tagNameValue}`);
+                      return tagNameValue;
+
+            - name: Get package name for tag
+              id: get_package_name
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const packageName = require('./package.json').name;
+                      const tagName = ${{ steps.validate_tag_name.outputs.result }}
+                      const packageVersion = tagName.slice(1); // Take the 'v' off the tag.
+                      const vsixPackageName = `${packageName}-${packageVersion}.vsix`;
+                      console.log(`Package name that will be used: ${vsixPackageName}`);
+                      return vsixPackageName;
+
+            - name: Get release and associated VSIX asset
+              id: get_release_and_asset
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const releaseTagName = ${{ steps.validate_tag_name.outputs.result }};
+                      const vsixPackageName = ${{ steps.get_package_name.outputs.result }};
+                      const response = await github.rest.repos.getReleaseByTag({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        tag: releaseTagName
+                      });
+                      if (!response.data) {
+                        throw new Error(`Release not found for tag: ${releaseTagName}`);
+                      }
+                      const release = response.data;
+                      const asset = release.assets.find(asset => asset.name === vsixPackageName);
+                      if (!asset) {
+                        throw new Error(`Asset '${vsixPackageName}' not found for release tag: ${releaseTagName}`);
+                      }
+                      const assetResponse = await github.rest.repos.getReleaseAsset({
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        asset_id: asset.id,
+                      });
+                      return assetResponse.url;
+
+            - name: Download asset
+              id: download_asset
+              uses: actions/github-script@v6
+              with:
+                  script: |
+                      const assetUrl = ${{ steps.get_release_and_asset.outputs.result }};
+                      const vsixPackageName = ${{ steps.get_package_name.outputs.result }};
+                      console.log(`assetUrl: ${assetUrl}`);
+                      const response = await github.request(`GET ${assetUrl}`, {
+                          headers: {
+                              'Accept': 'application/octet-stream'
+                          },
+                          responseType: 'arraybuffer'
+                      });
+                      if (response.status !== 200) {
+                        throw new Error(`Failed to download '${vsixPackageName}': ${response.status}`);
+                      }
+                      const fs = require('fs');
+                      fs.writeFileSync(vsixPackageName, Buffer.from(response.data, 'binary'));
+
+            - name: Publish to VSCode Marketplace
+              env:
+                  VSCE_PERSONAL_ACCESS_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
+              run: |
+                  npx vsce publish -p ${{ env.VSCE_PERSONAL_ACCESS_TOKEN }} --packagePath ${{ steps.get_package_name.outputs.result }}

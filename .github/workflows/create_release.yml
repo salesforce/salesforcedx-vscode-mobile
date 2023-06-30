@@ -8,7 +8,7 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Checkout code
+            - name: Checkout repository
               uses: actions/checkout@v3
 
             - name: Install Node.js
@@ -27,7 +27,6 @@ jobs:
               uses: actions/github-script@v6
               with:
                   script: |
-                      const fs = require('fs');
                       const packageVersion = require('./package.json').version;
                       const response = await github.rest.repos.createRelease({
                         owner: context.repo.owner,
