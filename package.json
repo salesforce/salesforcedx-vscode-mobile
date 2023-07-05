@@ -2,7 +2,7 @@
   "name": "salesforcedx-vscode-mobile",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "publisher": "salesforce",
   "engines": {
     "vscode": "^1.77.0"
