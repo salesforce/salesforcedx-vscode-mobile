@@ -20,6 +20,9 @@ jobs:
               with:
                   node-version: '16.x'
 
+            - name: Install dependencies
+              run: npm install
+
             - name: Validate tag name
               id: validate_tag_name
               uses: actions/github-script@v6
