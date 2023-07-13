@@ -19,12 +19,15 @@ export interface ProjectConfigurationProcessor {
     ): void;
     getProjectFolderPath(): Promise<Uri[] | undefined>;
     preActionUserAcknowledgment(): Promise<void>;
+    executeProjectCreation(folderUri: Uri): Promise<string>;
+    executeProjectOpen(folderUri: Uri): Promise<void>;
 }
 
-class DefaultProjectConfigurationProcessor
+export class DefaultProjectConfigurationProcessor
     implements ProjectConfigurationProcessor
 {
     extensionUri: Uri;
+
     constructor(extensionUri: Uri) {
         this.extensionUri = extensionUri;
     }
@@ -46,6 +49,26 @@ class DefaultProjectConfigurationProcessor
                     }
                 ]
             );
+        });
+    }
+
+    async executeProjectCreation(folderUri: Uri): Promise<string> {
+        return new Promise(async (resolve) => {
+            await commands.executeCommand(
+                'git.clone',
+                ConfigureProjectCommand.STARTER_KIT_REPO_URI,
+                folderUri.fsPath
+            );
+            return resolve(folderUri.fsPath);
+        });
+    }
+
+    async executeProjectOpen(folderUri: Uri): Promise<void> {
+        return new Promise(async (resolve) => {
+            await commands.executeCommand('vscode.openFolder', folderUri, {
+                forceReuseWindow: true
+            });
+            return resolve();
         });
     }
 
@@ -110,24 +133,44 @@ export class ConfigureProjectCommand {
             new DefaultProjectConfigurationProcessor(extensionUri);
     }
 
+    async createProjectAction(
+        panel?: WebviewPanel
+    ): Promise<string | undefined> {
+        return new Promise((resolve) => {
+            // It's actually important to run this async, because
+            // createNewProject() will not resolve its Promise
+            // until a path is selected, allowing the user to
+            // cancel the open dialog and re-initiate it as many
+            // times as they want.
+            this.createNewProject(panel).then((path) => {
+                return resolve(path);
+            });
+        });
+    }
+
+    async openProjectAction(panel?: WebviewPanel): Promise<string | undefined> {
+        return new Promise((resolve) => {
+            // It's actually important to run this async, because
+            // createNewProject() will not resolve its Promise
+            // until a path is selected, allowing the user to
+            // cancel the open dialog and re-initiate it as many
+            // times as they want.
+            this.openExistingProject(panel).then((path) => {
+                return resolve(path);
+            });
+        });
+    }
+
     async configureProject(): Promise<string | undefined> {
-        return new Promise(async (resolve) => {
+        return new Promise((resolve) => {
             this.projectConfigurationProcessor.getProjectManagementChoice(
-                (panel) => {
-                    // It's actually important to run this async, because
-                    // createNewProject() will not resolve its Promise
-                    // until a path is selected, allowing the user to
-                    // cancel the open dialog and re-initiate it as many
-                    // times as they want.
-                    this.createNewProject(panel).then((path) => {
-                        return resolve(path);
-                    });
+                async (panel) => {
+                    const path = await this.createProjectAction(panel);
+                    return resolve(path);
                 },
-                (panel) => {
-                    // See above for rationale for running this async.
-                    this.openExistingProject(panel).then((path) => {
-                        return resolve(path);
-                    });
+                async (panel) => {
+                    const path = await this.openProjectAction(panel);
+                    return resolve(path);
                 }
             );
         });
@@ -153,9 +196,10 @@ export class ConfigureProjectCommand {
                 .preActionUserAcknowledgment()
                 .then(async () => {
                     try {
-                        const path = await this.executeProjectCreation(
-                            folderUri[0]
-                        );
+                        const path =
+                            await this.projectConfigurationProcessor.executeProjectCreation(
+                                folderUri[0]
+                            );
                         return resolve(path);
                     } catch (error) {
                         return reject(error);
@@ -192,24 +236,11 @@ export class ConfigureProjectCommand {
             this.projectConfigurationProcessor
                 .preActionUserAcknowledgment()
                 .then(async () => {
-                    await commands.executeCommand(
-                        'vscode.openFolder',
-                        folderUri[0],
-                        { forceReuseWindow: true }
+                    await this.projectConfigurationProcessor.executeProjectOpen(
+                        folderUri[0]
                     );
                     return resolve(folderUri[0].fsPath);
                 });
-        });
-    }
-
-    async executeProjectCreation(folderUri: Uri): Promise<string> {
-        return new Promise(async (resolve) => {
-            await commands.executeCommand(
-                'git.clone',
-                ConfigureProjectCommand.STARTER_KIT_REPO_URI,
-                folderUri.fsPath
-            );
-            return resolve(folderUri.fsPath);
         });
     }
 

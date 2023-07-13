@@ -12,11 +12,15 @@ import * as path from 'path';
 import * as process from 'process';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import * as sinon from 'sinon';
-import { l10n, Uri } from 'vscode';
-import { ConfigureProjectCommand } from '../../../commands/configureProjectCommand';
+import { l10n, Uri, window } from 'vscode';
+import {
+    ConfigureProjectCommand,
+    DefaultProjectConfigurationProcessor,
+    ProjectConfigurationProcessor
+} from '../../../commands/configureProjectCommand';
 import {
     TempProjectDirManager,
-    createNonExistentAbsolutePath
+    createPlatformAbsolutePath
 } from '../../TestHelper';
 
 suite('Configure Project Command Test Suite', () => {
@@ -29,7 +33,14 @@ suite('Configure Project Command Test Suite', () => {
     test('Open Project: Non-existent folder is an error', async () => {
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
-        const nonExistentFolderUri = Uri.file(createNonExistentAbsolutePath());
+        const nonExistentFolderUri = Uri.file(
+            createPlatformAbsolutePath(
+                'starter-kit-tests',
+                'path',
+                'to',
+                'nowhere'
+            )
+        );
         try {
             await new ConfigureProjectCommand(
                 extensionUri
@@ -193,4 +204,341 @@ suite('Configure Project Command Test Suite', () => {
             projectFolder.removeDir();
         }
     }).timeout(60000); // 1 min, just to be safe. This test should ideally land < 10s.
+
+    test('Canceling "Create Project" should not resolve. Subsequent choice should.', async () => {
+        const extensionUri = Uri.file('whateva');
+        const configurationProcessor = new DefaultProjectConfigurationProcessor(
+            extensionUri
+        );
+        const configureProjectCmd = new ConfigureProjectCommand(
+            extensionUri,
+            configurationProcessor
+        );
+
+        const fakeProjectPath = createPlatformAbsolutePath(
+            'fake',
+            'project',
+            'path'
+        );
+        const folderPathStub = setupCreateProjectCancellationStubs(
+            configurationProcessor,
+            fakeProjectPath
+        );
+
+        // We're looking for the promise *not* to be resolved in this case, so
+        // we'll have our fake promise resolve first.
+        const timeoutProjectPath = createPlatformAbsolutePath(
+            'timeout',
+            'project',
+            'path'
+        );
+        const timeout = 500;
+        let timeoutPromise = new Promise<string>((resolve) => {
+            setTimeout(() => {
+                resolve(timeoutProjectPath);
+            }, timeout);
+        });
+
+        let resultPath = await Promise.race([
+            configureProjectCmd.createProjectAction(),
+            timeoutPromise
+        ]);
+        assert.equal(
+            resultPath,
+            timeoutProjectPath,
+            'New project cancel should not resolve promise.'
+        );
+
+        // Subsequently choosing a non-null folder path should resolve
+        // the Promise.
+        folderPathStub.restore();
+        sinon
+            .stub(configurationProcessor, 'getProjectFolderPath')
+            .callsFake(() => {
+                return new Promise((resolve) => {
+                    const projectPathUri = Uri.file(fakeProjectPath);
+                    return resolve([projectPathUri]);
+                });
+            });
+
+        // Have to recreate the timoeut promise, as the original promise
+        // was already resolved above.
+        timeoutPromise = new Promise<string>((resolve) => {
+            setTimeout(() => {
+                resolve(timeoutProjectPath);
+            }, timeout);
+        });
+
+        resultPath = await Promise.race([
+            configureProjectCmd.createProjectAction(),
+            timeoutPromise
+        ]);
+        assert.equal(
+            resultPath,
+            fakeProjectPath,
+            'Valid new project path should resolve promise.'
+        );
+    });
+
+    test('Canceling "Open Project" should not resolve. Subsequent choice should.', async () => {
+        const extensionUri = Uri.file('whateva');
+        const configurationProcessor = new DefaultProjectConfigurationProcessor(
+            extensionUri
+        );
+        const configureProjectCmd = new ConfigureProjectCommand(
+            extensionUri,
+            configurationProcessor
+        );
+
+        const fakeProjectPath = createPlatformAbsolutePath(
+            'fake',
+            'project',
+            'path'
+        );
+        const folderPathStub = setupOpenProjectCancellationStubs(
+            configureProjectCmd,
+            configurationProcessor,
+            fakeProjectPath
+        );
+
+        // We're looking for the promise *not* to be resolved in this case, so
+        // we'll have our fake promise resolve first.
+        const timeoutProjectPath = createPlatformAbsolutePath(
+            'timeout',
+            'project',
+            'path'
+        );
+        const timeout = 500;
+        let timeoutPromise = new Promise<string>((resolve) => {
+            setTimeout(() => {
+                resolve(timeoutProjectPath);
+            }, timeout);
+        });
+
+        let resultPath = await Promise.race([
+            configureProjectCmd.openProjectAction(),
+            timeoutPromise
+        ]);
+        assert.equal(
+            resultPath,
+            timeoutProjectPath,
+            'Open project cancel should not resolve promise.'
+        );
+
+        // Subsequently choosing a non-null folder path should resolve
+        // the Promise.
+        folderPathStub.restore();
+        sinon
+            .stub(configurationProcessor, 'getProjectFolderPath')
+            .callsFake(() => {
+                return new Promise((resolve) => {
+                    const projectPathUri = Uri.file(fakeProjectPath);
+                    return resolve([projectPathUri]);
+                });
+            });
+
+        // Have to recreate the timoeut promise, as the original promise
+        // was already resolved above.
+        timeoutPromise = new Promise<string>((resolve) => {
+            setTimeout(() => {
+                resolve(timeoutProjectPath);
+            }, timeout);
+        });
+
+        resultPath = await Promise.race([
+            configureProjectCmd.openProjectAction(),
+            timeoutPromise
+        ]);
+        assert.equal(
+            resultPath,
+            fakeProjectPath,
+            'Valid open project path should resolve promise.'
+        );
+    });
+
+    test('Invalid folder for "Open Project" should not resolve. Subsequent choice should.', async () => {
+        const extensionUri = Uri.file('whateva');
+        const configurationProcessor = new DefaultProjectConfigurationProcessor(
+            extensionUri
+        );
+        const configureProjectCmd = new ConfigureProjectCommand(
+            extensionUri,
+            configurationProcessor
+        );
+
+        const fakeProjectPath = createPlatformAbsolutePath(
+            'fake',
+            'project',
+            'path'
+        );
+        const validateFolderStub = setupOpenProjectInvalidFolderStubs(
+            configureProjectCmd,
+            configurationProcessor,
+            fakeProjectPath
+        );
+
+        // We're looking for the promise *not* to be resolved in this case, so
+        // we'll have our fake promise resolve first.
+        const timeoutProjectPath = createPlatformAbsolutePath(
+            'timeout',
+            'project',
+            'path'
+        );
+        const timeout = 500;
+        let timeoutPromise = new Promise<string>((resolve) => {
+            setTimeout(() => {
+                resolve(timeoutProjectPath);
+            }, timeout);
+        });
+
+        let resultPath = await Promise.race([
+            configureProjectCmd.openProjectAction(),
+            timeoutPromise
+        ]);
+        assert.equal(
+            resultPath,
+            timeoutProjectPath,
+            'Open project with invalid folder should not resolve promise.'
+        );
+
+        // Subsequently choosing a valid folder path should resolve
+        // the Promise.
+        validateFolderStub.restore();
+        sinon
+            .stub(configureProjectCmd, 'validateProjectFolder')
+            .callsFake(() => {
+                return new Promise((resolve) => {
+                    return resolve();
+                });
+            });
+
+        // Have to recreate the timoeut promise, as the original promise
+        // was already resolved above.
+        timeoutPromise = new Promise<string>((resolve) => {
+            setTimeout(() => {
+                resolve(timeoutProjectPath);
+            }, timeout);
+        });
+
+        resultPath = await Promise.race([
+            configureProjectCmd.openProjectAction(),
+            timeoutPromise
+        ]);
+        assert.equal(
+            resultPath,
+            fakeProjectPath,
+            'Valid open project path should resolve promise.'
+        );
+    });
 });
+
+function setupCreateProjectCancellationStubs(
+    configurationProcessor: ProjectConfigurationProcessor,
+    fakeProjectPath: string
+): sinon.SinonStub {
+    // getProjectFolderPath() returning undefined is equivalent to the user
+    // canceling the operation.
+    const folderPathStub = sinon
+        .stub(configurationProcessor, 'getProjectFolderPath')
+        .callsFake(() => {
+            return new Promise((resolve) => {
+                return resolve(undefined);
+            });
+        });
+
+    sinon
+        .stub(configurationProcessor, 'preActionUserAcknowledgment')
+        .callsFake(() => {
+            return new Promise((resolve) => {
+                return resolve();
+            });
+        });
+
+    sinon
+        .stub(configurationProcessor, 'executeProjectCreation')
+        .callsFake(() => {
+            return new Promise((resolve) => {
+                return resolve(fakeProjectPath);
+            });
+        });
+
+    return folderPathStub;
+}
+
+function setupOpenProjectCancellationStubs(
+    configureProjectCmd: ConfigureProjectCommand,
+    configurationProcessor: ProjectConfigurationProcessor,
+    fakeProjectPath: string
+): sinon.SinonStub {
+    // getProjectFolderPath() returning undefined is equivalent to the user
+    // canceling the operation.
+    const folderPathStub = sinon
+        .stub(configurationProcessor, 'getProjectFolderPath')
+        .callsFake(() => {
+            return new Promise((resolve) => {
+                return resolve(undefined);
+            });
+        });
+
+    sinon.stub(configureProjectCmd, 'validateProjectFolder').callsFake(() => {
+        return new Promise((resolve) => {
+            return resolve();
+        });
+    });
+
+    sinon
+        .stub(configurationProcessor, 'preActionUserAcknowledgment')
+        .callsFake(() => {
+            return new Promise((resolve) => {
+                return resolve();
+            });
+        });
+
+    sinon.stub(configurationProcessor, 'executeProjectOpen').callsFake(() => {
+        return new Promise((resolve) => {
+            return resolve();
+        });
+    });
+
+    return folderPathStub;
+}
+
+function setupOpenProjectInvalidFolderStubs(
+    configureProjectCmd: ConfigureProjectCommand,
+    configurationProcessor: ProjectConfigurationProcessor,
+    fakeProjectPath: string
+): sinon.SinonStub {
+    // getProjectFolderPath() returning undefined is equivalent to the user
+    // canceling the operation.
+    sinon.stub(configurationProcessor, 'getProjectFolderPath').callsFake(() => {
+        return new Promise((resolve) => {
+            return resolve([Uri.file(fakeProjectPath)]);
+        });
+    });
+
+    const validateFolderStub = sinon
+        .stub(configureProjectCmd, 'validateProjectFolder')
+        .callsFake(() => {
+            return new Promise((_resolve, reject) => {
+                return reject(new Error('Invalid folder in test.'));
+            });
+        });
+
+    sinon.stub(window, 'showErrorMessage');
+
+    sinon
+        .stub(configurationProcessor, 'preActionUserAcknowledgment')
+        .callsFake(() => {
+            return new Promise((resolve) => {
+                return resolve();
+            });
+        });
+
+    sinon.stub(configurationProcessor, 'executeProjectOpen').callsFake(() => {
+        return new Promise((resolve) => {
+            return resolve();
+        });
+    });
+
+    return validateFolderStub;
+}
