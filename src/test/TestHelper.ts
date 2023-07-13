@@ -54,5 +54,13 @@ export class TempProjectDirManager {
 // Create a platform-agnostic absolute path to a non-existent folder.
 export function createPlatformAbsolutePath(...pathArgs: string[]): string {
     const topLevel = path.parse(process.cwd()).root;
-    return path.join(topLevel, ...pathArgs);
+    let absPath = path.join(topLevel, ...pathArgs);
+
+    // On Windows, Uri.fsPath normalizes the drive letter down to lower-case.
+    // If we don't do the same, tests will break.
+    if (process.platform.startsWith('win')) {
+        const firstChar = absPath.charAt(0).toLowerCase();
+        absPath = firstChar + absPath.slice(1);
+    }
+    return absPath;
 }
