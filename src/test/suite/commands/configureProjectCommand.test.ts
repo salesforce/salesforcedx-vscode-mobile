@@ -20,7 +20,7 @@ import {
 } from '../../../commands/configureProjectCommand';
 import {
     TempProjectDirManager,
-    createNonExistentAbsolutePath
+    createPlatformAbsolutePath
 } from '../../TestHelper';
 
 suite('Configure Project Command Test Suite', () => {
@@ -33,7 +33,14 @@ suite('Configure Project Command Test Suite', () => {
     test('Open Project: Non-existent folder is an error', async () => {
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
-        const nonExistentFolderUri = Uri.file(createNonExistentAbsolutePath());
+        const nonExistentFolderUri = Uri.file(
+            createPlatformAbsolutePath(
+                'starter-kit-tests',
+                'path',
+                'to',
+                'nowhere'
+            )
+        );
         try {
             await new ConfigureProjectCommand(
                 extensionUri
@@ -208,7 +215,11 @@ suite('Configure Project Command Test Suite', () => {
             configurationProcessor
         );
 
-        const fakeProjectPath = '/fake/project/path';
+        const fakeProjectPath = createPlatformAbsolutePath(
+            'fake',
+            'project',
+            'path'
+        );
         const folderPathStub = setupCreateProjectCancellationStubs(
             configurationProcessor,
             fakeProjectPath
@@ -216,7 +227,11 @@ suite('Configure Project Command Test Suite', () => {
 
         // We're looking for the promise *not* to be resolved in this case, so
         // we'll have our fake promise resolve first.
-        const timeoutProjectPath = '/timeout/project/path';
+        const timeoutProjectPath = createPlatformAbsolutePath(
+            'timeout',
+            'project',
+            'path'
+        );
         const timeout = 500;
         let timeoutPromise = new Promise<string>((resolve) => {
             setTimeout(() => {
@@ -275,7 +290,11 @@ suite('Configure Project Command Test Suite', () => {
             configurationProcessor
         );
 
-        const fakeProjectPath = '/fake/project/path';
+        const fakeProjectPath = createPlatformAbsolutePath(
+            'fake',
+            'project',
+            'path'
+        );
         const folderPathStub = setupOpenProjectCancellationStubs(
             configureProjectCmd,
             configurationProcessor,
@@ -284,7 +303,11 @@ suite('Configure Project Command Test Suite', () => {
 
         // We're looking for the promise *not* to be resolved in this case, so
         // we'll have our fake promise resolve first.
-        const timeoutProjectPath = '/timeout/project/path';
+        const timeoutProjectPath = createPlatformAbsolutePath(
+            'timeout',
+            'project',
+            'path'
+        );
         const timeout = 500;
         let timeoutPromise = new Promise<string>((resolve) => {
             setTimeout(() => {
@@ -343,7 +366,11 @@ suite('Configure Project Command Test Suite', () => {
             configurationProcessor
         );
 
-        const fakeProjectPath = '/fake/project/path';
+        const fakeProjectPath = createPlatformAbsolutePath(
+            'fake',
+            'project',
+            'path'
+        );
         const validateFolderStub = setupOpenProjectInvalidFolderStubs(
             configureProjectCmd,
             configurationProcessor,
@@ -352,7 +379,11 @@ suite('Configure Project Command Test Suite', () => {
 
         // We're looking for the promise *not* to be resolved in this case, so
         // we'll have our fake promise resolve first.
-        const timeoutProjectPath = '/timeout/project/path';
+        const timeoutProjectPath = createPlatformAbsolutePath(
+            'timeout',
+            'project',
+            'path'
+        );
         const timeout = 500;
         let timeoutPromise = new Promise<string>((resolve) => {
             setTimeout(() => {

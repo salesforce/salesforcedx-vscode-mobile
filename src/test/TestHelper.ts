@@ -52,7 +52,7 @@ export class TempProjectDirManager {
 }
 
 // Create a platform-agnostic absolute path to a non-existent folder.
-export function createNonExistentAbsolutePath(): string {
+export function createPlatformAbsolutePath(...pathArgs: string[]): string {
     const topLevel = path.parse(process.cwd()).root;
-    return path.join(topLevel, 'starter-kit-tests', 'path', 'to', 'nowhere');
+    return path.join(topLevel, ...pathArgs);
 }
