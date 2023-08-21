@@ -40,6 +40,7 @@ suite('Org Utils Test Suite', () => {
                 deprecatedAndHidden: false,
                 feedEnabled: false,
                 hasSubtypes: false,
+                idEnabled: false,
                 isInterface: false,
                 isSubtype: false,
                 keyPrefix: '',
