@@ -5,7 +5,8 @@
   "version": "0.2.0",
   "publisher": "salesforce",
   "engines": {
-    "vscode": "^1.77.0"
+    "vscode": "^1.77.0",
+    "node": ">=18"
   },
   "categories": [
     "Other"
@@ -40,7 +41,7 @@
     ]
   },
   "volta": {
-    "node": ">=18"
+    "node": "18.17.1"
   },
   "scripts": {
     "clean": "rimraf out",
