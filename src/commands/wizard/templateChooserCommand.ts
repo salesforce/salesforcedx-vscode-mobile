@@ -58,24 +58,41 @@ export class TemplateChooserCommand {
         }
     ];
 
-    public static async chooseTemplate() {
-        const selectedItem = await UIUtils.showQuickPick(
-            l10n.t('Select a template...'),
-            undefined,
-            () => {
-                return new Promise<QuickPickItem[]>(async (resolve, reject) => {
-                    resolve(TemplateChooserCommand.TEMPLATE_LIST_ITEMS);
-                });
-            }
-        );
+    public static async chooseTemplate(extensionUri: Uri) {
+        return new Promise<void>((resolve) => {
+            new InstructionsWebviewProvider(
+                extensionUri
+            ).showInstructionWebview(
+                l10n.t('Offline Starter Kit: Select Landing Page'),
+                'resources/instructions/landingPageTemplateChoice.html',
+                [
+                    {
+                        buttonId: 'chooseTemplateButton',
+                        action: (panel) => {
+                            panel.dispose();
+                            return resolve();
+                        }
+                    }
+                ]
+            );
+        });
+        // const selectedItem = await UIUtils.showQuickPick(
+        //     l10n.t('Select a template...'),
+        //     undefined,
+        //     () => {
+        //         return new Promise<QuickPickItem[]>(async (resolve, reject) => {
+        //             resolve(TemplateChooserCommand.TEMPLATE_LIST_ITEMS);
+        //         });
+        //     }
+        // );
 
-        if (!selectedItem) {
-            return Promise.resolve();
-        }
+        // if (!selectedItem) {
+        //     return Promise.resolve();
+        // }
 
-        await TemplateChooserCommand.copySelectedFiles(
-            (selectedItem as TemplateQuickPickItem).filenamePrefix
-        );
+        // await TemplateChooserCommand.copySelectedFiles(
+        //     (selectedItem as TemplateQuickPickItem).filenamePrefix
+        // );
     }
 
     public static async copyDefaultTemplate(extensionUri: Uri) {

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Offline Starter Kit: Select Landing Page</title>
+        <style>
+            p {
+                margin: 0px;
+            }
+            .landing-page-option-set {
+                display: flex;
+                flex-direction: row;
+                flex-wrap: nowrap;
+            }
+            .landing-page-option-title {
+                font-weight: bold;
+                font-size: 12px;
+            }
+            .landing-page-option-subtitle {
+                font-size: 10px;
+            }
+            h1 {
+                font-size: 18px;
+                margin: 16px;
+            }
+            #chooseTemplateButton {
+                margin: 16px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Select a Landing Page Template</h1>
+
+        <label class="landing-page-option-set">
+            <input
+                type="radio"
+                id="default"
+                name="landingPageOption"
+                value="existing"
+            />
+            <div>
+                <p class="landing-page-option-title">Keep Existing</p>
+                <p class="landing-page-option-subtitle">
+                    Keep the landing page that's already configured in your
+                    project.
+                </p>
+            </div>
+        </label>
+
+        <label class="landing-page-option-set">
+            <input
+                type="radio"
+                id="default"
+                name="landingPageOption"
+                value="default"
+            />
+            <div>
+                <p class="landing-page-option-title">Default</p>
+                <p class="landing-page-option-subtitle">
+                    Recently viewed Contacts, Accounts, and Opportunities
+                </p>
+            </div>
+        </label>
+
+        <label class="landing-page-option-set">
+            <input
+                type="radio"
+                name="landingPageOption"
+                value="caseManagement"
+            />
+            <div>
+                <p class="landing-page-option-title">Case Management</p>
+                <p class="landing-page-option-subtitle">
+                    New Case action and the 5 most recent Cases, Accounts, and
+                    Contacts
+                </p>
+            </div>
+        </label>
+
+        <label class="landing-page-option-set">
+            <input type="radio" name="landingPageOption" value="healthcare" />
+            <div>
+                <p class="landing-page-option-title">Healthcare</p>
+                <p class="landing-page-option-subtitle">
+                    Global quick actions with BarcodeScanner, new Visitor, and
+                    more
+                </p>
+            </div>
+        </label>
+
+        <label class="landing-page-option-set">
+            <input type="radio" name="landingPageOption" value="retail" />
+            <div>
+                <p class="landing-page-option-title">Retail Execution</p>
+                <p class="landing-page-option-subtitle">
+                    Global quick actions with new Opportunity, new Lead, and
+                    more
+                </p>
+            </div>
+        </label>
+        <button id="chooseTemplateButton">Choose Template</button>
+        <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
+    </body>
+</html>

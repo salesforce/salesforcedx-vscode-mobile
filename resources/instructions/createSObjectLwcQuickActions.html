@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Offline Starter Kit: Create SObject LWC Quick Actions</title>
+    </head>
+    <style>
+        h1 {
+            font-size: 16px;
+        }
+        h2 {
+            font-size: 14px;
+        }
+        table {
+            border-collapse: collapse;
+        }
+        table,
+        th,
+        td {
+            border-width: 1px;
+            border-style: solid;
+        }
+        th,
+        td {
+            text-align: center;
+        }
+    </style>
+    <body>
+        <h1>Create SObject LWC Quick Actions</h1>
+
+        <p>
+            The following sObjects are present in your configured landing page:
+        </p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>SObject</th>
+                    <th>LWC Quick Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Contact</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Account</td>
+                    <td>✅</td>
+                </tr>
+                <tr>
+                    <td>Opportunity</td>
+                    <td>❌</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <label
+            style="display: block; margin-top: 10px; margin-bottom: 8px"
+            for="generateLwcQuickActionsButton"
+        >
+            Click 'Generate LWC Quick Actions' to create the missing LWC Quick
+            Actions:
+        </label>
+        <button id="generateLwcQuickActionsButton">
+            Generate LWC Quick Actions
+        </button>
+        <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
+    </body>
+</html>
