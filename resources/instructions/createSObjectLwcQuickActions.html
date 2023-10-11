@@ -66,6 +66,16 @@
         <button id="generateLwcQuickActionsButton">
             Generate LWC Quick Actions
         </button>
+        <script>
+            const generateQuickActionsButtonElement = document.getElementById(
+                'generateLwcQuickActionsButton'
+            );
+            generateQuickActionsButtonElement.addEventListener('click', () => {
+                webviewMessaging.sendMessageRequest(
+                    'generateLwcQuickActionsButton'
+                );
+            });
+        </script>
         <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
     </body>
 </html>

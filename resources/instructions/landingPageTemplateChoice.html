@@ -100,6 +100,14 @@
             </div>
         </label>
         <button id="chooseTemplateButton">Choose Template</button>
+        <script>
+            const chooseTemplateButtonElement = document.getElementById(
+                'chooseTemplateButton'
+            );
+            chooseTemplateButtonElement.addEventListener('click', () => {
+                webviewMessaging.sendMessageRequest('chooseTemplateButton');
+            });
+        </script>
         <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
     </body>
 </html>

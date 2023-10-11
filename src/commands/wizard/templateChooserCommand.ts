@@ -67,7 +67,7 @@ export class TemplateChooserCommand {
                 'resources/instructions/landingPageTemplateChoice.html',
                 [
                     {
-                        buttonId: 'chooseTemplateButton',
+                        type: 'chooseTemplateButton',
                         action: (panel) => {
                             panel.dispose();
                             return resolve();

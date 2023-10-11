@@ -17,7 +17,7 @@ export class LwcGenerationCommand {
                 'resources/instructions/createSObjectLwcQuickActions.html',
                 [
                     {
-                        buttonId: 'generateLwcQuickActionsButton',
+                        type: 'generateLwcQuickActionsButton',
                         action: (panel) => {
                             panel.dispose();
                             return resolve();
