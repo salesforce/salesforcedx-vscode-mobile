@@ -41,7 +41,7 @@ export class DefaultProjectConfigurationProcessor
                 'resources/instructions/projectBootstrapAcknowledgment.html',
                 [
                     {
-                        buttonId: 'okButton',
+                        type: 'okButton',
                         action: async (panel) => {
                             panel.dispose();
                             return resolve();
@@ -98,13 +98,13 @@ export class DefaultProjectConfigurationProcessor
             'resources/instructions/projectBootstrapChoice.html',
             [
                 {
-                    buttonId: 'createNewButton',
+                    type: 'createNewButton',
                     action: (panel) => {
                         createChoice(panel);
                     }
                 },
                 {
-                    buttonId: 'openExistingButton',
+                    type: 'openExistingButton',
                     action: (panel) => {
                         openChoice(panel);
                     }

@@ -5,23 +5,39 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-const vscode = acquireVsCodeApi();
+// ------------------
+// Callback Messaging
+// ------------------
+//
+// Async, callback-based messaging mechanism for clients
+//
+const webviewMessaging = (function () {
+    const vscode = acquireVsCodeApi();
+    let requestId = 0;
+    const asyncMessageCallbacks = {};
 
-// Set up button event handlers and message passing.
-const buttons = document.getElementsByTagName("button");
-if (!buttons || buttons.length === 0) {
-  console.error("No buttons found! No event handlers will be created.");
-} else {
-  for (const button of buttons) {
-    const buttonId = button.getAttribute("id");
-    if (!buttonId) {
-      console.error(
-        "Button has no id value! No event handler will be created."
-      );
-    } else {
-      button.addEventListener("click", () => {
-        vscode.postMessage({ button: buttonId });
-      });
-    }
-  }
-}
+    window.addEventListener('message', (event) => {
+        const message = event.data;
+        if (message.callbackId && asyncMessageCallbacks[message.callbackId]) {
+            const callback = asyncMessageCallbacks[message.callbackId];
+            delete asyncMessageCallbacks[message.callbackId];
+            delete message.callbackId;
+            callback(message);
+        }
+    });
+
+    return {
+        sendMessageRequest: function (type, data, callback) {
+            let message;
+            if (callback) {
+                const asyncMessageRequestId = requestId++;
+                asyncMessageCallbacks[asyncMessageRequestId] = callback;
+
+                message = { type, callbackId: asyncMessageRequestId, ...data };
+            } else {
+                message = { type, ...data };
+            }
+            vscode.postMessage(message);
+        }
+    };
+})();

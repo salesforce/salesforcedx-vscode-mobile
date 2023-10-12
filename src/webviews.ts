@@ -12,9 +12,15 @@ export const MESSAGING_SCRIPT_PATH_DEMARCATOR = '--- MESSAGING_SCRIPT_SRC ---';
 export const MESSAGING_JS_PATH = 'resources/instructions/webviewMessaging.js';
 const INSTRUCTION_VIEW_TYPE = 'instructionsView';
 
-export type ButtonAction = {
-    buttonId: string;
-    action: (panel: vscode.WebviewPanel) => void;
+export type WebviewMessageCallback = (responseData?: object) => void;
+
+export type WebviewMessageHandler = {
+    type: string;
+    action: (
+        panel: vscode.WebviewPanel,
+        data?: object,
+        callback?: WebviewMessageCallback
+    ) => void;
 };
 
 export class InstructionsWebviewProvider {
@@ -27,8 +33,9 @@ export class InstructionsWebviewProvider {
     public showInstructionWebview(
         title: string,
         contentPath: string,
-        buttonActions: ButtonAction[]
+        messageHandlers: WebviewMessageHandler[]
     ) {
+        this.validateMessageHanders(messageHandlers);
         const panel = vscode.window.createWebviewPanel(
             INSTRUCTION_VIEW_TYPE,
             title,
@@ -40,12 +47,24 @@ export class InstructionsWebviewProvider {
         );
 
         panel.webview.onDidReceiveMessage((data) => {
-            const clickedButtonId = data.button;
-            const buttonAction = buttonActions.find((action) => {
-                return action.buttonId === clickedButtonId;
-            });
-            if (buttonAction) {
-                buttonAction.action(panel);
+            const responsiveHandlers = messageHandlers.filter(
+                (messageHandler) => data.type === messageHandler.type
+            );
+            if (responsiveHandlers.length > 0) {
+                const handler = responsiveHandlers[0];
+                let callback: WebviewMessageCallback | undefined;
+                if (data.callbackId) {
+                    const returnedCallbackId = data.callbackId;
+                    delete data.callbackId;
+                    callback = (responseData?: object) => {
+                        const fullResponseMessage = {
+                            callbackId: returnedCallbackId,
+                            ...responseData
+                        };
+                        panel.webview.postMessage(fullResponseMessage);
+                    };
+                }
+                handler.action(panel, data, callback);
             }
         });
 
@@ -82,7 +101,7 @@ export class InstructionsWebviewProvider {
                 new InstructionsWebviewProvider(extensionUri);
             provider.showInstructionWebview(title, contentPath, [
                 {
-                    buttonId: 'okButton',
+                    type: 'okButton',
                     action: (panel) => {
                         panel.dispose();
                         return resolve();
@@ -117,6 +136,19 @@ export class InstructionsWebviewProvider {
         } else {
             // fall back
             return contentPath;
+        }
+    }
+
+    private validateMessageHanders(messageHandlers: WebviewMessageHandler[]) {
+        const handlerMap: { [type: string]: boolean } = {};
+        for (const handler of messageHandlers) {
+            if (handlerMap[handler.type] === true) {
+                throw new Error(
+                    `There can be only one message handler per type. There are at least two handlers with type '${handler.type}'.`
+                );
+            } else {
+                handlerMap[handler.type] = true;
+            }
         }
     }
 }

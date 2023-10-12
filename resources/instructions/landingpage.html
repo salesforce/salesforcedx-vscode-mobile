@@ -1,19 +1,29 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Landing Page Customization</title>
+    </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Landing Page Customization</title>
-</head>
-
-<body>
-    <p id="message">A default landing page file (landing_page.json) has been created in the staticresources directory.
-        See <a href="https://help.salesforce.com/s/articleView?id=sf.salesforce_app_plus_offline_landing_page.htm&type=5">Customize The Landing Page</a>
-        for more information on how to modify the landing page file.
-    </p>
-    <button id="okButton">OK</button>
-    <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
-</body>
-
+    <body>
+        <p id="message">
+            A default landing page file (landing_page.json) has been created in
+            the staticresources directory. See
+            <a
+                href="https://help.salesforce.com/s/articleView?id=sf.salesforce_app_plus_offline_landing_page.htm&type=5"
+            >
+                Customize The Landing Page
+            </a>
+            for more information on how to modify the landing page file.
+        </p>
+        <button id="okButton">OK</button>
+        <script>
+            const okButtonElement = document.getElementById('okButton');
+            okButtonElement.addEventListener('click', () => {
+                webviewMessaging.sendMessageRequest('okButton');
+            });
+        </script>
+        <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
+    </body>
 </html>
