@@ -30,7 +30,7 @@ const webviewMessaging = (function () {
         sendMessageRequest: function (type, data, callback) {
             let message;
             if (callback) {
-                const asyncMessageRequestId = requestId++;
+                const asyncMessageRequestId = ++requestId;
                 asyncMessageCallbacks[asyncMessageRequestId] = callback;
 
                 message = { type, callbackId: asyncMessageRequestId, ...data };
