@@ -98,29 +98,18 @@ export class TemplateChooserCommand {
                         }
                     },
                     {
-                        type: 'landingPageExists',
-                        action: (panel, data, callback) => {}
+                        type: 'landingPageStatus',
+                        action: async (_panel, _data, callback) => {
+                            if (callback) {
+                                const landingPageStatus =
+                                    await this.getLandingPageStatus();
+                                callback(landingPageStatus);
+                            }
+                        }
                     }
                 ]
             );
         });
-        // const selectedItem = await UIUtils.showQuickPick(
-        //     l10n.t('Select a template...'),
-        //     undefined,
-        //     () => {
-        //         return new Promise<QuickPickItem[]>(async (resolve, reject) => {
-        //             resolve(TemplateChooserCommand.TEMPLATE_LIST_ITEMS);
-        //         });
-        //     }
-        // );
-
-        // if (!selectedItem) {
-        //     return Promise.resolve();
-        // }
-
-        // await TemplateChooserCommand.copySelectedFiles(
-        //     (selectedItem as TemplateQuickPickItem).filenamePrefix
-        // );
     }
 
     public static async copyDefaultTemplate(extensionUri: Uri) {
@@ -173,71 +162,68 @@ export class TemplateChooserCommand {
     }
 
     static async getLandingPageStatus(): Promise<LandingPageCollectionStatus> {
-        return new Promise<LandingPageCollectionStatus>(
-            async (resolve, reject) => {
-                const landingPageCollectionStatus: LandingPageCollectionStatus =
-                    {
-                        landingPageCollection: {}
-                    };
-                const workspaceFolders = workspace.workspaceFolders;
-                if (!workspaceFolders || workspaceFolders.length === 0) {
-                    return reject('No workspace defined for this project.');
-                }
-                const projectPath = workspaceFolders[0].uri.fsPath;
-                const staticResourcesPath = path.join(
-                    projectPath,
-                    this.STATIC_RESOURCES_PATH
-                );
-                try {
-                    await access(staticResourcesPath);
-                } catch (err) {
-                    return reject(
-                        `Could not read landing page directory at '${staticResourcesPath}': ${err}`
-                    );
-                }
-
-                for (const landingPageType of Object.keys(
-                    this.LANDING_PAGE_FILENAME_PREFIXES
-                )) {
-                    const landingPageFilesExist =
-                        await this.landingPageFilesExist(
-                            staticResourcesPath,
-                            landingPageType
-                        );
-                    const landingPageExists =
-                        landingPageFilesExist.jsonFileExists ||
-                        landingPageFilesExist.metaFileExists;
-                    let warningMessage: string | undefined;
-                    if (
-                        landingPageFilesExist.jsonFileExists &&
-                        !landingPageFilesExist.metaFileExists
-                    ) {
-                        warningMessage = l10n.t(
-                            "File '{0}{1}' does not exist",
-                            this.LANDING_PAGE_FILENAME_PREFIXES[
-                                landingPageType
-                            ],
-                            this.LANDING_PAGE_METADATA_FILE_EXTENSION
-                        );
-                    } else if (
-                        !landingPageFilesExist.jsonFileExists &&
-                        landingPageFilesExist.metaFileExists
-                    ) {
-                        warningMessage = l10n.t(
-                            "File '{0}{1}' does not exist",
-                            this.LANDING_PAGE_FILENAME_PREFIXES[
-                                landingPageType
-                            ],
-                            this.LANDING_PAGE_JSON_FILE_EXTENSION
-                        );
-                    }
-                    landingPageCollectionStatus.landingPageCollection[
-                        landingPageType
-                    ] = { exists: landingPageExists, warning: warningMessage };
-                }
+        return new Promise<LandingPageCollectionStatus>(async (resolve) => {
+            const landingPageCollectionStatus: LandingPageCollectionStatus = {
+                landingPageCollection: {}
+            };
+            const workspaceFolders = workspace.workspaceFolders;
+            if (!workspaceFolders || workspaceFolders.length === 0) {
+                landingPageCollectionStatus.error =
+                    'No workspace defined for this project.';
                 return resolve(landingPageCollectionStatus);
             }
-        );
+            const projectPath = workspaceFolders[0].uri.fsPath;
+            const staticResourcesPath = path.join(
+                projectPath,
+                this.STATIC_RESOURCES_PATH
+            );
+            try {
+                await access(staticResourcesPath);
+            } catch (err) {
+                landingPageCollectionStatus.error = `Could not read landing page directory at '${staticResourcesPath}': ${err}`;
+                return resolve(landingPageCollectionStatus);
+            }
+
+            for (const landingPageType of Object.keys(
+                this.LANDING_PAGE_FILENAME_PREFIXES
+            )) {
+                const landingPageFilesExist = await this.landingPageFilesExist(
+                    staticResourcesPath,
+                    landingPageType
+                );
+                const landingPageExists =
+                    landingPageFilesExist.jsonFileExists &&
+                    landingPageFilesExist.metaFileExists;
+                let warningMessage: string | undefined;
+                if (
+                    !landingPageFilesExist.jsonFileExists &&
+                    !landingPageFilesExist.metaFileExists
+                ) {
+                    warningMessage = l10n.t(
+                        "The landing page files '{0}{1}' and '{0}{2}' do not exist.",
+                        this.LANDING_PAGE_FILENAME_PREFIXES[landingPageType],
+                        this.LANDING_PAGE_JSON_FILE_EXTENSION,
+                        this.LANDING_PAGE_METADATA_FILE_EXTENSION
+                    );
+                } else if (!landingPageFilesExist.metaFileExists) {
+                    warningMessage = l10n.t(
+                        "The landing page file '{0}{1}' does not exist",
+                        this.LANDING_PAGE_FILENAME_PREFIXES[landingPageType],
+                        this.LANDING_PAGE_METADATA_FILE_EXTENSION
+                    );
+                } else if (!landingPageFilesExist.jsonFileExists) {
+                    warningMessage = l10n.t(
+                        "The landing page file '{0}{1}' does not exist",
+                        this.LANDING_PAGE_FILENAME_PREFIXES[landingPageType],
+                        this.LANDING_PAGE_JSON_FILE_EXTENSION
+                    );
+                }
+                landingPageCollectionStatus.landingPageCollection[
+                    landingPageType
+                ] = { exists: landingPageExists, warning: warningMessage };
+            }
+            return resolve(landingPageCollectionStatus);
+        });
     }
 
     static async landingPageFilesExist(
@@ -249,7 +235,9 @@ export class TemplateChooserCommand {
             metaFileExists: boolean;
         }>(async (resolve) => {
             let jsonFileExists = true;
-            const jsonFilename = `${this.LANDING_PAGE_FILENAME_PREFIXES[landingPageType]}${this.LANDING_PAGE_JSON_FILE_EXTENSION}`;
+            const jsonFilename =
+                this.LANDING_PAGE_FILENAME_PREFIXES[landingPageType] +
+                this.LANDING_PAGE_JSON_FILE_EXTENSION;
             const jsonFilePath = path.join(staticResourcesPath, jsonFilename);
             try {
                 await access(jsonFilePath);
@@ -260,7 +248,9 @@ export class TemplateChooserCommand {
                 jsonFileExists = false;
             }
             let metaFileExists = true;
-            const metaFilename = `${this.LANDING_PAGE_FILENAME_PREFIXES[landingPageType]}${this.LANDING_PAGE_METADATA_FILE_EXTENSION}`;
+            const metaFilename =
+                this.LANDING_PAGE_FILENAME_PREFIXES[landingPageType] +
+                this.LANDING_PAGE_METADATA_FILE_EXTENSION;
             const metaFilePath = path.join(staticResourcesPath, metaFilename);
             try {
                 await access(metaFilePath);

@@ -22,90 +22,196 @@
             }
             h1 {
                 font-size: 18px;
-                margin: 16px;
             }
+            .warning,
+            .error {
+                color: #f00;
+            }
+            .enabled-content-toggle.disabled {
+                opacity: 0.25;
+            }
+            #globalError,
             #chooseTemplateButton {
-                margin: 16px;
+                margin-top: 12px;
+                margin-bottom: 12px;
             }
         </style>
     </head>
     <body>
         <h1>Select a Landing Page Template</h1>
 
-        <label class="landing-page-option-set">
-            <input
-                type="radio"
-                id="default"
-                name="landingPageOption"
-                value="existing"
-            />
-            <div>
-                <p class="landing-page-option-title">Keep Existing</p>
-                <p class="landing-page-option-subtitle">
-                    Keep the landing page that's already configured in your
-                    project.
-                </p>
-            </div>
-        </label>
+        <p id="globalError" class="error" style="display: none"></p>
+        <div id="landingPageCollection" class="enabled-content-toggle">
+            <label id="existingLandingPageLabel">
+                <div class="enabled-content-toggle landing-page-option-set">
+                    <input
+                        type="radio"
+                        id="existingLandingPage"
+                        name="landingPageOption"
+                        value="existing"
+                    />
+                    <div>
+                        <p class="landing-page-option-title">Keep Existing</p>
+                        <p class="landing-page-option-subtitle">
+                            Keep the landing page that's already configured in
+                            your project.
+                        </p>
+                    </div>
+                </div>
+            </label>
 
-        <label class="landing-page-option-set">
-            <input
-                type="radio"
-                id="default"
-                name="landingPageOption"
-                value="default"
-            />
-            <div>
-                <p class="landing-page-option-title">Default</p>
-                <p class="landing-page-option-subtitle">
-                    Recently viewed Contacts, Accounts, and Opportunities
-                </p>
-            </div>
-        </label>
+            <label id="defaultLandingPageTemplateLabel">
+                <p
+                    id="defaultLandingPageWarning"
+                    class="warning"
+                    style="display: none"
+                ></p>
+                <div class="enabled-content-toggle landing-page-option-set">
+                    <input
+                        type="radio"
+                        id="defaultLandingPage"
+                        name="landingPageOption"
+                        value="default"
+                    />
+                    <div>
+                        <p class="landing-page-option-title">Default</p>
+                        <p class="landing-page-option-subtitle">
+                            Recently viewed Contacts, Accounts, and
+                            Opportunities
+                        </p>
+                    </div>
+                </div>
+            </label>
 
-        <label class="landing-page-option-set">
-            <input
-                type="radio"
-                name="landingPageOption"
-                value="caseManagement"
-            />
-            <div>
-                <p class="landing-page-option-title">Case Management</p>
-                <p class="landing-page-option-subtitle">
-                    New Case action and the 5 most recent Cases, Accounts, and
-                    Contacts
-                </p>
-            </div>
-        </label>
+            <label id="caseManagementLandingPageTemplateLabel">
+                <p
+                    id="caseManagementLandingPageWarning"
+                    class="warning"
+                    style="display: none"
+                ></p>
+                <div class="enabled-content-toggle landing-page-option-set">
+                    <input
+                        type="radio"
+                        id="caseManagementLandingPage"
+                        name="landingPageOption"
+                        value="caseManagement"
+                    />
+                    <div>
+                        <p class="landing-page-option-title">Case Management</p>
+                        <p class="landing-page-option-subtitle">
+                            New Case action and the 5 most recent Cases,
+                            Accounts, and Contacts
+                        </p>
+                    </div>
+                </div>
+            </label>
 
-        <label class="landing-page-option-set">
-            <input type="radio" name="landingPageOption" value="healthcare" />
-            <div>
-                <p class="landing-page-option-title">Healthcare</p>
-                <p class="landing-page-option-subtitle">
-                    Global quick actions with BarcodeScanner, new Visitor, and
-                    more
-                </p>
-            </div>
-        </label>
+            <label id="healthcareLandingPageTemplateLabel">
+                <p
+                    id="healthcareLandingPageWarning"
+                    class="warning"
+                    style="display: none"
+                ></p>
+                <div class="enabled-content-toggle landing-page-option-set">
+                    <input
+                        type="radio"
+                        id="healthcareLandingPage"
+                        name="landingPageOption"
+                        value="healthcare"
+                    />
+                    <div>
+                        <p class="landing-page-option-title">Healthcare</p>
+                        <p class="landing-page-option-subtitle">
+                            Global quick actions with BarcodeScanner, new
+                            Visitor, and more
+                        </p>
+                    </div>
+                </div>
+            </label>
 
-        <label class="landing-page-option-set">
-            <input type="radio" name="landingPageOption" value="retail" />
-            <div>
-                <p class="landing-page-option-title">Retail Execution</p>
-                <p class="landing-page-option-subtitle">
-                    Global quick actions with new Opportunity, new Lead, and
-                    more
-                </p>
-            </div>
-        </label>
+            <label id="retailLandingPageTemplateLabel">
+                <p
+                    id="retailLandingPageWarning"
+                    class="warning"
+                    style="display: none"
+                ></p>
+                <div class="enabled-content-toggle landing-page-option-set">
+                    <input
+                        type="radio"
+                        id="retailLandingPage"
+                        name="landingPageOption"
+                        value="retail"
+                    />
+                    <div>
+                        <p class="landing-page-option-title">
+                            Retail Execution
+                        </p>
+                        <p class="landing-page-option-subtitle">
+                            Global quick actions with new Opportunity, new Lead,
+                            and more
+                        </p>
+                    </div>
+                </div>
+            </label>
+        </div>
         <button id="chooseTemplateButton">Choose Template</button>
         <script>
-            const chooseTemplateButtonElement = document.getElementById(
-                'chooseTemplateButton'
-            );
-            chooseTemplateButtonElement.addEventListener('click', () => {
-                webviewMessaging.sendMessageRequest('chooseTemplateButton');
+            // Wait until all scripts are loaded, before engaging with e.g.
+            // messaging functionality.
+            window.addEventListener('load', () => {
+                // What's the status of the various landing pages / templates?
+                webviewMessaging.sendMessageRequest(
+                    'landingPageStatus',
+                    {},
+                    (response) => {
+                        //export type LandingPageStatus = {
+                        //    exists: boolean;
+                        //    warning?: string;
+                        //};
+                        //
+                        //export type LandingPageCollectionStatus = {
+                        //    error?: string;
+                        //    landingPageCollection: { [landingPageType: string]: LandingPageStatus };
+                        //};
+                        if (response.error) {
+                            const globalErrorElement =
+                                document.getElementById('globalError');
+                            globalErrorElement.innerText = response.error;
+                            globalErrorElement.style.display = 'block';
+                            const landingPageCollectionElement =
+                                document.getElementById(
+                                    'landingPageCollection'
+                                );
+                            landingPageCollectionElement.classList.add(
+                                'disabled'
+                            );
+                            debugger;
+                            const radioElements = document.querySelectorAll(
+                                ".enabled-content-toggle > input[type='radio']"
+                            );
+                            radioElements.forEach((radioElement) => {
+                                radioElement.disabled = true;
+                            });
+                            const chooseTemplateButton =
+                                document.getElementById('chooseTemplateButton');
+                            chooseTemplateButton.disabled = true;
+                        } else {
+                            const existingLandingPageElement =
+                                document.getElementById(
+                                    'existingLandingPageLabel'
+                                );
+                            existingLandingPageElement.style.display = 'block';
+                        }
+                    }
+                );
+
+                // chooseTemplateButton click
+                const chooseTemplateButtonElement = document.getElementById(
+                    'chooseTemplateButton'
+                );
+                chooseTemplateButtonElement.addEventListener('click', () => {
+                    webviewMessaging.sendMessageRequest('chooseTemplateButton');
+                });
             });
         </script>
         <script src="--- MESSAGING_SCRIPT_SRC ---"></script>

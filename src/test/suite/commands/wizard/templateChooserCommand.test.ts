@@ -53,8 +53,8 @@ suite('Template Chooser Command Test Suite', () => {
 
         // ensure copy was performed for both json and metadata files
         for (const fileExtension of [
-            TemplateChooserCommand.JSON_FILE_EXTENSION,
-            TemplateChooserCommand.METADATA_FILE_EXTENSION
+            TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION,
+            TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION
         ]) {
             const expectedSourcePath = path.join(
                 testPath,
@@ -64,7 +64,7 @@ suite('Template Chooser Command Test Suite', () => {
             const expectedDestinationPath = path.join(
                 testPath,
                 TemplateChooserCommand.STATIC_RESOURCES_PATH,
-                `${TemplateChooserCommand.LANDING_PAGE_DESTINATION_FILENAME_PREFIX}${fileExtension}`
+                `${TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIX}${fileExtension}`
             );
             assert.ok(
                 copyFileSyncStub.calledWith(
