@@ -9,8 +9,8 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { commands, window } from 'vscode';
 import { afterEach } from 'mocha';
-import { AuthorizeCommand } from '../../../commands/authorizeCommand';
-import { OrgUtils } from '../../../utils/orgUtils';
+import { AuthorizeCommand } from '../../../../commands/wizard/authorizeCommand';
+import { OrgUtils } from '../../../../utils/orgUtils';
 
 suite('Authorize Org Command Test Suite', () => {
     afterEach(function () {

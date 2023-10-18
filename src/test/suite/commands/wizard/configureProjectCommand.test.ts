@@ -17,11 +17,11 @@ import {
     ConfigureProjectCommand,
     DefaultProjectConfigurationProcessor,
     ProjectConfigurationProcessor
-} from '../../../commands/configureProjectCommand';
+} from '../../../../commands/wizard/configureProjectCommand';
 import {
     TempProjectDirManager,
     createPlatformAbsolutePath
-} from '../../TestHelper';
+} from '../../../TestHelper';
 
 suite('Configure Project Command Test Suite', () => {
     beforeEach(function () {});
