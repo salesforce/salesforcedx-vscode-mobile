@@ -5,19 +5,18 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Offline Starter Kit: Select Landing Page</title>
         <style>
-            p {
-                margin: 0px;
-            }
             .landing-page-option-set {
                 display: flex;
                 flex-direction: row;
                 flex-wrap: nowrap;
             }
             .landing-page-option-title {
+                margin: 0px;
                 font-weight: bold;
                 font-size: 12px;
             }
             .landing-page-option-subtitle {
+                margin: 0px;
                 font-size: 10px;
             }
             h1 {
@@ -26,6 +25,8 @@
             .warning,
             .error {
                 color: #f00;
+                font-size: 12px;
+                margin: 3px 5px;
             }
             .enabled-content-toggle.disabled {
                 opacity: 0.25;
@@ -42,7 +43,7 @@
 
         <p id="globalError" class="error" style="display: none"></p>
         <div id="landingPageCollection" class="enabled-content-toggle">
-            <label id="existingLandingPageLabel">
+            <label id="existingLandingPageTemplateLabel">
                 <div class="enabled-content-toggle landing-page-option-set">
                     <input
                         type="radio"
@@ -164,15 +165,6 @@
                     'landingPageStatus',
                     {},
                     (response) => {
-                        //export type LandingPageStatus = {
-                        //    exists: boolean;
-                        //    warning?: string;
-                        //};
-                        //
-                        //export type LandingPageCollectionStatus = {
-                        //    error?: string;
-                        //    landingPageCollection: { [landingPageType: string]: LandingPageStatus };
-                        //};
                         if (response.error) {
                             const globalErrorElement =
                                 document.getElementById('globalError');
@@ -185,7 +177,6 @@
                             landingPageCollectionElement.classList.add(
                                 'disabled'
                             );
-                            debugger;
                             const radioElements = document.querySelectorAll(
                                 ".enabled-content-toggle > input[type='radio']"
                             );
@@ -196,11 +187,45 @@
                                 document.getElementById('chooseTemplateButton');
                             chooseTemplateButton.disabled = true;
                         } else {
-                            const existingLandingPageElement =
-                                document.getElementById(
-                                    'existingLandingPageLabel'
-                                );
-                            existingLandingPageElement.style.display = 'block';
+                            for (const landingPageType in response.landingPageCollection) {
+                                const landingPageStatus =
+                                    response.landingPageCollection[
+                                        landingPageType
+                                    ];
+                                if (!landingPageStatus.exists) {
+                                    const landingPageLabelId = `${landingPageType}LandingPageTemplateLabel`;
+                                    const landingPageLabelElement =
+                                        document.getElementById(
+                                            landingPageLabelId
+                                        );
+                                    if (landingPageStatus.warning) {
+                                        const warningElement =
+                                            landingPageLabelElement.querySelector(
+                                                'p.warning'
+                                            );
+                                        // We'll leave the warning element off of the existing landing page,
+                                        // for example.
+                                        if (warningElement) {
+                                            warningElement.innerText =
+                                                landingPageStatus.warning;
+                                            warningElement.style.display =
+                                                'block';
+                                        }
+                                    }
+                                    const contentToDisableElement =
+                                        landingPageLabelElement.querySelector(
+                                            '.enabled-content-toggle'
+                                        );
+                                    contentToDisableElement.classList.add(
+                                        'disabled'
+                                    );
+                                    const radioButtonElement =
+                                        contentToDisableElement.querySelector(
+                                            "input[type='radio']"
+                                        );
+                                    radioButtonElement.disabled = true;
+                                }
+                            }
                         }
                     }
                 );
