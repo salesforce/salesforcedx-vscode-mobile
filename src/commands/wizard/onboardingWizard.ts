@@ -14,7 +14,8 @@ import { AuthorizeCommand } from './authorizeCommand';
 import { InstructionsWebviewProvider } from '../../webviews';
 
 const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
-const onboardingWizardStateKey = 'salesforcedx-vscode-offline-app.onboardingWizard.projectCreationState';
+const onboardingWizardStateKey =
+    'salesforcedx-vscode-offline-app.onboardingWizard.projectCreationState';
 
 enum OnboardingWizardState {
     projectConfigured
