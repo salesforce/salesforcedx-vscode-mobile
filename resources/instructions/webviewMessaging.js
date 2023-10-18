@@ -16,6 +16,10 @@ const webviewMessaging = (function () {
     let requestId = 0;
     const asyncMessageCallbacks = {};
 
+    // Receives messages from the backing TypeScript controller page that
+    // created the hosted webview. These messages will be linked back to
+    // originating requests, passing any response data back to the async
+    // caller.
     window.addEventListener('message', (event) => {
         const message = event.data;
         if (message.callbackId && asyncMessageCallbacks[message.callbackId]) {
@@ -27,6 +31,16 @@ const webviewMessaging = (function () {
     });
 
     return {
+        /**
+         * Sends a message request to the backing TypeScript controller page that
+         * created the hosted webview.
+         * @param {string} type - A name representing the type of request. Basically
+         * the event key to which the controller page will subscribe.
+         * @param {object} [data] - An optional block of input data to pass to the
+         * controller.
+         * @param {Function} [callback] - An optional callback for receiving a
+         * response from the controller, if expected.
+         */
         sendMessageRequest: function (type, data, callback) {
             let message;
             if (callback) {
