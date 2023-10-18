@@ -164,80 +164,98 @@
                 webviewMessaging.sendMessageRequest(
                     'landingPageStatus',
                     {},
-                    (response) => {
-                        if (response.error) {
-                            const globalErrorElement =
-                                document.getElementById('globalError');
-                            globalErrorElement.innerText = response.error;
-                            globalErrorElement.style.display = 'block';
-                            const landingPageCollectionElement =
-                                document.getElementById(
-                                    'landingPageCollection'
-                                );
-                            landingPageCollectionElement.classList.add(
-                                'disabled'
-                            );
-                            const radioElements = document.querySelectorAll(
-                                ".enabled-content-toggle > input[type='radio']"
-                            );
-                            radioElements.forEach((radioElement) => {
-                                radioElement.disabled = true;
-                            });
-                            const chooseTemplateButton =
-                                document.getElementById('chooseTemplateButton');
-                            chooseTemplateButton.disabled = true;
-                        } else {
-                            for (const landingPageType in response.landingPageCollection) {
-                                const landingPageStatus =
-                                    response.landingPageCollection[
-                                        landingPageType
-                                    ];
-                                if (!landingPageStatus.exists) {
-                                    const landingPageLabelId = `${landingPageType}LandingPageTemplateLabel`;
-                                    const landingPageLabelElement =
-                                        document.getElementById(
-                                            landingPageLabelId
-                                        );
-                                    if (landingPageStatus.warning) {
-                                        const warningElement =
-                                            landingPageLabelElement.querySelector(
-                                                'p.warning'
-                                            );
-                                        // We'll leave the warning element off of the existing landing page,
-                                        // for example.
-                                        if (warningElement) {
-                                            warningElement.innerText =
-                                                landingPageStatus.warning;
-                                            warningElement.style.display =
-                                                'block';
-                                        }
-                                    }
-                                    const contentToDisableElement =
-                                        landingPageLabelElement.querySelector(
-                                            '.enabled-content-toggle'
-                                        );
-                                    contentToDisableElement.classList.add(
-                                        'disabled'
-                                    );
-                                    const radioButtonElement =
-                                        contentToDisableElement.querySelector(
-                                            "input[type='radio']"
-                                        );
-                                    radioButtonElement.disabled = true;
-                                }
-                            }
-                        }
-                    }
+                    handleLandingPageStatusResponse
                 );
 
                 // chooseTemplateButton click
                 const chooseTemplateButtonElement = document.getElementById(
                     'chooseTemplateButton'
                 );
-                chooseTemplateButtonElement.addEventListener('click', () => {
-                    webviewMessaging.sendMessageRequest('chooseTemplateButton');
-                });
+                chooseTemplateButtonElement.addEventListener(
+                    'click',
+                    chooseTemplateClicked
+                );
             });
+
+            function chooseTemplateClicked() {
+                const selectedTemplateElement = document.querySelector(
+                    'input[name="landingPageOption"]:checked'
+                );
+                if (!selectedTemplateElement) {
+                    const globalErrorElement =
+                        document.getElementById('globalError');
+                    globalErrorElement.innerText = 'No landing page selected.';
+                    globalErrorElement.style.display = 'block';
+                } else {
+                    const selectedValue = selectedTemplateElement.value;
+                    webviewMessaging.sendMessageRequest('landingPageChosen', {
+                        landingPageType: selectedValue
+                    });
+                }
+            }
+
+            function handleLandingPageStatusResponse(response) {
+                if (response.error) {
+                    const globalErrorElement =
+                        document.getElementById('globalError');
+                    globalErrorElement.innerText = response.error;
+                    globalErrorElement.style.display = 'block';
+                    const landingPageCollectionElement =
+                        document.getElementById('landingPageCollection');
+                    landingPageCollectionElement.classList.add('disabled');
+                    const radioElements = document.querySelectorAll(
+                        ".enabled-content-toggle > input[type='radio']"
+                    );
+                    radioElements.forEach((radioElement) => {
+                        radioElement.disabled = true;
+                    });
+                    const chooseTemplateButton = document.getElementById(
+                        'chooseTemplateButton'
+                    );
+                    chooseTemplateButton.disabled = true;
+                } else {
+                    for (const landingPageType in response.landingPageCollection) {
+                        const landingPageStatus =
+                            response.landingPageCollection[landingPageType];
+                        if (!landingPageStatus.exists) {
+                            const landingPageLabelId = `${landingPageType}LandingPageTemplateLabel`;
+                            const landingPageLabelElement =
+                                document.getElementById(landingPageLabelId);
+                            if (landingPageStatus.warning) {
+                                const warningElement =
+                                    landingPageLabelElement.querySelector(
+                                        'p.warning'
+                                    );
+                                // We'll leave the warning element off of the existing landing page,
+                                // for example.
+                                if (warningElement) {
+                                    warningElement.innerText =
+                                        landingPageStatus.warning;
+                                    warningElement.style.display = 'block';
+                                }
+                            }
+                            const contentToDisableElement =
+                                landingPageLabelElement.querySelector(
+                                    '.enabled-content-toggle'
+                                );
+                            contentToDisableElement.classList.add('disabled');
+                            const radioButtonElement =
+                                contentToDisableElement.querySelector(
+                                    "input[type='radio']"
+                                );
+                            radioButtonElement.disabled = true;
+                        }
+                    }
+
+                    // If there's an existing landing page, make that the selected.
+                    if (response.landingPageCollection['existing'].exists) {
+                        const existingRadioElement = document.getElementById(
+                            'existingLandingPage'
+                        );
+                        existingRadioElement.checked = true;
+                    }
+                }
+            }
         </script>
         <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
     </body>

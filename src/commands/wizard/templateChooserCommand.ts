@@ -7,10 +7,9 @@
 
 import { QuickPickItem, Uri, l10n } from 'vscode';
 import { UIUtils } from '../../utils/uiUtils';
-import { workspace } from 'vscode';
+import { ProgressLocation, window, workspace } from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
-import { access } from 'fs/promises';
+import { access, copyFile } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 
 export interface TemplateQuickPickItem extends QuickPickItem {
@@ -91,10 +90,19 @@ export class TemplateChooserCommand {
                 'resources/instructions/landingPageTemplateChoice.html',
                 [
                     {
-                        type: 'chooseTemplateButton',
-                        action: (panel) => {
-                            panel.dispose();
-                            return resolve();
+                        type: 'landingPageChosen',
+                        action: async (panel, data) => {
+                            const landingPageChosenData = data as {
+                                landingPageType: string;
+                            };
+                            const completed =
+                                await this.handleLandingPageChosen(
+                                    landingPageChosenData
+                                );
+                            if (completed) {
+                                panel.dispose();
+                                return resolve();
+                            }
                         }
                     },
                     {
@@ -112,53 +120,85 @@ export class TemplateChooserCommand {
         });
     }
 
-    public static async copyDefaultTemplate(extensionUri: Uri) {
-        await TemplateChooserCommand.copySelectedFiles(
-            TemplateChooserCommand.TEMPLATE_LIST_ITEMS[0].filenamePrefix
-        );
-
-        await InstructionsWebviewProvider.showDismissableInstructions(
-            extensionUri,
-            l10n.t('Landing Page Customization'),
-            'resources/instructions/landingpage.html'
-        );
-    }
-
     /**
-     * This will copy the given template files over to the staticresources/landing_page.* locations, including
-     * the .json and .resource-meta.xml file.
-     * @param fileNamePrefix filename prefix of the template file to copy.
+     * This will copy the chosen template files to landing_page.json and
+     * landing_page.resource-meta.xml in the staticresources folder of the project.
+     * @param choiceData The data object containing the landing page type the user
+     * selected.
      */
-    static async copySelectedFiles(fileNamePrefix: string): Promise<boolean> {
-        const workspaceFolders = workspace.workspaceFolders;
-        if (workspaceFolders && workspaceFolders.length > 0) {
-            const rootPath = workspaceFolders[0].uri.fsPath;
+    static async handleLandingPageChosen(choiceData: {
+        landingPageType: string;
+    }): Promise<boolean> {
+        return new Promise<boolean>(async (resolve, reject) => {
+            const landingPageType = choiceData.landingPageType;
 
-            // copy both the json and metadata files.
+            // Nothing to do if the user chose to keep their existing landing page.
+            if (landingPageType === 'existing') {
+                return resolve(true);
+            }
+
+            // If a landing page exists, warn about overwriting it.
+            const staticResourcesPath = await this.getStaticResourcesDir();
+            const existingLandingPageFiles = await this.landingPageFilesExist(
+                staticResourcesPath,
+                'existing'
+            );
+            if (
+                existingLandingPageFiles.jsonFileExists ||
+                existingLandingPageFiles.metaFileExists
+            ) {
+                const confirmOverwrite = await window.showWarningMessage(
+                    l10n.t(
+                        'Are you sure you want to overwrite your existing landing page?'
+                    ),
+                    { modal: true },
+                    l10n.t('Yes'),
+                    l10n.t('No')
+                );
+                if (confirmOverwrite === l10n.t('No')) {
+                    console.info(
+                        'User chose not to overwrite their existing landing page.'
+                    );
+                    return resolve(false);
+                }
+            }
+
+            // Copy both the json and metadata files.
+            const sourceFilenamePrefix =
+                this.LANDING_PAGE_FILENAME_PREFIXES[landingPageType];
+            const destFilenamePrefix =
+                this.LANDING_PAGE_FILENAME_PREFIXES.existing;
             for (const fileExtension of [
                 this.LANDING_PAGE_JSON_FILE_EXTENSION,
                 this.LANDING_PAGE_METADATA_FILE_EXTENSION
             ]) {
-                const fileName = `${fileNamePrefix}${fileExtension}`;
-                const destinationFileName = `${this.LANDING_PAGE_FILENAME_PREFIX}${fileExtension}`;
-                console.log(`Copying ${fileName} to ${destinationFileName}`);
-
+                const sourceFilename = sourceFilenamePrefix + fileExtension;
+                const destFilename = destFilenamePrefix + fileExtension;
                 const sourcePath = path.join(
-                    rootPath,
-                    TemplateChooserCommand.STATIC_RESOURCES_PATH,
-                    fileName
+                    staticResourcesPath,
+                    sourceFilename
                 );
                 const destinationPath = path.join(
-                    rootPath,
-                    TemplateChooserCommand.STATIC_RESOURCES_PATH,
-                    destinationFileName
+                    staticResourcesPath,
+                    destFilename
                 );
 
-                fs.copyFileSync(sourcePath, destinationPath);
+                await window.withProgress(
+                    {
+                        location: ProgressLocation.Notification,
+                        title: l10n.t(
+                            "Copying '{0}' to '{1}'",
+                            sourceFilename,
+                            destFilename
+                        )
+                    },
+                    async (_progress, _token) => {
+                        await copyFile(sourcePath, destinationPath);
+                    }
+                );
             }
-            return Promise.resolve(true);
-        }
-        return Promise.reject('Could not determine workspace folder.');
+            return resolve(true);
+        });
     }
 
     static async getLandingPageStatus(): Promise<LandingPageCollectionStatus> {
@@ -166,21 +206,12 @@ export class TemplateChooserCommand {
             const landingPageCollectionStatus: LandingPageCollectionStatus = {
                 landingPageCollection: {}
             };
-            const workspaceFolders = workspace.workspaceFolders;
-            if (!workspaceFolders || workspaceFolders.length === 0) {
-                landingPageCollectionStatus.error =
-                    'No workspace defined for this project.';
-                return resolve(landingPageCollectionStatus);
-            }
-            const projectPath = workspaceFolders[0].uri.fsPath;
-            const staticResourcesPath = path.join(
-                projectPath,
-                this.STATIC_RESOURCES_PATH
-            );
+
+            let staticResourcesPath: string;
             try {
-                await access(staticResourcesPath);
+                staticResourcesPath = await this.getStaticResourcesDir();
             } catch (err) {
-                landingPageCollectionStatus.error = `Could not read landing page directory at '${staticResourcesPath}': ${err}`;
+                landingPageCollectionStatus.error = (err as Error).message;
                 return resolve(landingPageCollectionStatus);
             }
 
@@ -223,6 +254,39 @@ export class TemplateChooserCommand {
                 ] = { exists: landingPageExists, warning: warningMessage };
             }
             return resolve(landingPageCollectionStatus);
+        });
+    }
+
+    static getWorkspaceDir(): string {
+        const workspaceFolders = workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            throw new Error('No workspace defined for this project.');
+        }
+        return workspaceFolders[0].uri.fsPath;
+    }
+
+    static async getStaticResourcesDir(): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            let projectPath: string;
+            try {
+                projectPath = this.getWorkspaceDir();
+            } catch (err) {
+                return reject(err);
+            }
+            const staticResourcesPath = path.join(
+                projectPath,
+                this.STATIC_RESOURCES_PATH
+            );
+            try {
+                await access(staticResourcesPath);
+            } catch (err) {
+                const accessErrorObj = err as Error;
+                const noAccessError = new Error(
+                    `Could not read landing page directory at '${staticResourcesPath}': ${accessErrorObj.message}`
+                );
+                return reject(noAccessError);
+            }
+            return resolve(staticResourcesPath);
         });
     }
 

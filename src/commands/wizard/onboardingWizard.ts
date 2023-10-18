@@ -28,9 +28,10 @@ async function runPostProjectConfigurationSteps(
     return new Promise(async (resolve) => {
         await AuthorizeCommand.authorizeToOrg();
         await BriefcaseCommand.setupBriefcase(extensionUri);
-        // await TemplateChooserCommand.copyDefaultTemplate(extensionUri);
         await TemplateChooserCommand.chooseTemplate(extensionUri);
-        await new LwcGenerationCommand(extensionUri).createSObjectLwcQuickActions();
+        await new LwcGenerationCommand(
+            extensionUri
+        ).createSObjectLwcQuickActions();
 
         await AuthorizeCommand.authorizeToOrg();
         await DeployToOrgCommand.deployToOrg();
