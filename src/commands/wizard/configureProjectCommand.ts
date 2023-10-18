@@ -8,7 +8,7 @@
 import { Uri, WebviewPanel, commands, l10n, window } from 'vscode';
 import * as process from 'process';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
-import { InstructionsWebviewProvider } from '../webviews';
+import { InstructionsWebviewProvider } from '../../webviews';
 
 export type ProjectManagementChoiceAction = (panel?: WebviewPanel) => void;
 

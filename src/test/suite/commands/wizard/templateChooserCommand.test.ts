@@ -12,11 +12,11 @@ import * as path from 'path';
 import { workspace, Uri } from 'vscode';
 import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
-import { UIUtils } from '../../../utils/uiUtils';
+import { UIUtils } from '../../../../utils/uiUtils';
 import {
     TemplateChooserCommand,
     TemplateQuickPickItem
-} from '../../../commands/templateChooserCommand';
+} from '../../../../commands/wizard/templateChooserCommand';
 
 suite('Template Chooser Command Test Suite', () => {
     beforeEach(function () {});

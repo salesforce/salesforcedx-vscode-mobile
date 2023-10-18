@@ -7,7 +7,7 @@
 
 import { ProgressLocation, Uri, window, l10n } from 'vscode';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
-import { InstructionsWebviewProvider } from '../webviews';
+import { InstructionsWebviewProvider } from '../../webviews';
 
 export class BriefcaseCommand {
     static readonly OPEN_ORG_BRIEFCASE_PAGE_CMD =

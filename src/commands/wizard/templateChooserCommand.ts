@@ -6,11 +6,11 @@
  */
 
 import { QuickPickItem, Uri, l10n } from 'vscode';
-import { UIUtils } from '../utils/uiUtils';
+import { UIUtils } from '../../utils/uiUtils';
 import { workspace } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { InstructionsWebviewProvider } from '../webviews';
+import { InstructionsWebviewProvider } from '../../webviews';
 
 export interface TemplateQuickPickItem extends QuickPickItem {
     filenamePrefix: string;

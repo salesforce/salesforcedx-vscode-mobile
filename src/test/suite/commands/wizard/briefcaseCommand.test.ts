@@ -8,10 +8,10 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
-import { BriefcaseCommand } from '../../../commands/briefcaseCommand';
+import { BriefcaseCommand } from '../../../../commands/wizard/briefcaseCommand';
 import { Uri, l10n, window, Progress, CancellationToken } from 'vscode';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
-import { InstructionsWebviewProvider } from '../../../webviews';
+import { InstructionsWebviewProvider } from '../../../../webviews';
 
 suite('Briefcase Command Test Suite', () => {
     beforeEach(function () {});

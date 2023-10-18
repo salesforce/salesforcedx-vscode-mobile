@@ -6,7 +6,7 @@
  */
 
 import { commands, window, l10n } from 'vscode';
-import { OrgUtils } from '../utils/orgUtils';
+import { OrgUtils } from '../../utils/orgUtils';
 
 export class AuthorizeCommand {
     static async authorizeToOrg(): Promise<boolean> {

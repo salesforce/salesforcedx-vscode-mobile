@@ -9,7 +9,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { afterEach } from 'mocha';
 import { Uri, commands, window, workspace } from 'vscode';
-import { DeployToOrgCommand } from '../../../commands/deployToOrgCommand';
+import { DeployToOrgCommand } from '../../../../commands/wizard/deployToOrgCommand';
 
 suite('Deploy To Org Command Test Suite', () => {
     afterEach(function () {

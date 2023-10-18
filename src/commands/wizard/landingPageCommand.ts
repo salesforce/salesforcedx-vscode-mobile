@@ -6,9 +6,9 @@
  */
 
 import { window, QuickPickItem, QuickPickItemKind, l10n } from 'vscode';
-import { Field, OrgUtils } from '../utils/orgUtils';
-import { UIUtils } from '../utils/uiUtils';
-import { UEMBuilder } from '../utils/uemBuilder';
+import { Field, OrgUtils } from '../../utils/orgUtils';
+import { UIUtils } from '../../utils/uiUtils';
+import { UEMBuilder } from '../../utils/uemBuilder';
 
 export class LandingPageCommand {
     public static readonly GLOBAL_ACTIONS_CARD_LABEL = l10n.t('Global Actions');
