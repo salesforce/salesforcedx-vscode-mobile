@@ -11,7 +11,7 @@ import { afterEach, beforeEach } from 'mocha';
 import { BriefcaseCommand } from '../../../../commands/wizard/briefcaseCommand';
 import { Uri, l10n, window, Progress, CancellationToken } from 'vscode';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
-import { InstructionsWebviewProvider } from '../../../../webviews';
+import { InstructionsWebviewProvider } from '../../../../webviews/instructions';
 
 suite('Briefcase Command Test Suite', () => {
     beforeEach(function () {});

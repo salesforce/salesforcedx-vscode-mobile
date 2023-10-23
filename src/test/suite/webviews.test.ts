@@ -8,7 +8,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { Uri, env, languages } from 'vscode';
-import { InstructionsWebviewProvider } from '../../webviews';
+import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { afterEach, beforeEach } from 'mocha';
 import * as fs from 'fs';
 

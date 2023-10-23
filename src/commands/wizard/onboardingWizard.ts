@@ -11,7 +11,7 @@ import { BriefcaseCommand } from './briefcaseCommand';
 import { DeployToOrgCommand } from './deployToOrgCommand';
 import { ConfigureProjectCommand } from './configureProjectCommand';
 import { AuthorizeCommand } from './authorizeCommand';
-import { InstructionsWebviewProvider } from '../../webviews';
+import { InstructionsWebviewProvider } from '../../webviews/instructions';
 
 const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
 const onboardingWizardStateKey =
