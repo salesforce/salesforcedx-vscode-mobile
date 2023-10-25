@@ -25,7 +25,7 @@ export class InstructionsWebviewProvider {
         contentPath: string,
         messageHandlers: WebviewMessageHandler[]
     ) {
-        this.validateMessageHanders(messageHandlers);
+        WebviewProcessor.validateMessageHanders(messageHandlers);
         const panel = this.processor.createWebviewPanel(
             INSTRUCTION_VIEW_TYPE,
             title
@@ -64,18 +64,5 @@ export class InstructionsWebviewProvider {
                 }
             ]);
         });
-    }
-
-    private validateMessageHanders(messageHandlers: WebviewMessageHandler[]) {
-        const handlerMap: { [type: string]: boolean } = {};
-        for (const handler of messageHandlers) {
-            if (handlerMap[handler.type] === true) {
-                throw new Error(
-                    `There can be only one message handler per type. There are at least two handlers with type '${handler.type}'.`
-                );
-            } else {
-                handlerMap[handler.type] = true;
-            }
-        }
     }
 }

@@ -9,13 +9,16 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { Uri, WebviewPanel, env } from 'vscode';
 import { afterEach, beforeEach } from 'mocha';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import {
     WebviewMessageHandler,
     WebviewProcessor
 } from '../../webviews/processor';
 
-suite('InstructionsWebviewProvider Test Suite', () => {
+suite('Webview Test Suite', () => {
     const extensionUri = Uri.parse('file:///tmp/testdir');
 
     beforeEach(function () {});
@@ -224,5 +227,79 @@ suite('InstructionsWebviewProvider Test Suite', () => {
         }
         panel.dispose();
         postMessageStub.restore();
+    });
+
+    test('Unique types for message handler collection passes validation', async () => {
+        const messageHandlers: WebviewMessageHandler[] = [
+            {
+                type: 'type1',
+                action: (_panel, data, callback) => {}
+            },
+            {
+                type: 'type2',
+                action: (_panel, data, callback) => {}
+            }
+        ];
+        WebviewProcessor.validateMessageHanders(messageHandlers);
+    });
+
+    test('Repeated types for message handler collection fails validation', async () => {
+        const messageHandlers: WebviewMessageHandler[] = [
+            {
+                type: 'type1',
+                action: (_panel, _data) => {}
+            },
+            {
+                type: 'type1',
+                action: (_panel, _data) => {}
+            }
+        ];
+        assert.throws(() => {
+            WebviewProcessor.validateMessageHanders(messageHandlers);
+        }, 'A collection of message handlers that has more than one instance of a given type, should fail validation.');
+    });
+
+    test('Get webview content with script demarcator', async () => {
+        const extensionUriTempDir = await mkdtemp(
+            join(tmpdir(), 'salesforcedx-vscode-mobile-')
+        );
+        const extensionUri = Uri.file(extensionUriTempDir);
+        const processor = new WebviewProcessor(extensionUri);
+        const webviewPanel = processor.createWebviewPanel(
+            'someViewType',
+            'someTitle'
+        );
+        const contentWithDemarcator =
+            '<html><body><script src="--- MESSAGING_SCRIPT_SRC ---"></script></body></html>';
+        const contentWithDemarcatorDereferenced = `<html><body><script src="${webviewPanel.webview.asWebviewUri(
+            processor.getMessagingJsPathUri()
+        )}"></script></body></html>`;
+
+        const contentFilename = 'contentFile.html';
+        const contentDirPathRelative = 'content';
+        const contentDirPathAbsolute = join(
+            extensionUriTempDir,
+            contentDirPathRelative
+        );
+        const contentPathRelative = join(
+            contentDirPathRelative,
+            contentFilename
+        );
+        const contentPathAbsolute = join(
+            contentDirPathAbsolute,
+            contentFilename
+        );
+        await mkdir(join(extensionUriTempDir, contentDirPathRelative));
+        await writeFile(contentPathAbsolute, contentWithDemarcator);
+
+        const generatedWebviewContent = processor.getWebviewContent(
+            webviewPanel,
+            contentPathRelative
+        );
+        assert.equal(
+            generatedWebviewContent,
+            contentWithDemarcatorDereferenced
+        );
+        webviewPanel.dispose();
     });
 });

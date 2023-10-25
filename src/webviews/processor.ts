@@ -42,6 +42,21 @@ export class WebviewProcessor {
         return panel;
     }
 
+    public static validateMessageHanders(
+        messageHandlers: WebviewMessageHandler[]
+    ) {
+        const handlerMap: { [type: string]: boolean } = {};
+        for (const handler of messageHandlers) {
+            if (handlerMap[handler.type] === true) {
+                throw new Error(
+                    `There can be only one message handler per type. There are at least two handlers with type '${handler.type}'.`
+                );
+            } else {
+                handlerMap[handler.type] = true;
+            }
+        }
+    }
+
     public onWebviewReceivedMessage(
         data: any,
         panel: WebviewPanel,
@@ -71,11 +86,7 @@ export class WebviewProcessor {
     public getWebviewContent(panel: WebviewPanel, contentPath: string): string {
         const localeContentPath = this.getLocaleContentPath(contentPath);
         const htmlPath = Uri.joinPath(this.extensionUri, localeContentPath);
-        const messagingJsPath = Uri.joinPath(
-            this.extensionUri,
-            MESSAGING_JS_PATH
-        );
-
+        const messagingJsPath = this.getMessagingJsPathUri();
         let webviewContent = readFileSync(htmlPath.fsPath, {
             encoding: 'utf-8'
         });
@@ -84,6 +95,10 @@ export class WebviewProcessor {
             panel.webview.asWebviewUri(messagingJsPath).toString()
         );
         return webviewContent;
+    }
+
+    public getMessagingJsPathUri(): Uri {
+        return Uri.joinPath(this.extensionUri, MESSAGING_JS_PATH);
     }
 
     /**
