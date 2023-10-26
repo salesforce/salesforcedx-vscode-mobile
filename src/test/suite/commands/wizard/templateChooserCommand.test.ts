@@ -8,7 +8,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as fs from 'fs';
-import { mkdir, rm, writeFile } from 'fs/promises';
+import { mkdir } from 'fs/promises';
 import * as path from 'path';
 import { workspace, Uri } from 'vscode';
 import { SinonStub } from 'sinon';
@@ -153,7 +153,7 @@ suite('Template Chooser Command Test Suite', () => {
         }
     });
 
-    test('Landing pages exist: no landing page files exist', async () => {
+    test('Landing pages exist: existing landing page file combinations', async () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
         const getWorkspaceDirStub = sinon.stub(
@@ -167,76 +167,78 @@ suite('Template Chooser Command Test Suite', () => {
         );
         await mkdir(staticResourcesAbsPath, { recursive: true });
 
-        for (const landingPageType in TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES) {
-            const filesExist =
-                await TemplateChooserCommand.landingPageFilesExist(
-                    staticResourcesAbsPath,
-                    landingPageType
-                );
-            assert.equal(filesExist.jsonFileExists, false);
-            assert.equal(filesExist.metaFileExists, false);
-        }
-
-        await projectDirMgr.removeDir();
-        getWorkspaceDirStub.restore();
-    });
-
-    test('Landing pages exist: one landing page file exists', async () => {
-        const projectDirMgr =
-            await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(
-            TemplateChooserCommand,
-            'getWorkspaceDir'
-        );
-        getWorkspaceDirStub.returns(projectDirMgr.projectDir);
-        const staticResourcesAbsPath = path.join(
-            projectDirMgr.projectDir,
-            TemplateChooserCommand.STATIC_RESOURCES_PATH
-        );
-        await mkdir(staticResourcesAbsPath, { recursive: true });
-
-        for (const landingPageType in TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES) {
-            [
-                {
-                    extension:
-                        TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION,
-                    result: {
-                        jsonFileExists: true,
-                        metaFileExists: false
+        (async () => {
+            for (const landingPageType in TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES) {
+                for (const fileConfig of [
+                    {
+                        extensionList: [],
+                        result: {
+                            jsonFileExists: false,
+                            metaFileExists: false
+                        }
+                    },
+                    {
+                        extensionList: [
+                            TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION
+                        ],
+                        result: {
+                            jsonFileExists: true,
+                            metaFileExists: false
+                        }
+                    },
+                    {
+                        extensionList: [
+                            TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION
+                        ],
+                        result: { jsonFileExists: false, metaFileExists: true }
+                    },
+                    {
+                        extensionList: [
+                            TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION,
+                            TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION
+                        ],
+                        result: { jsonFileExists: true, metaFileExists: true }
                     }
-                },
-                {
-                    extension:
-                        TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION,
-                    result: { jsonFileExists: false, metaFileExists: true }
-                }
-            ].forEach(async (ext) => {
-                const file = path.join(
-                    staticResourcesAbsPath,
-                    TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES[
-                        landingPageType
-                    ] + ext.extension
-                );
-                writeFile(file, 'blah');
-                const filesExist =
-                    await TemplateChooserCommand.landingPageFilesExist(
-                        staticResourcesAbsPath,
-                        landingPageType
+                ]) {
+                    fileConfig.extensionList.forEach((extension) => {
+                        const file = path.join(
+                            staticResourcesAbsPath,
+                            TemplateChooserCommand
+                                .LANDING_PAGE_FILENAME_PREFIXES[
+                                landingPageType
+                            ] + extension
+                        );
+                        fs.writeFileSync(file, 'blah');
+                    });
+                    const filesExist =
+                        await TemplateChooserCommand.landingPageFilesExist(
+                            staticResourcesAbsPath,
+                            landingPageType
+                        );
+                    assert.equal(
+                        filesExist.jsonFileExists,
+                        fileConfig.result.jsonFileExists
                     );
-                assert.equal(
-                    filesExist.jsonFileExists,
-                    ext.result.jsonFileExists
-                );
-                assert.equal(
-                    filesExist.metaFileExists,
-                    ext.result.metaFileExists
-                );
-                await rm(file);
-            });
-        }
-
-        await projectDirMgr.removeDir();
-        getWorkspaceDirStub.restore();
+                    assert.equal(
+                        filesExist.metaFileExists,
+                        fileConfig.result.metaFileExists
+                    );
+                    fileConfig.extensionList.forEach((extension) => {
+                        const file = path.join(
+                            staticResourcesAbsPath,
+                            TemplateChooserCommand
+                                .LANDING_PAGE_FILENAME_PREFIXES[
+                                landingPageType
+                            ] + extension
+                        );
+                        fs.rmSync(file);
+                    });
+                }
+            }
+        })().then(async () => {
+            await projectDirMgr.removeDir();
+            getWorkspaceDirStub.restore();
+        });
     });
 
     test('Choosing existing landing page automatically resolves', async () => {
