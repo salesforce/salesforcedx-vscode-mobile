@@ -33,7 +33,8 @@ export class TempProjectDirManager {
                     `Project dir '${this.projectDir}' is not a directory.`
                 );
             }
-            return rm(this.projectDir, { recursive: true, force: true });
+            await rm(this.projectDir, { recursive: true, force: true });
+            return resolve();
         });
     }
 

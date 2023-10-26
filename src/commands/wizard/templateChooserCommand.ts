@@ -50,37 +50,6 @@ export class TemplateChooserCommand {
         retail: `${this.LANDING_PAGE_FILENAME_PREFIX}_retail_execution`
     };
 
-    static readonly TEMPLATE_LIST_ITEMS: TemplateQuickPickItem[] = [
-        {
-            label: l10n.t('Default'),
-            detail: l10n.t(
-                'Recently viewed Contacts, Accounts, and Opportunities.'
-            ),
-            filenamePrefix: 'landing_page_default'
-        },
-        {
-            label: l10n.t('Case Management'),
-            detail: l10n.t(
-                'New Case action and the 5 most recent Cases, Accounts, and Contacts.'
-            ),
-            filenamePrefix: 'landing_page_case_management'
-        },
-        {
-            label: l10n.t('Healthcare'),
-            detail: l10n.t(
-                'Global quick actions with BarcodeScanner, new Visitor, and more.'
-            ),
-            filenamePrefix: 'landing_page_healthcare'
-        },
-        {
-            label: l10n.t('Retail Execution'),
-            detail: l10n.t(
-                'Global quick actions with new Opportunity, new Lead, and more.'
-            ),
-            filenamePrefix: 'landing_page_retail_execution'
-        }
-    ];
-
     public static async chooseTemplate(extensionUri: Uri) {
         return new Promise<void>((resolve) => {
             new InstructionsWebviewProvider(
@@ -95,10 +64,9 @@ export class TemplateChooserCommand {
                             const landingPageChosenData = data as {
                                 landingPageType: string;
                             };
-                            const completed =
-                                await this.handleLandingPageChosen(
-                                    landingPageChosenData
-                                );
+                            const completed = await this.onLandingPageChosen(
+                                landingPageChosenData
+                            );
                             if (completed) {
                                 panel.dispose();
                                 return resolve();
@@ -126,10 +94,10 @@ export class TemplateChooserCommand {
      * @param choiceData The data object containing the landing page type the user
      * selected.
      */
-    static async handleLandingPageChosen(choiceData: {
+    static async onLandingPageChosen(choiceData: {
         landingPageType: string;
     }): Promise<boolean> {
-        return new Promise<boolean>(async (resolve, reject) => {
+        return new Promise<boolean>(async (resolve) => {
             const landingPageType = choiceData.landingPageType;
 
             // Nothing to do if the user chose to keep their existing landing page.
@@ -260,7 +228,9 @@ export class TemplateChooserCommand {
     static getWorkspaceDir(): string {
         const workspaceFolders = workspace.workspaceFolders;
         if (!workspaceFolders || workspaceFolders.length === 0) {
-            throw new Error('No workspace defined for this project.');
+            throw new NoWorkspaceError(
+                'No workspace defined for this project.'
+            );
         }
         return workspaceFolders[0].uri.fsPath;
     }
@@ -281,7 +251,7 @@ export class TemplateChooserCommand {
                 await access(staticResourcesPath);
             } catch (err) {
                 const accessErrorObj = err as Error;
-                const noAccessError = new Error(
+                const noAccessError = new NoStaticResourcesDirError(
                     `Could not read landing page directory at '${staticResourcesPath}': ${accessErrorObj.message}`
                 );
                 return reject(noAccessError);
@@ -327,5 +297,21 @@ export class TemplateChooserCommand {
 
             return resolve({ jsonFileExists, metaFileExists });
         });
+    }
+}
+
+export class NoWorkspaceError extends Error {
+    constructor(message?: string) {
+        super(message);
+        this.name = this.constructor.name;
+        Object.setPrototypeOf(this, NoWorkspaceError.prototype);
+    }
+}
+
+export class NoStaticResourcesDirError extends Error {
+    constructor(message?: string) {
+        super(message);
+        this.name = this.constructor.name;
+        Object.setPrototypeOf(this, NoStaticResourcesDirError.prototype);
     }
 }

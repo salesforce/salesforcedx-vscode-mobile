@@ -71,12 +71,12 @@ export class WebviewProcessor {
             if (data.callbackId) {
                 const returnedCallbackId = data.callbackId;
                 delete data.callbackId;
-                callback = (responseData?: object) => {
+                callback = async (responseData?: object) => {
                     const fullResponseMessage = {
                         callbackId: returnedCallbackId,
                         ...responseData
                     };
-                    panel.webview.postMessage(fullResponseMessage);
+                    await panel.webview.postMessage(fullResponseMessage);
                 };
             }
             responsiveHandler.action(panel, data, callback);

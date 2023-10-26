@@ -7,16 +7,16 @@
 
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import { Uri, WebviewPanel, env } from 'vscode';
+import { Uri, env } from 'vscode';
 import { afterEach, beforeEach } from 'mocha';
 import * as fs from 'node:fs';
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import {
     WebviewMessageHandler,
     WebviewProcessor
 } from '../../webviews/processor';
+import { TempProjectDirManager } from '../TestHelper';
 
 suite('Webview Test Suite', () => {
     const extensionUri = Uri.parse('file:///tmp/testdir');
@@ -260,10 +260,9 @@ suite('Webview Test Suite', () => {
     });
 
     test('Get webview content with script demarcator', async () => {
-        const extensionUriTempDir = await mkdtemp(
-            join(tmpdir(), 'salesforcedx-vscode-mobile-')
-        );
-        const extensionUri = Uri.file(extensionUriTempDir);
+        const extensionUriTempDir =
+            await TempProjectDirManager.createTempProjectDir();
+        const extensionUri = Uri.file(extensionUriTempDir.projectDir);
         const processor = new WebviewProcessor(extensionUri);
         const webviewPanel = processor.createWebviewPanel(
             'someViewType',
@@ -275,10 +274,12 @@ suite('Webview Test Suite', () => {
             processor.getMessagingJsPathUri()
         )}"></script></body></html>`;
 
+        // Absolute path vars are for the test writing content. Relative path vars are
+        // for processor.getWebviewContent().
         const contentFilename = 'contentFile.html';
         const contentDirPathRelative = 'content';
         const contentDirPathAbsolute = join(
-            extensionUriTempDir,
+            extensionUriTempDir.projectDir,
             contentDirPathRelative
         );
         const contentPathRelative = join(
@@ -289,7 +290,10 @@ suite('Webview Test Suite', () => {
             contentDirPathAbsolute,
             contentFilename
         );
-        await mkdir(join(extensionUriTempDir, contentDirPathRelative));
+
+        await mkdir(
+            join(extensionUriTempDir.projectDir, contentDirPathRelative)
+        );
         await writeFile(contentPathAbsolute, contentWithDemarcator);
 
         const generatedWebviewContent = processor.getWebviewContent(
@@ -300,6 +304,8 @@ suite('Webview Test Suite', () => {
             generatedWebviewContent,
             contentWithDemarcatorDereferenced
         );
+
+        await extensionUriTempDir.removeDir();
         webviewPanel.dispose();
     });
 });

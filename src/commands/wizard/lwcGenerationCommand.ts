@@ -1,5 +1,5 @@
 import { Uri, l10n } from 'vscode';
-import { InstructionsWebviewProvider } from '../../webviews';
+import { InstructionsWebviewProvider } from '../../webviews/instructions';
 
 export class LwcGenerationCommand {
     extensionUri: Uri;
