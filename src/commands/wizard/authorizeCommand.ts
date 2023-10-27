@@ -24,7 +24,7 @@ export class AuthorizeCommand {
             if (!result || result.title === l10n.t('No')) {
                 return Promise.resolve(false);
             } else {
-                await commands.executeCommand('sfdx.force.auth.web.login');
+                await commands.executeCommand('sfdx.org.login.web');
                 await window.showInformationMessage(
                     l10n.t(
                         "Once you've authorized your Org, click here to continue."

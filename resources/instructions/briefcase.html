@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -20,6 +20,12 @@
             If you've already configured a briefcase, move on to the next step.
         </p>
         <button id="okButton">OK</button>
+        <script>
+            const okButtonElement = document.getElementById('okButton');
+            okButtonElement.addEventListener('click', () => {
+                webviewMessaging.sendMessageRequest('okButton');
+            });
+        </script>
         <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
     </body>
 </html>

@@ -8,7 +8,7 @@
 import { Uri, WebviewPanel, commands, l10n, window } from 'vscode';
 import * as process from 'process';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
-import { InstructionsWebviewProvider } from '../../webviews';
+import { InstructionsWebviewProvider } from '../../webviews/instructions';
 
 export type ProjectManagementChoiceAction = (panel?: WebviewPanel) => void;
 
@@ -41,7 +41,7 @@ export class DefaultProjectConfigurationProcessor
                 'resources/instructions/projectBootstrapAcknowledgment.html',
                 [
                     {
-                        buttonId: 'okButton',
+                        type: 'okButton',
                         action: async (panel) => {
                             panel.dispose();
                             return resolve();
@@ -98,13 +98,13 @@ export class DefaultProjectConfigurationProcessor
             'resources/instructions/projectBootstrapChoice.html',
             [
                 {
-                    buttonId: 'createNewButton',
+                    type: 'createNewButton',
                     action: (panel) => {
                         createChoice(panel);
                     }
                 },
                 {
-                    buttonId: 'openExistingButton',
+                    type: 'openExistingButton',
                     action: (panel) => {
                         openChoice(panel);
                     }

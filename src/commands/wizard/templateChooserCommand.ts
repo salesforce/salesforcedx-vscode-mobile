@@ -10,7 +10,7 @@ import { UIUtils } from '../../utils/uiUtils';
 import { workspace } from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { InstructionsWebviewProvider } from '../../webviews';
+import { InstructionsWebviewProvider } from '../../webviews/instructions';
 
 export interface TemplateQuickPickItem extends QuickPickItem {
     filenamePrefix: string;

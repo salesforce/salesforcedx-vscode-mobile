@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -14,6 +14,14 @@
         </p>
         <button id="createNewButton">Create New Project</button>
         <button id="openExistingButton">Open Existing Project</button>
+        <script>
+            for (const buttonId of ['createNewButton', 'openExistingButton']) {
+                const buttonElement = document.getElementById(buttonId);
+                buttonElement.addEventListener('click', () => {
+                    webviewMessaging.sendMessageRequest(buttonId);
+                });
+            }
+        </script>
         <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
     </body>
 </html>
