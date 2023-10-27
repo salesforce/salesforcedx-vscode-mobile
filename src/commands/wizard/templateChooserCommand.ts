@@ -5,25 +5,29 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { QuickPickItem, Uri, l10n } from 'vscode';
-import { UIUtils } from '../../utils/uiUtils';
+import { Uri, l10n } from 'vscode';
 import { ProgressLocation, window, workspace } from 'vscode';
 import * as path from 'path';
 import { access, copyFile } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
-
-export interface TemplateQuickPickItem extends QuickPickItem {
-    filenamePrefix: string;
-}
 
 export type LandingPageStatus = {
     exists: boolean;
     warning?: string;
 };
 
+export type LandingPageType =
+    | 'existing'
+    | 'default'
+    | 'caseManagement'
+    | 'healthcare'
+    | 'retail';
+
 export type LandingPageCollectionStatus = {
     error?: string;
-    landingPageCollection: { [landingPageType: string]: LandingPageStatus };
+    landingPageCollection: {
+        [landingPageType in LandingPageType]?: LandingPageStatus;
+    };
 };
 
 /**
@@ -41,7 +45,7 @@ export class TemplateChooserCommand {
     static readonly LANDING_PAGE_JSON_FILE_EXTENSION = '.json';
     static readonly LANDING_PAGE_METADATA_FILE_EXTENSION = '.resource-meta.xml';
     static readonly LANDING_PAGE_FILENAME_PREFIXES: {
-        [landingPageType: string]: string;
+        [landingPageType in LandingPageType]: string;
     } = {
         existing: this.LANDING_PAGE_FILENAME_PREFIX,
         default: `${this.LANDING_PAGE_FILENAME_PREFIX}_default`,
@@ -62,7 +66,7 @@ export class TemplateChooserCommand {
                         type: 'landingPageChosen',
                         action: async (panel, data) => {
                             const landingPageChosenData = data as {
-                                landingPageType: string;
+                                landingPageType: LandingPageType;
                             };
                             const completed = await this.onLandingPageChosen(
                                 landingPageChosenData
@@ -95,7 +99,7 @@ export class TemplateChooserCommand {
      * selected.
      */
     static async onLandingPageChosen(choiceData: {
-        landingPageType: string;
+        landingPageType: LandingPageType;
     }): Promise<boolean> {
         return new Promise<boolean>(async (resolve) => {
             const landingPageType = choiceData.landingPageType;
@@ -115,14 +119,8 @@ export class TemplateChooserCommand {
                 existingLandingPageFiles.jsonFileExists ||
                 existingLandingPageFiles.metaFileExists
             ) {
-                const confirmOverwrite = await window.showWarningMessage(
-                    l10n.t(
-                        'Are you sure you want to overwrite your existing landing page?'
-                    ),
-                    { modal: true },
-                    l10n.t('Yes'),
-                    l10n.t('No')
-                );
+                const confirmOverwrite =
+                    await this.askUserToOverwriteLandingPage();
                 if (confirmOverwrite === l10n.t('No')) {
                     console.info(
                         'User chose not to overwrite their existing landing page.'
@@ -169,6 +167,17 @@ export class TemplateChooserCommand {
         });
     }
 
+    static askUserToOverwriteLandingPage(): Thenable<string | undefined> {
+        return window.showWarningMessage(
+            l10n.t(
+                'Are you sure you want to overwrite your existing landing page?'
+            ),
+            { modal: true },
+            l10n.t('Yes'),
+            l10n.t('No')
+        );
+    }
+
     static async getLandingPageStatus(): Promise<LandingPageCollectionStatus> {
         return new Promise<LandingPageCollectionStatus>(async (resolve) => {
             const landingPageCollectionStatus: LandingPageCollectionStatus = {
@@ -183,9 +192,8 @@ export class TemplateChooserCommand {
                 return resolve(landingPageCollectionStatus);
             }
 
-            for (const landingPageType of Object.keys(
-                this.LANDING_PAGE_FILENAME_PREFIXES
-            )) {
+            for (const lptIndex in this.LANDING_PAGE_FILENAME_PREFIXES) {
+                const landingPageType = lptIndex as LandingPageType;
                 const landingPageFilesExist = await this.landingPageFilesExist(
                     staticResourcesPath,
                     landingPageType
@@ -262,7 +270,7 @@ export class TemplateChooserCommand {
 
     static async landingPageFilesExist(
         staticResourcesPath: string,
-        landingPageType: string
+        landingPageType: LandingPageType
     ): Promise<{ jsonFileExists: boolean; metaFileExists: boolean }> {
         return new Promise<{
             jsonFileExists: boolean;

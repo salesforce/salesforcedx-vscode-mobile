@@ -10,88 +10,26 @@ import * as sinon from 'sinon';
 import * as fs from 'fs';
 import { mkdir } from 'fs/promises';
 import * as path from 'path';
-import { workspace, Uri } from 'vscode';
-import { SinonStub } from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
-import { UIUtils } from '../../../../utils/uiUtils';
 import {
     TemplateChooserCommand,
-    TemplateQuickPickItem,
     NoWorkspaceError,
-    NoStaticResourcesDirError
+    NoStaticResourcesDirError,
+    LandingPageType
 } from '../../../../commands/wizard/templateChooserCommand';
 import { TempProjectDirManager } from '../../../TestHelper';
+
+type LandingPageTestIOConfig = {
+    [landingPageType in LandingPageType]?: {
+        [exists in 'jsonExists' | 'metaExists']: boolean;
+    };
+};
 
 suite('Template Chooser Command Test Suite', () => {
     beforeEach(function () {});
 
     afterEach(function () {
         sinon.restore();
-    });
-
-    // test('Selects a template file and it is copied', async () => {
-    //     const showQuickPickStub: SinonStub = sinon.stub(
-    //         UIUtils,
-    //         'showQuickPick'
-    //     );
-
-    //     // set up file picker
-    //     const chosenItem: TemplateQuickPickItem = {
-    //         label: 'Case Management',
-    //         description: 'This is the description',
-    //         detail: 'Contains a new case quick action, along with the 5 most recent cases, accounts, and contacts.',
-    //         filenamePrefix: 'somefile'
-    //     };
-
-    //     showQuickPickStub.onCall(0).returns(chosenItem);
-
-    //     // set up stubs for filesystem copy
-    //     const testPath = '/somepath';
-    //     const copyFileSyncStub = sinon.stub(fs, 'copyFileSync');
-    //     const workspaceFoldersStub = sinon
-    //         .stub(workspace, 'workspaceFolders')
-    //         .get(() => [{ uri: Uri.file(testPath) }]);
-
-    //     // execute our command
-    //     // await TemplateChooserCommand.chooseTemplate();
-
-    //     // ensure copy was performed for both json and metadata files
-    //     for (const fileExtension of [
-    //         TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION,
-    //         TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION
-    //     ]) {
-    //         const expectedSourcePath = path.join(
-    //             testPath,
-    //             TemplateChooserCommand.STATIC_RESOURCES_PATH,
-    //             `somefile${fileExtension}`
-    //         );
-    //         const expectedDestinationPath = path.join(
-    //             testPath,
-    //             TemplateChooserCommand.STATIC_RESOURCES_PATH,
-    //             `${TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIX}${fileExtension}`
-    //         );
-    //         assert.ok(
-    //             copyFileSyncStub.calledWith(
-    //                 expectedSourcePath,
-    //                 expectedDestinationPath
-    //             ),
-    //             `Should attempt to copy ${expectedSourcePath} to ${expectedDestinationPath}`
-    //         );
-    //     }
-    // });
-
-    test('Nothing is selected', async () => {
-        const showQuickPickStub: SinonStub = sinon.stub(
-            UIUtils,
-            'showQuickPick'
-        );
-
-        showQuickPickStub.onCall(0).returns(undefined);
-
-        // execute our command and get the promise to ensure expected value is received.
-        // let promise = TemplateChooserCommand.chooseTemplate();
-        // let result = await promise;
-        // assert.equal(result, undefined);
     });
 
     test('Static resources dir: workspace does not exist', async () => {
@@ -168,48 +106,39 @@ suite('Template Chooser Command Test Suite', () => {
         await mkdir(staticResourcesAbsPath, { recursive: true });
 
         (async () => {
-            for (const landingPageType in TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES) {
-                for (const fileConfig of [
+            for (const lptIndex in TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES) {
+                const landingPageType = lptIndex as LandingPageType;
+                const fileConfigList: LandingPageTestIOConfig[] = [
                     {
-                        extensionList: [],
-                        result: {
-                            jsonFileExists: false,
-                            metaFileExists: false
+                        [landingPageType]: {
+                            jsonExists: false,
+                            metaExists: false
                         }
                     },
                     {
-                        extensionList: [
-                            TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION
-                        ],
-                        result: {
-                            jsonFileExists: true,
-                            metaFileExists: false
+                        [landingPageType]: {
+                            jsonExists: true,
+                            metaExists: false
                         }
                     },
                     {
-                        extensionList: [
-                            TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION
-                        ],
-                        result: { jsonFileExists: false, metaFileExists: true }
+                        [landingPageType]: {
+                            jsonExists: false,
+                            metaExists: true
+                        }
                     },
                     {
-                        extensionList: [
-                            TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION,
-                            TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION
-                        ],
-                        result: { jsonFileExists: true, metaFileExists: true }
+                        [landingPageType]: {
+                            jsonExists: true,
+                            metaExists: true
+                        }
                     }
-                ]) {
-                    fileConfig.extensionList.forEach((extension) => {
-                        const file = path.join(
-                            staticResourcesAbsPath,
-                            TemplateChooserCommand
-                                .LANDING_PAGE_FILENAME_PREFIXES[
-                                landingPageType
-                            ] + extension
-                        );
-                        fs.writeFileSync(file, 'blah');
-                    });
+                ];
+                for (const fileConfig of fileConfigList) {
+                    createLandingPageContent(
+                        fileConfig,
+                        staticResourcesAbsPath
+                    );
                     const filesExist =
                         await TemplateChooserCommand.landingPageFilesExist(
                             staticResourcesAbsPath,
@@ -217,22 +146,16 @@ suite('Template Chooser Command Test Suite', () => {
                         );
                     assert.equal(
                         filesExist.jsonFileExists,
-                        fileConfig.result.jsonFileExists
+                        fileConfig[landingPageType]!.jsonExists
                     );
                     assert.equal(
                         filesExist.metaFileExists,
-                        fileConfig.result.metaFileExists
+                        fileConfig[landingPageType]!.metaExists
                     );
-                    fileConfig.extensionList.forEach((extension) => {
-                        const file = path.join(
-                            staticResourcesAbsPath,
-                            TemplateChooserCommand
-                                .LANDING_PAGE_FILENAME_PREFIXES[
-                                landingPageType
-                            ] + extension
-                        );
-                        fs.rmSync(file);
-                    });
+                    deleteLandingPageContent(
+                        fileConfig,
+                        staticResourcesAbsPath
+                    );
                 }
             }
         })().then(async () => {
@@ -242,91 +165,264 @@ suite('Template Chooser Command Test Suite', () => {
     });
 
     test('Choosing existing landing page automatically resolves', async () => {
-        const choiceData = {
+        const choiceData: { landingPageType: LandingPageType } = {
             landingPageType: 'existing'
         };
         assert.ok(await TemplateChooserCommand.onLandingPageChosen(choiceData));
     });
 
-    test('Choosing existing landing page automatically resolves', async () => {
-        const choiceData = {
-            landingPageType: 'existing'
+    test('User is asked to overwrite existing landing page', async () => {
+        const projectDirMgr =
+            await TempProjectDirManager.createTempProjectDir();
+        const getWorkspaceDirStub = sinon.stub(
+            TemplateChooserCommand,
+            'getWorkspaceDir'
+        );
+        getWorkspaceDirStub.returns(projectDirMgr.projectDir);
+        const staticResourcesAbsPath = path.join(
+            projectDirMgr.projectDir,
+            TemplateChooserCommand.STATIC_RESOURCES_PATH
+        );
+        await mkdir(staticResourcesAbsPath, { recursive: true });
+        const config: LandingPageTestIOConfig = {
+            existing: {
+                jsonExists: true,
+                metaExists: false
+            }
         };
-        assert.ok(await TemplateChooserCommand.onLandingPageChosen(choiceData));
+        createLandingPageContent(config, staticResourcesAbsPath);
+
+        const askUserToOverwriteStub = sinon.stub(
+            TemplateChooserCommand,
+            'askUserToOverwriteLandingPage'
+        );
+        askUserToOverwriteStub.returns(
+            new Promise((resolve) => {
+                return resolve('No');
+            })
+        );
+        const choiceData: { landingPageType: LandingPageType } = {
+            landingPageType: 'caseManagement'
+        };
+        const pageChosen =
+            await TemplateChooserCommand.onLandingPageChosen(choiceData);
+        assert.ok(
+            askUserToOverwriteStub.called,
+            'User should have been asked if they wanted to overwrite the existing landing page.'
+        );
+        assert.equal(
+            pageChosen,
+            false,
+            'Choice was not to overwrite existing page.'
+        );
+
+        askUserToOverwriteStub.restore();
+        await projectDirMgr.removeDir();
+        getWorkspaceDirStub.restore();
+    });
+
+    test('Landing page template written to landing page files', async () => {
+        const projectDirMgr =
+            await TempProjectDirManager.createTempProjectDir();
+        const getWorkspaceDirStub = sinon.stub(
+            TemplateChooserCommand,
+            'getWorkspaceDir'
+        );
+        getWorkspaceDirStub.returns(projectDirMgr.projectDir);
+        const staticResourcesAbsPath = path.join(
+            projectDirMgr.projectDir,
+            TemplateChooserCommand.STATIC_RESOURCES_PATH
+        );
+        await mkdir(staticResourcesAbsPath, { recursive: true });
+
+        const landingPageIoConfig: LandingPageTestIOConfig = {
+            default: {
+                jsonExists: true,
+                metaExists: true
+            },
+            caseManagement: {
+                jsonExists: true,
+                metaExists: true
+            },
+            healthcare: {
+                jsonExists: true,
+                metaExists: true
+            },
+            retail: {
+                jsonExists: true,
+                metaExists: true
+            }
+        };
+        createLandingPageContent(landingPageIoConfig, staticResourcesAbsPath);
+
+        (async () => {
+            for (const lptIndex in TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES) {
+                const landingPageType = lptIndex as LandingPageType;
+                if (landingPageType === 'existing') {
+                    continue;
+                }
+                const copied = await TemplateChooserCommand.onLandingPageChosen(
+                    { landingPageType }
+                );
+                assert.ok(
+                    copied,
+                    `Landing page for type '${landingPageType}' should have been copied.`
+                );
+                for (const landingPageExtension of [
+                    TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION,
+                    TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION
+                ]) {
+                    const fileName =
+                        TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES
+                            .existing + landingPageExtension;
+                    const readContent = fs.readFileSync(
+                        path.join(staticResourcesAbsPath, fileName),
+                        { encoding: 'utf-8' }
+                    );
+                    assert.equal(
+                        readContent,
+                        `${landingPageType} ${landingPageExtension} content`
+                    );
+                }
+            }
+        })().then(async () => {
+            await projectDirMgr.removeDir();
+            getWorkspaceDirStub.restore();
+        });
+    });
+
+    test('Landing page status: staticresources does not exist', async () => {
+        const status = await TemplateChooserCommand.getLandingPageStatus();
+        assert.ok(status.error && status.error.length > 0);
+    });
+
+    test('Landing page status: various file existence scenarios', async () => {
+        const projectDirMgr =
+            await TempProjectDirManager.createTempProjectDir();
+        const getWorkspaceDirStub = sinon.stub(
+            TemplateChooserCommand,
+            'getWorkspaceDir'
+        );
+        getWorkspaceDirStub.returns(projectDirMgr.projectDir);
+        const staticResourcesAbsPath = path.join(
+            projectDirMgr.projectDir,
+            TemplateChooserCommand.STATIC_RESOURCES_PATH
+        );
+        await mkdir(staticResourcesAbsPath, { recursive: true });
+        const landingPageConfig: LandingPageTestIOConfig = {
+            existing: {
+                jsonExists: false,
+                metaExists: false
+            },
+            default: {
+                jsonExists: true,
+                metaExists: false
+            },
+            caseManagement: {
+                jsonExists: false,
+                metaExists: true
+            },
+            healthcare: {
+                jsonExists: true,
+                metaExists: true
+            },
+            retail: {
+                jsonExists: false,
+                metaExists: false
+            }
+        };
+
+        createLandingPageContent(landingPageConfig, staticResourcesAbsPath);
+
+        const landingPageStatus =
+            await TemplateChooserCommand.getLandingPageStatus();
+        for (const lptIndex in landingPageConfig) {
+            const landingPageType = lptIndex as LandingPageType;
+            const config = landingPageConfig[landingPageType]!;
+            const landingPageCollectionStatus =
+                landingPageStatus.landingPageCollection[landingPageType]!;
+            if (config.jsonExists && config.metaExists) {
+                assert.equal(landingPageCollectionStatus.exists, true);
+                assert.ok(!landingPageCollectionStatus.warning);
+            } else {
+                assert.equal(landingPageCollectionStatus.exists, false);
+                assert.ok(
+                    landingPageCollectionStatus.warning &&
+                        landingPageCollectionStatus.warning.length > 0
+                );
+            }
+        }
+
+        await projectDirMgr.removeDir();
+        getWorkspaceDirStub.restore();
     });
 });
 
-// static async onLandingPageChosen(choiceData: {
-//     landingPageType: string;
-// }): Promise<boolean> {
-//     return new Promise<boolean>(async (resolve, reject) => {
-//         const landingPageType = choiceData.landingPageType;
+function writeLandingPageFile(
+    landingPageType: LandingPageType,
+    landingPageExtension: string,
+    staticResourcesPath: string
+) {
+    const fileContent = `${landingPageType} ${landingPageExtension} content`;
+    const fileName =
+        TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES[landingPageType] +
+        landingPageExtension;
+    fs.writeFileSync(path.join(staticResourcesPath, fileName), fileContent);
+}
 
-//         // Nothing to do if the user chose to keep their existing landing page.
-//         if (landingPageType === 'existing') {
-//             return resolve(true);
-//         }
+function createLandingPageContent(
+    landingPageIOConfig: LandingPageTestIOConfig,
+    staticResourcesPath: string
+) {
+    for (const lptIndex in landingPageIOConfig) {
+        const landingPageType = lptIndex as LandingPageType;
+        if (landingPageIOConfig[landingPageType]!.jsonExists) {
+            writeLandingPageFile(
+                landingPageType,
+                TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION,
+                staticResourcesPath
+            );
+        }
+        if (landingPageIOConfig[landingPageType]!.metaExists) {
+            writeLandingPageFile(
+                landingPageType,
+                TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION,
+                staticResourcesPath
+            );
+        }
+    }
+}
 
-//         // If a landing page exists, warn about overwriting it.
-//         const staticResourcesPath = await this.getStaticResourcesDir();
-//         const existingLandingPageFiles = await this.landingPageFilesExist(
-//             staticResourcesPath,
-//             'existing'
-//         );
-//         if (
-//             existingLandingPageFiles.jsonFileExists ||
-//             existingLandingPageFiles.metaFileExists
-//         ) {
-//             const confirmOverwrite = await window.showWarningMessage(
-//                 l10n.t(
-//                     'Are you sure you want to overwrite your existing landing page?'
-//                 ),
-//                 { modal: true },
-//                 l10n.t('Yes'),
-//                 l10n.t('No')
-//             );
-//             if (confirmOverwrite === l10n.t('No')) {
-//                 console.info(
-//                     'User chose not to overwrite their existing landing page.'
-//                 );
-//                 return resolve(false);
-//             }
-//         }
+function deleteLandingPageFile(
+    landingPageType: LandingPageType,
+    landingPageExtension: string,
+    staticResourcesPath: string
+) {
+    const fileName =
+        TemplateChooserCommand.LANDING_PAGE_FILENAME_PREFIXES[landingPageType] +
+        landingPageExtension;
+    fs.rmSync(path.join(staticResourcesPath, fileName));
+}
 
-//         // Copy both the json and metadata files.
-//         const sourceFilenamePrefix =
-//             this.LANDING_PAGE_FILENAME_PREFIXES[landingPageType];
-//         const destFilenamePrefix =
-//             this.LANDING_PAGE_FILENAME_PREFIXES.existing;
-//         for (const fileExtension of [
-//             this.LANDING_PAGE_JSON_FILE_EXTENSION,
-//             this.LANDING_PAGE_METADATA_FILE_EXTENSION
-//         ]) {
-//             const sourceFilename = sourceFilenamePrefix + fileExtension;
-//             const destFilename = destFilenamePrefix + fileExtension;
-//             const sourcePath = path.join(
-//                 staticResourcesPath,
-//                 sourceFilename
-//             );
-//             const destinationPath = path.join(
-//                 staticResourcesPath,
-//                 destFilename
-//             );
-
-//             await window.withProgress(
-//                 {
-//                     location: ProgressLocation.Notification,
-//                     title: l10n.t(
-//                         "Copying '{0}' to '{1}'",
-//                         sourceFilename,
-//                         destFilename
-//                     )
-//                 },
-//                 async (_progress, _token) => {
-//                     await copyFile(sourcePath, destinationPath);
-//                 }
-//             );
-//         }
-//         return resolve(true);
-//     });
-// }
+function deleteLandingPageContent(
+    landingPageIOConfig: LandingPageTestIOConfig,
+    staticResourcesPath: string
+) {
+    for (const lptIndex in landingPageIOConfig) {
+        const landingPageType = lptIndex as LandingPageType;
+        if (landingPageIOConfig[landingPageType]!.jsonExists) {
+            deleteLandingPageFile(
+                landingPageType,
+                TemplateChooserCommand.LANDING_PAGE_JSON_FILE_EXTENSION,
+                staticResourcesPath
+            );
+        }
+        if (landingPageIOConfig[landingPageType]!.metaExists) {
+            deleteLandingPageFile(
+                landingPageType,
+                TemplateChooserCommand.LANDING_PAGE_METADATA_FILE_EXTENSION,
+                staticResourcesPath
+            );
+        }
+    }
+}
