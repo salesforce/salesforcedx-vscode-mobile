@@ -62,11 +62,11 @@ export class WebviewProcessor {
         panel: WebviewPanel,
         messageHandlers: WebviewMessageHandler[]
     ) {
-        const responsiveHandlers = messageHandlers.filter(
+        // There can be at most one message handler responsive to a given type.
+        const responsiveHandler = messageHandlers.find(
             (messageHandler) => data.type === messageHandler.type
         );
-        if (responsiveHandlers.length > 0) {
-            const handler = responsiveHandlers[0];
+        if (responsiveHandler) {
             let callback: WebviewMessageCallback | undefined;
             if (data.callbackId) {
                 const returnedCallbackId = data.callbackId;
@@ -79,7 +79,7 @@ export class WebviewProcessor {
                     panel.webview.postMessage(fullResponseMessage);
                 };
             }
-            handler.action(panel, data, callback);
+            responsiveHandler.action(panel, data, callback);
         }
     }
 
