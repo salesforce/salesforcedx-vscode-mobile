@@ -71,7 +71,7 @@ export class LandingPageCommand {
     }
 
     /**
-     * A Record List card shows a customized card for a particular SObject. It needs the following params from the user:
+     * A Record List card shows a customized card for a particular sObject. It needs the following params from the user:
      * - Primary, and optionally Secondary and Tertiary fields
      * - OrderBy field
      * - OrderBy direction (Ascending or Descending)

@@ -12,6 +12,7 @@ import { DeployToOrgCommand } from './deployToOrgCommand';
 import { ConfigureProjectCommand } from './configureProjectCommand';
 import { AuthorizeCommand } from './authorizeCommand';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
+import { LwcGenerationCommand } from './lwcGenerationCommand';
 
 const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
 const onboardingWizardStateKey =
@@ -27,7 +28,7 @@ async function runPostProjectConfigurationSteps(
     return new Promise(async (resolve) => {
         await AuthorizeCommand.authorizeToOrg();
         await BriefcaseCommand.setupBriefcase(extensionUri);
-        await TemplateChooserCommand.copyDefaultTemplate(extensionUri);
+        await TemplateChooserCommand.chooseTemplate(extensionUri);
 
         await AuthorizeCommand.authorizeToOrg();
         await DeployToOrgCommand.deployToOrg();
