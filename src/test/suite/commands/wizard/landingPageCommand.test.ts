@@ -108,7 +108,7 @@ suite('Landing Page Command Test Suite', () => {
         };
         UIUtils.showQuickPick = mockUIUtilsShowQuickPick;
 
-        // set up the sobject and 3 field pickers
+        // Set up the sObject and 3 field pickers
         const orgUtilsStubSobjects = sinon.stub(OrgUtils, 'getSobjects');
         const sobjects = [sobject];
         orgUtilsStubSobjects.returns(Promise.resolve(sobjects));

@@ -13,7 +13,7 @@ export class LwcGenerationCommand {
             new InstructionsWebviewProvider(
                 this.extensionUri
             ).showInstructionWebview(
-                l10n.t('Offline Starter Kit: Create SObject LWC Quick Actions'),
+                l10n.t('Offline Starter Kit: Create sObject LWC Quick Actions'),
                 'resources/instructions/createSObjectLwcQuickActions.html',
                 [
                     {

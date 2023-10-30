@@ -140,7 +140,7 @@ suite('Org Utils Test Suite', () => {
         assert.equal(sobject.labelPlural, 'Labels');
     });
 
-    test('Returns list of fields for given sobject', async () => {
+    test('Returns list of fields for given sObject', async () => {
         const sobjectFields: FieldType[] = [
             buildField('City', 'string', 'Label'),
             buildField('Name', 'string', 'ObjectName')
