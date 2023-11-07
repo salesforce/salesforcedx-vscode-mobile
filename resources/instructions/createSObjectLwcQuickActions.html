@@ -35,55 +35,67 @@
 <body>
     <h1>Create sObject LWC Quick Actions</h1>
 
-    <p>
-        The following sObjects are present in your configured landing page:
-    </p>
+        <p id="sobjectTableError"></p>
 
-    <table id="quickActionStatusTable">
-        <thead>
-            <tr>
-                <th rowspan="2">sObject</th>
-                <th colspan="3">LWC Quick Actions</th>
-            </tr>
-            <tr>
-                <th>view</th>
-                <th>edit</th>
-                <th>create</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- will be filled in programatically below -->
-        </tbody>
-    </table>
+        <p id="sobjectDiv">
+            The following sObjects are present in your configured landing page:
+        </p>
 
-    <label style="display: block; margin-top: 10px; margin-bottom: 8px" for="generateLwcQuickActionsButton">
-        Click 'Generate LWC Quick Actions' to create the missing LWC Quick
-        Actions:
-    </label>
-    <button id="generateLwcQuickActionsButton">
-        Generate LWC Quick Actions
-    </button>
-    <script>
-        const generateQuickActionsButtonElement = document.getElementById(
-            'generateLwcQuickActionsButton'
-        );
-        generateQuickActionsButtonElement.addEventListener('click', () => {
-            webviewMessaging.sendMessageRequest(
+        <table>
+            <thead>
+                <tr>
+                    <th rowspan="2">sObject</th>
+                    <th colspan="3">LWC Quick Actions</th>
+                </tr>
+                <tr>
+                    <th>view</th>
+                    <th>edit</th>
+                    <th>create</th>
+                </tr>
+            </thead>
+            <tbody id="sobjectFound">
+                <!-- will be filled in programatically below -->
+            </tbody>
+        </table>
+
+        <label
+            style="display: block; margin-top: 10px; margin-bottom: 8px"
+            for="generateLwcQuickActionsButton"
+        >
+            Click 'Generate LWC Quick Actions' to create the missing LWC Quick
+            Actions:
+        </label>
+        <button id="generateLwcQuickActionsButton">
+            Generate LWC Quick Actions
+        </button>
+        <script>
+            const generateQuickActionsButtonElement = document.getElementById(
                 'generateLwcQuickActionsButton'
             );
-        });
+            generateQuickActionsButtonElement.addEventListener('click', () => {
+                webviewMessaging.sendMessageRequest(
+                    'generateLwcQuickActionsButton'
+                );
+            });
 
-        // Wait until all scripts are loaded, before engaging with e.g.
-        // messaging functionality.
-        window.addEventListener('load', () => {
-            // What's the status of the various sobject quick actions in the landing_page.json?
-            webviewMessaging.sendMessageRequest(
-                'getQuickActionStatus',
-                {},
-                handleQuickActionStatusResponse
-            );
+            // Wait until all scripts are loaded, before engaging with e.g.
+            // messaging functionality.
+            window.addEventListener('load', () => {
+                // What's the status of the various sobject quick actions in the landing_page.json?
+                webviewMessaging.sendMessageRequest(
+                    'getQuickActionStatus',
+                    {},
+                    handleQuickActionStatusResponse
+                );
 
-        });
+                // Are there any sObjects on the landing page
+                webviewMessaging.sendMessageRequest(
+                    'generateLwcPageStatus',
+                    {},
+                    handlegenerateLwcPageStatusResponse
+                );
+
+            });
 
         function handleQuickActionStatusResponse(response) {
             const table = document.getElementById('quickActionStatusTable');
@@ -102,9 +114,41 @@
                 create.innerHTML = quickActions.create == true ? "✅" : "❌";
             }
         }
-    </script>
 
-    <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
-</body>
+        function handlegenerateLwcPageStatusResponse(response) {
+                if (Object.keys(response).length == 0) {
+                    // If sObjects weren't found hide the table and instead display the error message.
+                    const sobjectDiv = document.getElementById(
+                        'sobjectDiv'
+                    );
+                    sobjectDiv.style.display = 'none';
 
+                    const sobjectFoundTableError = document.getElementById(
+                        'sobjectTableError'
+                    );
+
+                    sobjectFoundTableError.innerText = 'Could not find any sObjects on the landing page';
+                } else {
+                    const sobjectFoundTableBody = document.getElementById(
+                        'sobjectFound'
+                    );
+                        
+                    const keys = Object.keys(response);
+                    for (const key in keys) {
+                        var newRow = sobjectFoundTableBody.insertRow();
+
+                        var newCell = newRow.insertCell();
+                        var newText = document.createTextNode(response[key]);
+                        newCell.appendChild(newText);
+
+                        // TODO: Update the status after determining if we need a LWC for a sObject.
+                        newCell = newRow.insertCell();
+                        newText = document.createTextNode('✅');
+                        newCell.appendChild(newText);
+                    }
+                }
+            }
+        </script>
+        <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
+    </body>
 </html>
