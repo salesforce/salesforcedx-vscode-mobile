@@ -35,6 +35,17 @@ export class LwcGenerationCommand {
                             panel.dispose();
                             return resolve();
                         }
+                    },
+                    {
+                        type: 'getQuickActionStatus',
+                        action: async (_panel, data, callback) => {
+                            // TODO: Hook this up to function from W-14439417 that parses landing_page.json.
+                            const sobjects = ['Account', 'Contact', 'Opportunity', 'SomeOther'];
+                            if (callback) {
+                                const quickActionStatus = await LwcGenerationCommand.checkForExistingQuickActions(sobjects);
+                                callback(quickActionStatus);
+                            }
+                        }
                     }
                 ]
             );
