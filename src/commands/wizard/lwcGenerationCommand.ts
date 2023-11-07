@@ -1,6 +1,11 @@
 import { Uri, l10n } from 'vscode';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
+import { InstructionsWebviewProvider } from '../../webviews/instructions';
+import { TemplateChooserCommand } from './templateChooserCommand';
+import { access } from 'fs/promises';
+import { UEMParser } from '../../utils/uemParser';
 import * as fs from 'fs';
+import * as path from 'path';
 
 export type QuickActionStatus = {
     view: boolean;
@@ -19,6 +24,54 @@ export class LwcGenerationCommand {
 
     constructor(extensionUri: Uri) {
         this.extensionUri = extensionUri;
+    }
+
+    static readFileAsJsonObject(filePath: string, callback: (err: Error | null, data: any) => void): void {
+        fs.readFile(filePath, 'utf8', (err, data) => {
+          if (err) {
+            callback(err, null);
+          } else {
+            try {
+              const jsonObject = JSON.parse(data);
+              callback(null, jsonObject);
+            } catch (parseError: any) {
+              callback(parseError, null);
+            }
+          }
+        });
+    }
+
+    static async getCreateLwcPageSobjects(): Promise<Array<string>> {
+        return new Promise<Array<string>>(async (resolve, reject) => {
+            let sObjects: Array<string> = [];
+            let landingPageExists = true;
+
+            const staticResourcesPath = await TemplateChooserCommand.getStaticResourcesDir();
+            const landingPageJson = 'landing_page.json';
+            const landingPagePath = path.join(staticResourcesPath, landingPageJson);
+
+            try {
+                await access(landingPagePath);
+            } catch (err) {
+                console.warn(
+                    `File '${landingPageJson}' does not exist at '${staticResourcesPath}'.`
+                );
+                landingPageExists = false;
+            }
+
+            if (landingPageExists) {
+                this.readFileAsJsonObject(landingPagePath, (error: Error| null, data: any) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        const sObjects = UEMParser.findFieldValues(data, 'objectApiName');
+                        resolve(sObjects);
+                    }
+                });
+            } else {
+                resolve(sObjects);
+            }
+        });
     }
 
     async createSObjectLwcQuickActions() {
@@ -52,6 +105,16 @@ export class LwcGenerationCommand {
                                         sobjects
                                     );
                                 callback(quickActionStatus);
+                            }
+                        }
+                    },
+                    {
+                        type: 'createLwcPageStatus',
+                        action: async (_panel, _data, callback) => {
+                            if (callback) {
+                                const sObjects =
+                                    await LwcGenerationCommand.getCreateLwcPageSobjects();
+                                callback(sObjects);
                             }
                         }
                     }
