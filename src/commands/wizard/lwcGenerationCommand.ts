@@ -2,13 +2,17 @@ import { Uri, l10n } from 'vscode';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import * as fs from 'fs';
 
-export interface SObjectQuickActions {
-    [name: string]: {
-        view: boolean;
-        edit: boolean;
-        create: boolean;
+export type QuickActionStatus = {
+    view: boolean;
+    edit: boolean;
+    create: boolean;
+};
+
+export type SObjectQuickActionStatus = {
+    sobjects: {
+        [name: string]: QuickActionStatus;
     };
-}
+};
 
 export class LwcGenerationCommand {
     extensionUri: Uri;
@@ -37,34 +41,40 @@ export class LwcGenerationCommand {
         });
     }
 
-    static checkForExistingQuickActions(
+    static async checkForExistingQuickActions(
         sobjects: string[]
-    ): SObjectQuickActions {
-        const results: SObjectQuickActions = {};
-        sobjects.forEach((sobject) => {
-            results[sobject] = {
-                view: false,
-                edit: false,
-                create: false
-            };
-            results[sobject].view =
-                LwcGenerationCommand.checkForExistingQuickAction(
-                    sobject,
-                    'view'
-                );
-            results[sobject].edit =
-                LwcGenerationCommand.checkForExistingQuickAction(
-                    sobject,
-                    'edit'
-                );
-            results[sobject].create =
-                LwcGenerationCommand.checkForExistingQuickAction(
-                    sobject,
-                    'create'
-                );
-        });
+    ): Promise<SObjectQuickActionStatus> {
+        return new Promise<SObjectQuickActionStatus>(async (resolve) => {
+            const results: SObjectQuickActionStatus = { sobjects: {} };
+            results.sobjects = {};
 
-        return results;
+            sobjects.forEach((sobject) => {
+                const quickActionStatus: QuickActionStatus = {
+                    view: false,
+                    edit: false,
+                    create: false
+                };
+                quickActionStatus.view =
+                    LwcGenerationCommand.checkForExistingQuickAction(
+                        sobject,
+                        'view'
+                    );
+                quickActionStatus.edit =
+                    LwcGenerationCommand.checkForExistingQuickAction(
+                        sobject,
+                        'edit'
+                    );
+                quickActionStatus.create =
+                    LwcGenerationCommand.checkForExistingQuickAction(
+                        sobject,
+                        'create'
+                    );
+
+                results.sobjects[sobject] = quickActionStatus;
+            });
+
+            return resolve(results);
+        });
     }
 
     private static checkForExistingQuickAction(

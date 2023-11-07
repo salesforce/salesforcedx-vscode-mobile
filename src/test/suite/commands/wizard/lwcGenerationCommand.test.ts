@@ -11,14 +11,9 @@ import * as fs from 'fs';
 import { afterEach, beforeEach } from 'mocha';
 import {
     LwcGenerationCommand,
-    SObjectQuickActions
+    SObjectQuickActionStatus,
+    QuickActionStatus
 } from '../../../../commands/wizard/lwcGenerationCommand';
-
-export interface DoSomething {
-    [name: string]: {
-        view: boolean;
-    };
-}
 
 suite('LWC Generation Command Test Suite', () => {
     beforeEach(function () {});
@@ -54,40 +49,40 @@ suite('LWC Generation Command Test Suite', () => {
             .withArgs(`${baseDir}/sobject2.create.quickAction-meta.xml`)
             .throws('error');
 
-        const result: SObjectQuickActions =
-            LwcGenerationCommand.checkForExistingQuickActions([
+        const result: SObjectQuickActionStatus =
+            await LwcGenerationCommand.checkForExistingQuickActions([
                 'sobject1',
                 'sobject2'
             ]);
 
         assert.equal(
-            result['sobject1'].view,
+            result.sobjects['sobject1'].view,
             true,
             'sobject1.view should exist'
         );
         assert.equal(
-            result['sobject1'].edit,
+            result.sobjects['sobject1'].edit,
             true,
             'sobject1.edit should exist'
         );
         assert.equal(
-            result['sobject1'].create,
+            result.sobjects['sobject1'].create,
             true,
             'sobject1.create should exist'
         );
 
         assert.equal(
-            result['sobject2'].view,
+            result.sobjects['sobject2'].view,
             false,
             'sobject2.view should NOT exist'
         );
         assert.equal(
-            result['sobject2'].edit,
+            result.sobjects['sobject2'].edit,
             false,
             'sobject2.edit should NOT exist'
         );
         assert.equal(
-            result['sobject2'].create,
+            result.sobjects['sobject2'].create,
             false,
             'sobject2.create should NOT exist'
         );
