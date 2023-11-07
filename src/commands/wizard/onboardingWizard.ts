@@ -33,6 +33,10 @@ async function runPostProjectConfigurationSteps(
         await AuthorizeCommand.authorizeToOrg();
         await DeployToOrgCommand.deployToOrg();
 
+        await new LwcGenerationCommand(
+            extensionUri
+        ).createSObjectLwcQuickActions();
+
         await InstructionsWebviewProvider.showDismissableInstructions(
             extensionUri,
             vscode.l10n.t('View in the Salesforce Mobile App'),

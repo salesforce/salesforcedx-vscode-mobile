@@ -19,7 +19,10 @@ suite('UEM Parser Test Suite', () => {
             objectApiName: 'foo'
         };
 
-        const sObjects = UEMParser.findFieldValues(landingPage, 'objectApiName');
+        const sObjects = UEMParser.findFieldValues(
+            landingPage,
+            'objectApiName'
+        );
         assert.equal(sObjects.length, 1);
         assert.equal(sObjects[0], 'foo');
     });
@@ -32,7 +35,10 @@ suite('UEM Parser Test Suite', () => {
             }
         };
 
-        const sObjects = UEMParser.findFieldValues(landingPage, 'objectApiName');
+        const sObjects = UEMParser.findFieldValues(
+            landingPage,
+            'objectApiName'
+        );
         assert.equal(sObjects.length, 2);
         assert.equal(sObjects[0], 'foo');
         assert.equal(sObjects[1], 'bar');
@@ -49,7 +55,10 @@ suite('UEM Parser Test Suite', () => {
             }
         };
 
-        const sObjects = UEMParser.findFieldValues(landingPage, 'objectApiName');
+        const sObjects = UEMParser.findFieldValues(
+            landingPage,
+            'objectApiName'
+        );
         assert.equal(sObjects.length, 2);
         assert.equal(sObjects[0], 'foo');
         assert.equal(sObjects[1], 'bar');

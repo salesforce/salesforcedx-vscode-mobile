@@ -124,7 +124,8 @@ export class LwcGenerationCommand {
                         type: 'createLwcPageStatus',
                         action: async (_panel, _data, callback) => {
                             if (callback) {
-                                const sObjects = await LwcGenerationCommand.getCreateLwcPageSobjects();
+                                const sObjects =
+                                    await LwcGenerationCommand.getCreateLwcPageSobjects();
                                 callback(sObjects);
                             }
                         }
