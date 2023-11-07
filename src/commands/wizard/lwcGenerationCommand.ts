@@ -18,6 +18,11 @@ export type SObjectQuickActionStatus = {
     };
 };
 
+export type LwcGenerationCommandStatus = {
+    error?: string;
+    sobjects: string[];
+};
+
 export class LwcGenerationCommand {
     extensionUri: Uri;
 
@@ -43,9 +48,8 @@ export class LwcGenerationCommand {
         });
     }
 
-    static async getCreateLwcPageSobjects(): Promise<Array<string>> {
-        return new Promise<Array<string>>(async (resolve) => {
-            let sObjects: Array<string> = [];
+    static async getLwcGenerationPageStatus(): Promise<LwcGenerationCommandStatus> {
+        return new Promise<LwcGenerationCommandStatus>(async (resolve) => {
             let landingPageExists = true;
 
             const staticResourcesPath =
@@ -56,6 +60,10 @@ export class LwcGenerationCommand {
                 landingPageJson
             );
 
+            const lwcGenerationCommandStatus: LwcGenerationCommandStatus = {
+                sobjects: []
+            };
+
             try {
                 await access(landingPagePath);
             } catch (err) {
@@ -63,6 +71,7 @@ export class LwcGenerationCommand {
                     `File '${landingPageJson}' does not exist at '${staticResourcesPath}'.`
                 );
                 landingPageExists = false;
+                lwcGenerationCommandStatus.error = (err as Error).message;
             }
 
             if (landingPageExists) {
@@ -71,17 +80,18 @@ export class LwcGenerationCommand {
                     (error: Error | null, data: any) => {
                         if (error) {
                             console.warn(`Error reading ${landingPageJson}`);
+                            lwcGenerationCommandStatus.error = (error as Error).message;
                         } else {
-                            sObjects = UEMParser.findFieldValues(
+                            lwcGenerationCommandStatus.sobjects = UEMParser.findFieldValues(
                                 data,
                                 'objectApiName'
                             );
                         }
-                        resolve(sObjects);
+                        resolve(lwcGenerationCommandStatus);            
                     }
                 );
             } else {
-                resolve(sObjects);
+                resolve(lwcGenerationCommandStatus);
             }
         });
     }
@@ -121,12 +131,12 @@ export class LwcGenerationCommand {
                         }
                     },
                     {
-                        type: 'createLwcPageStatus',
+                        type: 'generateLwcPageStatus',
                         action: async (_panel, _data, callback) => {
                             if (callback) {
-                                const sObjects =
-                                    await LwcGenerationCommand.getCreateLwcPageSobjects();
-                                callback(sObjects);
+                                const lwcGenerationPageStatus =
+                                    await LwcGenerationCommand.getLwcGenerationPageStatus();
+                                callback(lwcGenerationPageStatus);
                             }
                         }
                     }
