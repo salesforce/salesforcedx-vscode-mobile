@@ -87,7 +87,7 @@ export class LwcGenerationCommand {
             const stats = fs.statSync(
                 `force-app/main/default/quickActions/${expectedDirName}`
             );
-            return stats.isDirectory();
+            return stats.isFile();
         } catch (error) {
             // If an error occurs, the directory does not exist
             return false;

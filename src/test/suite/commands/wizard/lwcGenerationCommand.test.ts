@@ -26,7 +26,7 @@ suite('LWC Generation Command Test Suite', () => {
         const baseDir = 'force-app/main/default/quickActions';
         const statSyncStub = sinon.stub(fs, 'statSync');
         const statsStub = sinon.createStubInstance(fs.Stats);
-        statsStub.isDirectory.returns(true);
+        statsStub.isFile.returns(true);
 
         // stub the file system responses - any return value is a positive hit, an exception is a negative hit
         statSyncStub
