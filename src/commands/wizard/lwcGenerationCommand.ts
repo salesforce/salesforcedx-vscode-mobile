@@ -39,7 +39,7 @@ export class LwcGenerationCommand {
                     {
                         type: 'getQuickActionStatus',
                         action: async (_panel, data, callback) => {
-                            // TODO: Hook this up to function from W-14439417 that parses landing_page.json.
+                            // TODO: Hook this up to function that parses landing_page.json.
                             const sobjects = [
                                 'Account',
                                 'Contact',
