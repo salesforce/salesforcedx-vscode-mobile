@@ -56,18 +56,30 @@
             </tbody>
         </table>
 
-        <label
-            style="display: block; margin-top: 10px; margin-bottom: 8px"
-            for="generateLwcQuickActionsButton"
-        >
-            Click 'Generate LWC Quick Actions' to create the missing LWC Quick
-            Actions:
-        </label>
-        <button id="generateLwcQuickActionsButton">
-            Generate LWC Quick Actions
-        </button>
-        <script>
-            const generateQuickActionsButtonElement = document.getElementById(
+    <label style="display: block; margin-top: 10px; margin-bottom: 8px" for="generateLwcQuickActionsButton">
+        Click 'Generate LWC Quick Actions' to create the missing LWC Quick
+        Actions:
+    </label>
+
+    <button id="generateLwcQuickActionsButton">
+        Generate LWC Quick Actions
+    </button>
+
+    <button id="skipStepButton">
+        Skip This Step
+    </button>
+
+    <script>
+        const generateQuickActionsButtonElement = document.getElementById(
+            'generateLwcQuickActionsButton'
+        );
+
+        const skipStepButtonElement = document.getElementById(
+            'skipStepButton'
+        );
+
+        generateQuickActionsButtonElement.addEventListener('click', () => {
+            webviewMessaging.sendMessageRequest(
                 'generateLwcQuickActionsButton'
             );
             generateQuickActionsButtonElement.addEventListener('click', () => {
@@ -76,16 +88,21 @@
                 );
             });
 
-            // Wait until all scripts are loaded, before engaging with e.g.
-            // messaging functionality.
-            window.addEventListener('load', () => {
-                // What's the status of the various sobject quick actions in the landing_page.json?
-                webviewMessaging.sendMessageRequest(
-                    'getQuickActionStatus',
-                    {},
-                    handleQuickActionStatusResponse
-                );
-            });
+        skipStepButtonElement.addEventListener('click', () => {
+            webviewMessaging.sendMessageRequest(
+                'skipStepButton'
+            );
+        });
+
+        // Wait until all scripts are loaded, before engaging with e.g.
+        // messaging functionality.
+        window.addEventListener('load', () => {
+            // What's the status of the various sobject quick actions in the landing_page.json?
+            webviewMessaging.sendMessageRequest(
+                'getQuickActionStatus',
+                {},
+                handleQuickActionStatusResponse
+            );
 
             function handleQuickActionStatusResponse(response) {
                 const table = document.getElementById('quickActionStatusTable');

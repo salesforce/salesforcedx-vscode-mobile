@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2023, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
+ */
+
 import { Uri, l10n } from 'vscode';
 import { access } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
@@ -6,6 +13,7 @@ import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core';
 import { OrgUtils } from '../../utils/orgUtils';
 import * as fs from 'fs';
+import { CodeBuilder } from '../../utils/codeBuilder';
 import * as path from 'path';
 
 export type QuickActionStatus = {
@@ -65,14 +73,37 @@ export class LwcGenerationCommand {
     async createSObjectLwcQuickActions() {
         return new Promise<void>((resolve) => {
             new InstructionsWebviewProvider(
-                this.extensionUri
+                extensionUri
             ).showInstructionWebview(
                 l10n.t('Offline Starter Kit: Create sObject LWC Quick Actions'),
                 'resources/instructions/createSObjectLwcQuickActions.html',
                 [
                     {
-                        type: 'generateLwcQuickActionsButton',
+                        type: 'skipStepButton',
                         action: (panel) => {
+                            panel.dispose();
+                            return resolve();
+                        }
+                    },
+                    {
+                        type: 'generateLwcQuickActionsButton',
+                        action: async (panel) => {
+                            // TODO: Hook this up to function that parses landing_page.json.
+                            const sobjects = [
+                                'Account',
+                                'Contact',
+                                'Opportunity',
+                                'SomeOther'
+                            ];
+                            const quickActionStatus =
+                                await LwcGenerationCommand.checkForExistingQuickActions(
+                                    sobjects
+                                );
+
+                            await this.generateMissingLwcsAndQuickActions(
+                                extensionUri,
+                                quickActionStatus
+                            );
                             panel.dispose();
                             return resolve();
                         }
@@ -136,6 +167,47 @@ export class LwcGenerationCommand {
             });
 
             return resolve(results);
+        });
+    }
+
+    static async generateMissingLwcsAndQuickActions(
+        extensionUri: Uri,
+        quickActionStatus: SObjectQuickActionStatus
+    ): Promise<SObjectQuickActionStatus> {
+        return new Promise<SObjectQuickActionStatus>(async (resolve) => {
+            for (const sobject in quickActionStatus.sobjects) {
+                const quickActions = quickActionStatus.sobjects[sobject];
+
+                if (
+                    !quickActions.create ||
+                    !quickActions.edit ||
+                    !quickActions.view
+                ) {
+                    // at least 1 needs to be creaed
+                    // TODO: Hook up to compact layout to obtain list of field names to use
+                    const codeBuilder = new CodeBuilder(extensionUri, sobject, [
+                        'Name',
+                        'AccountId'
+                    ]);
+
+                    if (!quickActions.view) {
+                        await codeBuilder.generateView();
+                    }
+
+                    if (!quickActions.edit) {
+                        await codeBuilder.generateEdit();
+                    }
+
+                    if (!quickActions.create) {
+                        await codeBuilder.generateCreate();
+                    }
+                }
+            }
+
+            // Just double check now that things have been created.
+            return await LwcGenerationCommand.checkForExistingQuickActions(
+                Object.keys(quickActionStatus.sobjects)
+            );
         });
     }
 
