@@ -35,13 +35,11 @@
 <body>
     <h1>Create sObject LWC Quick Actions</h1>
 
-        <p id="sobjectTableError"></p>
-
         <p id="sobjectDiv">
             The following sObjects are present in your configured landing page:
         </p>
 
-        <table>
+        <table id="quickActionStatusTable">
             <thead>
                 <tr>
                     <th rowspan="2">sObject</th>
@@ -53,7 +51,7 @@
                     <th>create</th>
                 </tr>
             </thead>
-            <tbody id="sobjectFound">
+            <tbody>
                 <!-- will be filled in programatically below -->
             </tbody>
         </table>
@@ -87,14 +85,6 @@
                     {},
                     handleQuickActionStatusResponse
                 );
-
-                // Are there any sObjects on the landing page
-                webviewMessaging.sendMessageRequest(
-                    'generateLwcPageStatus',
-                    {},
-                    handleGenerateLwcPageStatusResponse
-                );
-
             });
 
             function handleQuickActionStatusResponse(response) {
@@ -112,39 +102,6 @@
                     view.innerHTML = quickActions.view == true ? "✅" : "❌";
                     edit.innerHTML = quickActions.edit == true ? "✅" : "❌";
                     create.innerHTML = quickActions.create == true ? "✅" : "❌";
-                }
-            }
-
-            function handleGenerateLwcPageStatusResponse(response) {
-                if (response.error) {
-                    // If sObjects weren't found then hide the table and instead display the error message.
-                    const sobjectDiv = document.getElementById(
-                        'sobjectDiv'
-                    );
-                    sobjectDiv.style.display = 'none';
-
-                    const sobjectFoundTableError = document.getElementById(
-                        'sobjectTableError'
-                    );
-
-                    sobjectFoundTableError.innerText = `Could not find any sObjects on the landing page: ${response.error}`;
-                } else {
-                    const sobjectFoundTableBody = document.getElementById(
-                        'sobjectFound'
-                    );
-                        
-                    for (const sobject of response.sobjects) {                        
-                        var newRow = sobjectFoundTableBody.insertRow();
-
-                        var newCell = newRow.insertCell();
-                        var newText = document.createTextNode(sobject);
-                        newCell.appendChild(newText);
-
-                        // TODO: Update the status after determining if we need a LWC for a sObject.
-                        newCell = newRow.insertCell();
-                        newText = document.createTextNode('✅');
-                        newCell.appendChild(newText);
-                    }
                 }
             }
         </script>

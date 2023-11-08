@@ -11,9 +11,9 @@ import * as fs from 'fs';
 import { afterEach, beforeEach } from 'mocha';
 import {
     LwcGenerationCommand,
-    SObjectQuickActionStatus,
-    QuickActionStatus
+    SObjectQuickActionStatus
 } from '../../../../commands/wizard/lwcGenerationCommand';
+import { TemplateChooserCommand } from '../../../../commands/wizard/templateChooserCommand';
 
 suite('LWC Generation Command Test Suite', () => {
     beforeEach(function () {});
@@ -49,11 +49,11 @@ suite('LWC Generation Command Test Suite', () => {
             .withArgs(`${baseDir}/sobject2.create.quickAction-meta.xml`)
             .throws('error');
 
-        const result: SObjectQuickActionStatus =
-            await LwcGenerationCommand.checkForExistingQuickActions([
-                'sobject1',
-                'sobject2'
-            ]);
+        const getSObjectsStub = sinon.stub(LwcGenerationCommand, "getSObjectsFromLandingPage");
+        getSObjectsStub.returns(Promise.resolve({sobjects: ["sobject1", "sobject2"]}));
+
+        const result: SObjectQuickActionStatus = await LwcGenerationCommand
+            .checkForExistingQuickActions();
 
         assert.equal(
             result.sobjects['sobject1'].view,
@@ -155,7 +155,7 @@ suite('LWC Generation Command Test Suite', () => {
         const invalidJsonFile = 'landing_page.json';
         fs.writeFileSync(invalidJsonFile, invalidJsonContents, 'utf8');
 
-        const status = await LwcGenerationCommand.getLwcGenerationPageStatus();
+        const status = await LwcGenerationCommand.getSObjectsFromLandingPage();
 
         assert.ok(status.error && status.error.length > 0);
 
@@ -175,7 +175,7 @@ suite('LWC Generation Command Test Suite', () => {
             '{"objectApiName": "Account", "nested": {"objectApiName": "Contact"}}';
         fs.writeFileSync(validJsonFile, jsonContents, 'utf8');
 
-        const status = await LwcGenerationCommand.getLwcGenerationPageStatus();
+        const status = await LwcGenerationCommand.getSObjectsFromLandingPage();
 
         assert.equal(status.sobjects.length, 2);
         assert.equal(status.sobjects[0], 'Account');

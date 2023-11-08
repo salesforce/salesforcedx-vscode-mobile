@@ -13,12 +13,13 @@ export type QuickActionStatus = {
 };
 
 export type SObjectQuickActionStatus = {
+    error?: string;
     sobjects: {
         [name: string]: QuickActionStatus;
     };
 };
 
-export type LwcGenerationCommandStatus = {
+export type GetSObjectsStatus = {
     error?: string;
     sobjects: string[];
 };
@@ -43,8 +44,8 @@ export class LwcGenerationCommand {
         }
     }
 
-    static async getLwcGenerationPageStatus(): Promise<LwcGenerationCommandStatus> {
-        return new Promise<LwcGenerationCommandStatus>(async (resolve) => {
+    static async getSObjectsFromLandingPage(): Promise<GetSObjectsStatus> {
+        return new Promise<GetSObjectsStatus>(async (resolve) => {
             let landingPageExists = true;
 
             const staticResourcesPath =
@@ -55,7 +56,7 @@ export class LwcGenerationCommand {
                 landingPageJson
             );
 
-            const lwcGenerationCommandStatus: LwcGenerationCommandStatus = {
+            const getSObjectsStatus: GetSObjectsStatus = {
                 sobjects: []
             };
 
@@ -66,7 +67,7 @@ export class LwcGenerationCommand {
                     `File '${landingPageJson}' does not exist at '${staticResourcesPath}'.`
                 );
                 landingPageExists = false;
-                lwcGenerationCommandStatus.error = (err as Error).message;
+                getSObjectsStatus.error = (err as Error).message;
             }
 
             if (landingPageExists) {
@@ -75,21 +76,19 @@ export class LwcGenerationCommand {
                     (error: Error | null, data: any) => {
                         if (error) {
                             console.warn(`Error reading ${landingPageJson}`);
-                            lwcGenerationCommandStatus.error = (
-                                error as Error
-                            ).message;
+                            getSObjectsStatus.error = (error as Error).message;
                         } else {
-                            lwcGenerationCommandStatus.sobjects =
+                            getSObjectsStatus.sobjects =
                                 UEMParser.findFieldValues(
                                     data,
                                     'objectApiName'
                                 );
                         }
-                        resolve(lwcGenerationCommandStatus);
+                        resolve(getSObjectsStatus);
                     }
                 );
             } else {
-                resolve(lwcGenerationCommandStatus);
+                resolve(getSObjectsStatus);
             }
         });
     }
@@ -112,29 +111,10 @@ export class LwcGenerationCommand {
                     {
                         type: 'getQuickActionStatus',
                         action: async (_panel, _data, callback) => {
-                            // TODO: Hook this up to function that parses landing_page.json.
-                            const sobjects = [
-                                'Account',
-                                'Contact',
-                                'Opportunity',
-                                'SomeOther'
-                            ];
                             if (callback) {
                                 const quickActionStatus =
-                                    await LwcGenerationCommand.checkForExistingQuickActions(
-                                        sobjects
-                                    );
+                                    await LwcGenerationCommand.checkForExistingQuickActions();
                                 callback(quickActionStatus);
-                            }
-                        }
-                    },
-                    {
-                        type: 'generateLwcPageStatus',
-                        action: async (_panel, _data, callback) => {
-                            if (callback) {
-                                const lwcGenerationPageStatus =
-                                    await LwcGenerationCommand.getLwcGenerationPageStatus();
-                                callback(lwcGenerationPageStatus);
                             }
                         }
                     }
@@ -143,13 +123,17 @@ export class LwcGenerationCommand {
         });
     }
 
-    static async checkForExistingQuickActions(
-        sobjects: string[]
-    ): Promise<SObjectQuickActionStatus> {
+    static async checkForExistingQuickActions(): Promise<SObjectQuickActionStatus> {
         return new Promise<SObjectQuickActionStatus>(async (resolve) => {
             const results: SObjectQuickActionStatus = { sobjects: {} };
 
-            sobjects.forEach((sobject) => {
+            const sObjectsStatus = await this.getSObjectsFromLandingPage();
+            if (sObjectsStatus.error) {
+                results.error = sObjectsStatus.error;
+                return resolve(results);
+            }
+
+            sObjectsStatus.sobjects.forEach((sobject) => {
                 const quickActionStatus: QuickActionStatus = {
                     view: false,
                     edit: false,
