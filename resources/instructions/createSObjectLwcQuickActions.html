@@ -126,7 +126,7 @@
                         'sobjectTableError'
                     );
 
-                    sobjectFoundTableError.innerText = 'Could not find any sObjects on the landing page';
+                    sobjectFoundTableError.innerText = `Could not find any sObjects on the landing page: ${response.error}`;
                 } else {
                     const sobjectFoundTableBody = document.getElementById(
                         'sobjectFound'

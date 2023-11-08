@@ -34,18 +34,13 @@ export class LwcGenerationCommand {
         filePath: string,
         callback: (error: Error | null, data: any) => void
     ): void {
-        fs.readFile(filePath, 'utf8', (error, data) => {
-            if (error) {
-                callback(error, null);
-            } else {
-                try {
-                    const jsonObject = JSON.parse(data);
-                    callback(null, jsonObject);
-                } catch (parseError: any) {
-                    callback(parseError, null);
-                }
-            }
-        });
+        try {
+            const data = fs.readFileSync(filePath, { encoding: 'utf-8' });
+            const jsonObject = JSON.parse(data);
+            callback(null, jsonObject);
+        } catch (error) {
+            callback(error as Error, null);
+        }
     }
 
     static async getLwcGenerationPageStatus(): Promise<LwcGenerationCommandStatus> {
@@ -80,14 +75,17 @@ export class LwcGenerationCommand {
                     (error: Error | null, data: any) => {
                         if (error) {
                             console.warn(`Error reading ${landingPageJson}`);
-                            lwcGenerationCommandStatus.error = (error as Error).message;
+                            lwcGenerationCommandStatus.error = (
+                                error as Error
+                            ).message;
                         } else {
-                            lwcGenerationCommandStatus.sobjects = UEMParser.findFieldValues(
-                                data,
-                                'objectApiName'
-                            );
+                            lwcGenerationCommandStatus.sobjects =
+                                UEMParser.findFieldValues(
+                                    data,
+                                    'objectApiName'
+                                );
                         }
-                        resolve(lwcGenerationCommandStatus);            
+                        resolve(lwcGenerationCommandStatus);
                     }
                 );
             } else {
