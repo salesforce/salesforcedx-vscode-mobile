@@ -92,7 +92,7 @@
                 webviewMessaging.sendMessageRequest(
                     'generateLwcPageStatus',
                     {},
-                    handlegenerateLwcPageStatusResponse
+                    handleGenerateLwcPageStatusResponse
                 );
 
             });
@@ -114,8 +114,9 @@
                     create.innerHTML = quickActions.create == true ? "✅" : "❌";
                 }
             }
-            function handlegenerateLwcPageStatusResponse(response) {
-                if (response.error) {  
+
+            function handleGenerateLwcPageStatusResponse(response) {
+                if (response.error) {
                     // If sObjects weren't found then hide the table and instead display the error message.
                     const sobjectDiv = document.getElementById(
                         'sobjectDiv'
