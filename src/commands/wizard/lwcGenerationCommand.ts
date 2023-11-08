@@ -38,7 +38,7 @@ export class LwcGenerationCommand {
                     },
                     {
                         type: 'getQuickActionStatus',
-                        action: async (_panel, data, callback) => {
+                        action: async (_panel, _data, callback) => {
                             // TODO: Hook this up to function that parses landing_page.json.
                             const sobjects = [
                                 'Account',
@@ -65,7 +65,6 @@ export class LwcGenerationCommand {
     ): Promise<SObjectQuickActionStatus> {
         return new Promise<SObjectQuickActionStatus>(async (resolve) => {
             const results: SObjectQuickActionStatus = { sobjects: {} };
-            results.sobjects = {};
 
             sobjects.forEach((sobject) => {
                 const quickActionStatus: QuickActionStatus = {
@@ -100,11 +99,11 @@ export class LwcGenerationCommand {
         sobject: string,
         qaName: string
     ): boolean {
-        const expectedDirName = `${sobject}.${qaName}.quickAction-meta.xml`;
+        const expectedMetadataFilename = `${sobject}.${qaName}.quickAction-meta.xml`;
         try {
             // Check if the qa directory exists
             const stats = fs.statSync(
-                `force-app/main/default/quickActions/${expectedDirName}`
+                `force-app/main/default/quickActions/${expectedMetadataFilename}`
             );
             return stats.isFile();
         } catch (error) {
