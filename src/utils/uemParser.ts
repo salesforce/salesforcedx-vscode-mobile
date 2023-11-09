@@ -35,35 +35,33 @@ export class UEMParser {
     ): Array<Object> {
         const results: Array<Object> = [];
 
-        if (typeof json === 'object') {
-            if (Array.isArray(json)) {
-                for (const item of json) {
-                    results.push(
-                        ...UEMParser.findObjectsWithValues(item, valuesToMatch)
-                    );
-                }
-            } else {
-                const values = Object.values(json);
-
-                const matched = valuesToMatch.some((value) =>
-                    values.includes(value)
+        if (Array.isArray(json)) {
+            for (const item of json) {
+                results.push(
+                    ...UEMParser.findObjectsWithValues(item, valuesToMatch)
                 );
+            }
+        } else {
+            const values = Object.values(json);
 
-                if (matched) {
-                    results.push(json);
-                }
+            const matched = valuesToMatch.some((value) =>
+                values.includes(value)
+            );
 
-                for (const key in json) {
-                    results.push(
-                        ...UEMParser.findObjectsWithValues(
-                            json[key as keyof Object],
-                            valuesToMatch
-                        )
-                    );
-                }
+            if (matched) {
+                results.push(json);
+            }
+
+            for (const key in json) {
+                results.push(
+                    ...UEMParser.findObjectsWithValues(
+                        json[key as keyof Object],
+                        valuesToMatch
+                    )
+                );
             }
         }
-
+        
         return results;
     }
 }
