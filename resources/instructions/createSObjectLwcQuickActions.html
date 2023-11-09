@@ -65,8 +65,8 @@
         Generate LWC Quick Actions
     </button>
 
-    <button id="skipStepButton">
-        Skip This Step
+    <button id="continueButton">
+        Continue
     </button>
 
     <script>
@@ -74,13 +74,15 @@
             'generateLwcQuickActionsButton'
         );
 
-        const skipStepButtonElement = document.getElementById(
-            'skipStepButton'
+        const continueButtonElement = document.getElementById(
+            'continueButton'
         );
 
         generateQuickActionsButtonElement.addEventListener('click', () => {
             webviewMessaging.sendMessageRequest(
-                'generateLwcQuickActionsButton'
+                'generateLwcQuickActionsButton',
+                {},
+                handleQuickActionStatusResponse
             );
             generateQuickActionsButtonElement.addEventListener('click', () => {
                 webviewMessaging.sendMessageRequest(
@@ -88,9 +90,9 @@
                 );
             });
 
-        skipStepButtonElement.addEventListener('click', () => {
+        continueButtonElement.addEventListener('click', () => {
             webviewMessaging.sendMessageRequest(
-                'skipStepButton'
+                'continueButton'
             );
         });
 
@@ -109,17 +111,29 @@
                 for (const sobject in response.sobjects) {
                     const quickActions = response.sobjects[sobject];
 
-                    const sobjectRow = table.insertRow();
-                    const name = sobjectRow.insertCell(0);
-                    const view = sobjectRow.insertCell(1);
-                    const edit = sobjectRow.insertCell(2);
-                    const create = sobjectRow.insertCell(3);
+        function handleQuickActionStatusResponse(response) {
+            const table = document.getElementById('quickActionStatusTable');
+            var tbody = table.getElementsByTagName('tbody')[0];
 
-                    name.innerText = sobject;
-                    view.innerHTML = quickActions.view == true ? "✅" : "❌";
-                    edit.innerHTML = quickActions.edit == true ? "✅" : "❌";
-                    create.innerHTML = quickActions.create == true ? "✅" : "❌";
-                }
+            // remove all table rows first
+            while (tbody.firstChild) {
+                tbody.removeChild(tbody.firstChild);
+            }
+
+            // now re-populate the table body with updated results
+            for (const sobject in response.sobjects) {
+                const quickActions = response.sobjects[sobject];
+
+                const sobjectRow = tbody.insertRow();
+                const name = sobjectRow.insertCell(0);
+                const view = sobjectRow.insertCell(1);
+                const edit = sobjectRow.insertCell(2);
+                const create = sobjectRow.insertCell(3);
+
+                name.innerText = sobject;
+                view.innerHTML = quickActions.view == true ? "✅" : "❌";
+                edit.innerHTML = quickActions.edit == true ? "✅" : "❌";
+                create.innerHTML = quickActions.create == true ? "✅" : "❌";
             }
         </script>
         <script src="--- MESSAGING_SCRIPT_SRC ---"></script>

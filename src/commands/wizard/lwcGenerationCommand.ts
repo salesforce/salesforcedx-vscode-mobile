@@ -79,7 +79,7 @@ export class LwcGenerationCommand {
                 'resources/instructions/createSObjectLwcQuickActions.html',
                 [
                     {
-                        type: 'skipStepButton',
+                        type: 'continueButton',
                         action: (panel) => {
                             panel.dispose();
                             return resolve();
@@ -87,7 +87,7 @@ export class LwcGenerationCommand {
                     },
                     {
                         type: 'generateLwcQuickActionsButton',
-                        action: async (panel) => {
+                        action: async (panel, _data, callback) => {
                             // TODO: Hook this up to function that parses landing_page.json.
                             const sobjects = [
                                 'Account',
@@ -104,8 +104,15 @@ export class LwcGenerationCommand {
                                 extensionUri,
                                 quickActionStatus
                             );
-                            panel.dispose();
-                            return resolve();
+
+                            // send back updates so UI can be refreshed
+                            if (callback) {
+                                const quickActionStatus =
+                                    await LwcGenerationCommand.checkForExistingQuickActions(
+                                        sobjects
+                                    );
+                                callback(quickActionStatus);
+                            }
                         }
                     },
                     {
@@ -205,9 +212,11 @@ export class LwcGenerationCommand {
             }
 
             // Just double check now that things have been created.
-            return await LwcGenerationCommand.checkForExistingQuickActions(
-                Object.keys(quickActionStatus.sobjects)
-            );
+            const newStatus =
+                await LwcGenerationCommand.checkForExistingQuickActions(
+                    Object.keys(quickActionStatus.sobjects)
+                );
+            resolve(newStatus);
         });
     }
 

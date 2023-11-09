@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionSubtype>ScreenAction</actionSubtype>
+    <label>///TEMPLATE_QUICK_ACTION_LABEL///</label>
+    <lightningWebComponent>///TEMPLATE_LWC_NAME///</lightningWebComponent>
+    <optionsCreateFeedItem>false</optionsCreateFeedItem>
+    <type>LightningWebComponent</type>
+    ///TEMPLATE_QUICK_ACTION_ICON///
+</QuickAction>

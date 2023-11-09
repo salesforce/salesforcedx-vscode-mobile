@@ -12,7 +12,10 @@ type TemplateVariables = { [name: string]: string };
 
 export class CodeBuilder {
     static readonly TEMPLATE_DIR = './resources/templates';
-    static readonly DESTINATION_DIR = './force-app/main/default/lwc';
+    static readonly QUICK_ACTION_TEMPLATE_NAME = 'quickAction.xml';
+    static readonly LWC_DESTINATION_DIR = './force-app/main/default/lwc';
+    static readonly QA_DESTINATION_DIR =
+        './force-app/main/default/quickActions';
     static readonly TEMPLATE_FILE_EXTENSIONS = [
         'css',
         'html',
@@ -39,32 +42,70 @@ export class CodeBuilder {
 
     async generateView(): Promise<boolean> {
         return new Promise(async (resolve) => {
-            this.copyTemplateFiles(
-                'viewRecord',
-                `view${this.objectApiName}Record`
-            );
+            const lwcName = `view${this.objectApiName}Record`;
+            this.copyTemplateFiles('viewRecord', lwcName);
+            this.createQuickAction('View', lwcName);
             resolve(true);
         });
     }
 
     async generateEdit(): Promise<boolean> {
         return new Promise(async (resolve) => {
-            this.copyTemplateFiles(
-                'editRecord',
-                `edit${this.objectApiName}Record`
-            );
+            const lwcName = `edit${this.objectApiName}Record`;
+            this.copyTemplateFiles('editRecord', lwcName);
+            this.createQuickAction('Edit', lwcName, 'editActionIcon');
             resolve(true);
         });
     }
 
     async generateCreate(): Promise<boolean> {
         return new Promise(async (resolve) => {
-            this.copyTemplateFiles(
-                'createRecord',
-                `create${this.objectApiName}Record`
-            );
+            const lwcName = `create${this.objectApiName}Record`;
+            this.copyTemplateFiles('createRecord', lwcName);
+            this.createQuickAction('Create', lwcName);
             resolve(true);
         });
+    }
+
+    private createQuickAction(
+        label: string,
+        name: string,
+        iconName: string = ''
+    ) {
+        const templateFilePath = path.join(
+            CodeBuilder.TEMPLATE_DIR,
+            CodeBuilder.QUICK_ACTION_TEMPLATE_NAME
+        );
+        const fileContents = this.readFileContents(templateFilePath);
+
+        const quickActionVariables: TemplateVariables = {};
+        quickActionVariables['TEMPLATE_QUICK_ACTION_LABEL'] = label;
+        quickActionVariables['TEMPLATE_LWC_NAME'] = name;
+        if (iconName !== '') {
+            quickActionVariables[
+                'TEMPLATE_QUICK_ACTION_ICON'
+            ] = `<icon>${iconName}</icon>`;
+        } else {
+            quickActionVariables['TEMPLATE_QUICK_ACTION_ICON'] = '';
+        }
+
+        // do substitutions
+        const newFileContents = this.replaceAllTemplateVariables(fileContents, {
+            ...this.templateVariables,
+            ...quickActionVariables
+        });
+
+        // copy to destination directory
+        const objectApiName =
+            this.templateVariables['TEMPLATE_OBJECT_API_NAME'];
+        // file name convention example: Account.view.quickAction-meta.xml
+        const destinationFile = `${objectApiName}.${label.toLocaleLowerCase()}.quickAction-meta.xml`;
+
+        this.writeFileContents(
+            CodeBuilder.QA_DESTINATION_DIR,
+            destinationFile,
+            newFileContents
+        );
     }
 
     private copyTemplateFiles(template: string, destinationLwc: string) {
@@ -84,7 +125,7 @@ export class CodeBuilder {
 
             // copy to destination directory
             const destinationDir = path.join(
-                CodeBuilder.DESTINATION_DIR,
+                CodeBuilder.LWC_DESTINATION_DIR,
                 destinationLwc
             );
             const destinationFile = `${destinationLwc}.${extension}`;
