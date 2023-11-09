@@ -10,6 +10,7 @@ import { ProgressLocation, window, workspace } from 'vscode';
 import * as path from 'path';
 import { access, copyFile } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
+import { UIUtils } from '../../utils/uiUtils';
 
 export type LandingPageStatus = {
     exists: boolean;
@@ -35,12 +36,6 @@ export type LandingPageCollectionStatus = {
  * When the project is deployed to the user's org, this file will also be copied into static resources and picked up by SApp+.
  */
 export class TemplateChooserCommand {
-    static readonly STATIC_RESOURCES_PATH = path.join(
-        'force-app',
-        'main',
-        'default',
-        'staticresources'
-    );
     static readonly LANDING_PAGE_FILENAME_PREFIX = 'landing_page';
     static readonly LANDING_PAGE_JSON_FILE_EXTENSION = '.json';
     static readonly LANDING_PAGE_METADATA_FILE_EXTENSION = '.resource-meta.xml';
@@ -110,7 +105,7 @@ export class TemplateChooserCommand {
             }
 
             // If a landing page exists, warn about overwriting it.
-            const staticResourcesPath = await this.getStaticResourcesDir();
+            const staticResourcesPath = await UIUtils.getStaticResourcesDir();
             const existingLandingPageFiles = await this.landingPageFilesExist(
                 staticResourcesPath,
                 'existing'
@@ -186,7 +181,7 @@ export class TemplateChooserCommand {
 
             let staticResourcesPath: string;
             try {
-                staticResourcesPath = await this.getStaticResourcesDir();
+                staticResourcesPath = await UIUtils.getStaticResourcesDir();
             } catch (err) {
                 landingPageCollectionStatus.error = (err as Error).message;
                 return resolve(landingPageCollectionStatus);
@@ -241,31 +236,6 @@ export class TemplateChooserCommand {
             );
         }
         return workspaceFolders[0].uri.fsPath;
-    }
-
-    static async getStaticResourcesDir(): Promise<string> {
-        return new Promise<string>(async (resolve, reject) => {
-            let projectPath: string;
-            try {
-                projectPath = this.getWorkspaceDir();
-            } catch (err) {
-                return reject(err);
-            }
-            const staticResourcesPath = path.join(
-                projectPath,
-                this.STATIC_RESOURCES_PATH
-            );
-            try {
-                await access(staticResourcesPath);
-            } catch (err) {
-                const accessErrorObj = err as Error;
-                const noAccessError = new NoStaticResourcesDirError(
-                    `Could not read landing page directory at '${staticResourcesPath}': ${accessErrorObj.message}`
-                );
-                return reject(noAccessError);
-            }
-            return resolve(staticResourcesPath);
-        });
     }
 
     static async landingPageFilesExist(

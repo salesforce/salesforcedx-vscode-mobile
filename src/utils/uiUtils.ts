@@ -5,12 +5,25 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { window, QuickPickItem, QuickPickItemKind, QuickPick } from 'vscode';
+import { window, workspace, QuickPickItem } from 'vscode';
+import { access } from 'fs/promises';
+import {
+    NoStaticResourcesDirError,
+    NoWorkspaceError
+} from '../commands/wizard/templateChooserCommand';
+import * as path from 'path';
 
 /**
  * Convenience wrapper for VS Code UI Extension methods such as showQuickPick().
  */
 export class UIUtils {
+    static readonly STATIC_RESOURCES_PATH = path.join(
+        'force-app',
+        'main',
+        'default',
+        'staticresources'
+    );
+
     /**
      * Wraps the ability to ask user for a selection from a quick pick list.
      *
@@ -62,6 +75,41 @@ export class UIUtils {
             quickPick.busy = false;
             quickPick.enabled = true;
             quickPick.show();
+        });
+    }
+
+    static getWorkspaceDir(): string {
+        const workspaceFolders = workspace.workspaceFolders;
+        if (!workspaceFolders || workspaceFolders.length === 0) {
+            throw new NoWorkspaceError(
+                'No workspace defined for this project.'
+            );
+        }
+        return workspaceFolders[0].uri.fsPath;
+    }
+
+    static async getStaticResourcesDir(): Promise<string> {
+        return new Promise<string>(async (resolve, reject) => {
+            let projectPath: string;
+            try {
+                projectPath = this.getWorkspaceDir();
+            } catch (err) {
+                return reject(err);
+            }
+            const staticResourcesPath = path.join(
+                projectPath,
+                this.STATIC_RESOURCES_PATH
+            );
+            try {
+                await access(staticResourcesPath);
+            } catch (err) {
+                const accessErrorObj = err as Error;
+                const noAccessError = new NoStaticResourcesDirError(
+                    `Could not read landing page directory at '${staticResourcesPath}': ${accessErrorObj.message}`
+                );
+                return reject(noAccessError);
+            }
+            return resolve(staticResourcesPath);
         });
     }
 }

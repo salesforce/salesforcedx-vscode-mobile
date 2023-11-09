@@ -13,7 +13,7 @@ import {
     LwcGenerationCommand,
     SObjectQuickActionStatus
 } from '../../../../commands/wizard/lwcGenerationCommand';
-import { TemplateChooserCommand } from '../../../../commands/wizard/templateChooserCommand';
+import { UIUtils } from '../../../../utils/uiUtils';
 
 suite('LWC Generation Command Test Suite', () => {
     beforeEach(function () {});
@@ -95,7 +95,7 @@ suite('LWC Generation Command Test Suite', () => {
 
     test('should return error status for landing page with invalid json', async () => {
         const getWorkspaceDirStub = sinon.stub(
-            TemplateChooserCommand,
+            UIUtils,
             'getStaticResourcesDir'
         );
         getWorkspaceDirStub.returns(Promise.resolve('.'));
@@ -114,7 +114,7 @@ suite('LWC Generation Command Test Suite', () => {
 
     test('should return 2 sObjects', async () => {
         const getWorkspaceDirStub = sinon.stub(
-            TemplateChooserCommand,
+            UIUtils,
             'getStaticResourcesDir'
         );
         getWorkspaceDirStub.returns(Promise.resolve('.'));
