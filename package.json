@@ -58,6 +58,7 @@
   },
   "devDependencies": {
     "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@types/cli-progress": "^3.11.5",
     "@types/glob": "^8.1.0",
     "@types/inquirer": "^9.0.6",
     "@types/mocha": "^10.0.3",

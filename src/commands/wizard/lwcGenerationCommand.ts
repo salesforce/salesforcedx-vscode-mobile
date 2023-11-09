@@ -3,6 +3,7 @@ import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { TemplateChooserCommand } from './templateChooserCommand';
 import { access } from 'fs/promises';
 import { UEMParser } from '../../utils/uemParser';
+import { CommonUtils } from '@salesforce/lwc-dev-mobile-core';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -29,19 +30,6 @@ export class LwcGenerationCommand {
 
     constructor(extensionUri: Uri) {
         this.extensionUri = extensionUri;
-    }
-
-    static readFileAsJsonObject(
-        filePath: string,
-        callback: (error: Error | null, data: any) => void
-    ): void {
-        try {
-            const data = fs.readFileSync(filePath, { encoding: 'utf-8' });
-            const jsonObject = JSON.parse(data);
-            callback(null, jsonObject);
-        } catch (error) {
-            callback(error as Error, null);
-        }
     }
 
     static async getSObjectsFromLandingPage(): Promise<GetSObjectsStatus> {
@@ -71,25 +59,11 @@ export class LwcGenerationCommand {
             }
 
             if (landingPageExists) {
-                this.readFileAsJsonObject(
-                    landingPagePath,
-                    (error: Error | null, data: any) => {
-                        if (error) {
-                            console.warn(`Error reading ${landingPageJson}`);
-                            getSObjectsStatus.error = (error as Error).message;
-                        } else {
-                            getSObjectsStatus.sobjects =
-                                UEMParser.findFieldValues(
-                                    data,
-                                    'objectApiName'
-                                );
-                        }
-                        resolve(getSObjectsStatus);
-                    }
-                );
-            } else {
-                resolve(getSObjectsStatus);
+                const uem = CommonUtils.loadJsonFromFile(landingPagePath);
+                getSObjectsStatus.sobjects = UEMParser.findSObjects(uem);
             }
+
+            resolve(getSObjectsStatus);
         });
     }
 
