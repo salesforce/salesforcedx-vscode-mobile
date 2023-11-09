@@ -32,35 +32,35 @@ suite('CodeBuilder Test Suite', () => {
         // follow the format of "///TEMPLATE_XYZ///" we will just ensure that no "///" value exists in the file
         // which proves that all placeholders were replaced.
         const allTemplateFields = [
-            'TEMPLATE_CREATE_LWC_LABEL',
-            'TEMPLATE_EDIT_LWC_LABEL',
-            'TEMPLATE_FIELDS',
-            'TEMPLATE_IMPORTS',
-            'TEMPLATE_LIGHTNING_INPUT_CREATE_FIELDS_HTML',
-            'TEMPLATE_LIGHTNING_INPUT_EDIT_FIELDS_HTML',
-            'TEMPLATE_OBJECT_API_NAME',
-            'TEMPLATE_VARIABLES',
-            'TEMPLATE_VARIABLE_ASSIGNMENTS',
-            'TEMPLATE_VIEW_LWC_LABEL'
+            CodeBuilder.TEMPLATE_CREATE_LWC_LABEL,
+            CodeBuilder.TEMPLATE_EDIT_LWC_LABEL,
+            CodeBuilder.TEMPLATE_FIELDS,
+            CodeBuilder.TEMPLATE_IMPORTS,
+            CodeBuilder.TEMPLATE_LIGHTNING_INPUT_CREATE_FIELDS_HTML,
+            CodeBuilder.TEMPLATE_LIGHTNING_INPUT_EDIT_FIELDS_HTML,
+            CodeBuilder.TEMPLATE_OBJECT_API_NAME,
+            CodeBuilder.TEMPLATE_VARIABLES,
+            CodeBuilder.TEMPLATE_VARIABLE_ASSIGNMENTS,
+            CodeBuilder.TEMPLATE_VIEW_LWC_LABEL
         ];
 
         // but only these are substituted in a qa
         const allQaTemplateFields = [
-            'TEMPLATE_LWC_NAME',
-            'TEMPLATE_QUICK_ACTION_ICON',
-            'TEMPLATE_QUICK_ACTION_LABEL'
+            CodeBuilder.TEMPLATE_LWC_NAME,
+            CodeBuilder.TEMPLATE_QUICK_ACTION_ICON,
+            CodeBuilder.TEMPLATE_QUICK_ACTION_LABEL
         ];
 
-        var allTemplateFieldsContent = "";
-        allTemplateFields.forEach( (field) => {
+        var allTemplateFieldsContent = '';
+        allTemplateFields.forEach((field) => {
             allTemplateFieldsContent += `///${field}///\n`;
         });
 
         var allQaTemplateFieldsContent = allTemplateFieldsContent;
-        allQaTemplateFields.forEach( (field) => {
+        allQaTemplateFields.forEach((field) => {
             allQaTemplateFieldsContent += `///${field}///\n`;
         });
-        
+
         var result = stubFileSystem([
             allTemplateFieldsContent,
             allTemplateFieldsContent,
@@ -79,7 +79,10 @@ suite('CodeBuilder Test Suite', () => {
 
         // Test that every file written out had all template values replaced
         recordedFiles.forEach((file: any) => {
-            assert.ok(!file.data.includes('///'), `All values should have been replaced in file ${file.filePath}!`);
+            assert.ok(
+                !file.data.includes('///'),
+                `All values should have been replaced in file ${file.filePath}!`
+            );
         });
     });
 
@@ -258,46 +261,51 @@ suite('CodeBuilder Test Suite', () => {
         const templateVars = codeBuilder.templateVariables;
 
         assert.equal(
-            templateVars['TEMPLATE_CREATE_LWC_LABEL'],
+            templateVars[CodeBuilder.TEMPLATE_CREATE_LWC_LABEL],
             'LWC for creating a/an Account instance.'
         );
         assert.equal(
-            templateVars['TEMPLATE_EDIT_LWC_LABEL'],
+            templateVars[CodeBuilder.TEMPLATE_EDIT_LWC_LABEL],
             'LWC for editing a/an Account instance.'
         );
         assert.equal(
-            templateVars['TEMPLATE_VIEW_LWC_LABEL'],
+            templateVars[CodeBuilder.TEMPLATE_VIEW_LWC_LABEL],
             'LWC for viewing a/an Account instance.'
         );
 
-        assert.equal(templateVars['TEMPLATE_FIELDS'], 'FIELD1_FIELD, ');
+        assert.equal(
+            templateVars[CodeBuilder.TEMPLATE_FIELDS],
+            'FIELD1_FIELD, '
+        );
         assert.ok(
-            templateVars['TEMPLATE_IMPORTS'].includes(
+            templateVars[CodeBuilder.TEMPLATE_IMPORTS].includes(
                 'import FIELD1_FIELD from "@salesforce/schema/Account.field1";'
             )
         );
         assert.ok(
             templateVars[
-                'TEMPLATE_LIGHTNING_INPUT_CREATE_FIELDS_HTML'
+                CodeBuilder.TEMPLATE_LIGHTNING_INPUT_CREATE_FIELDS_HTML
             ].includes(
                 '<lightning-input-field field-name={field1Field} value={field1}></lightning-input-field>'
             )
         );
 
         assert.ok(
-            templateVars['TEMPLATE_LIGHTNING_INPUT_EDIT_FIELDS_HTML'].includes(
+            templateVars[
+                CodeBuilder.TEMPLATE_LIGHTNING_INPUT_EDIT_FIELDS_HTML
+            ].includes(
                 '<lightning-input-field field-name={field1Field}></lightning-input-field>'
             )
         );
 
         assert.ok(
-            templateVars['TEMPLATE_VARIABLES'].includes(
+            templateVars[CodeBuilder.TEMPLATE_VARIABLES].includes(
                 'field1Field = FIELD1_FIELD;'
             )
         );
 
         assert.ok(
-            templateVars['TEMPLATE_VARIABLE_ASSIGNMENTS'].includes(
+            templateVars[CodeBuilder.TEMPLATE_VARIABLE_ASSIGNMENTS].includes(
                 'field1 = "";'
             )
         );

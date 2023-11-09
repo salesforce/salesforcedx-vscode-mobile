@@ -23,6 +23,24 @@ export class CodeBuilder {
         'js-meta.xml'
     ];
 
+    // template variables
+    static readonly TEMPLATE_CREATE_LWC_LABEL = 'TEMPLATE_CREATE_LWC_LABEL';
+    static readonly TEMPLATE_EDIT_LWC_LABEL = 'TEMPLATE_EDIT_LWC_LABEL';
+    static readonly TEMPLATE_FIELDS = 'TEMPLATE_FIELDS';
+    static readonly TEMPLATE_IMPORTS = 'TEMPLATE_IMPORTS';
+    static readonly TEMPLATE_LIGHTNING_INPUT_CREATE_FIELDS_HTML =
+        'TEMPLATE_LIGHTNING_INPUT_CREATE_FIELDS_HTML';
+    static readonly TEMPLATE_LIGHTNING_INPUT_EDIT_FIELDS_HTML =
+        'TEMPLATE_LIGHTNING_INPUT_EDIT_FIELDS_HTML';
+    static readonly TEMPLATE_OBJECT_API_NAME = 'TEMPLATE_OBJECT_API_NAME';
+    static readonly TEMPLATE_VARIABLES = 'TEMPLATE_VARIABLES';
+    static readonly TEMPLATE_VARIABLE_ASSIGNMENTS =
+        'TEMPLATE_VARIABLE_ASSIGNMENTS';
+    static readonly TEMPLATE_VIEW_LWC_LABEL = 'TEMPLATE_VIEW_LWC_LABEL';
+    static readonly TEMPLATE_LWC_NAME = 'TEMPLATE_LWC_NAME';
+    static readonly TEMPLATE_QUICK_ACTION_ICON = 'TEMPLATE_QUICK_ACTION_ICON';
+    static readonly TEMPLATE_QUICK_ACTION_LABEL = 'TEMPLATE_QUICK_ACTION_LABEL';
+
     private extensionUri: Uri;
     private objectApiName: string;
     private fieldNames: string[];
@@ -79,14 +97,14 @@ export class CodeBuilder {
         const fileContents = this.readFileContents(templateFilePath);
 
         const quickActionVariables: TemplateVariables = {};
-        quickActionVariables['TEMPLATE_QUICK_ACTION_LABEL'] = label;
-        quickActionVariables['TEMPLATE_LWC_NAME'] = name;
+        quickActionVariables[CodeBuilder.TEMPLATE_QUICK_ACTION_LABEL] = label;
+        quickActionVariables[CodeBuilder.TEMPLATE_LWC_NAME] = name;
         if (iconName !== '') {
             quickActionVariables[
-                'TEMPLATE_QUICK_ACTION_ICON'
+                CodeBuilder.TEMPLATE_QUICK_ACTION_ICON
             ] = `<icon>${iconName}</icon>`;
         } else {
-            quickActionVariables['TEMPLATE_QUICK_ACTION_ICON'] = '';
+            quickActionVariables[CodeBuilder.TEMPLATE_QUICK_ACTION_ICON] = '';
         }
 
         // do substitutions
@@ -97,7 +115,7 @@ export class CodeBuilder {
 
         // copy to destination directory
         const objectApiName =
-            this.templateVariables['TEMPLATE_OBJECT_API_NAME'];
+            this.templateVariables[CodeBuilder.TEMPLATE_OBJECT_API_NAME];
         // file name convention example: Account.view.quickAction-meta.xml
         const destinationFile = `${objectApiName}.${label.toLocaleLowerCase()}.quickAction-meta.xml`;
 
@@ -192,17 +210,18 @@ export class CodeBuilder {
      * Ensure all the TEMPLATE_* variables have a value.
      */
     private generateTemplateVariables() {
-        this.templateVariables['TEMPLATE_OBJECT_API_NAME'] = this.objectApiName;
+        this.templateVariables[CodeBuilder.TEMPLATE_OBJECT_API_NAME] =
+            this.objectApiName;
 
         // Labels
         this.templateVariables[
-            'TEMPLATE_CREATE_LWC_LABEL'
+            CodeBuilder.TEMPLATE_CREATE_LWC_LABEL
         ] = `LWC for creating a/an ${this.objectApiName} instance.`;
         this.templateVariables[
-            'TEMPLATE_EDIT_LWC_LABEL'
+            CodeBuilder.TEMPLATE_EDIT_LWC_LABEL
         ] = `LWC for editing a/an ${this.objectApiName} instance.`;
         this.templateVariables[
-            'TEMPLATE_VIEW_LWC_LABEL'
+            CodeBuilder.TEMPLATE_VIEW_LWC_LABEL
         ] = `LWC for viewing a/an ${this.objectApiName} instance.`;
 
         // We need to populate the following template variables:
@@ -237,14 +256,16 @@ export class CodeBuilder {
             createFieldsHtml += `<lightning-input-field field-name={${fieldNameVariable}} value={${field.toLowerCase()}}></lightning-input-field>\n\t\t\t\t`;
             editFieldsHtml += `<lightning-input-field field-name={${fieldNameVariable}}></lightning-input-field>\n\t\t\t\t`;
         });
-        this.templateVariables['TEMPLATE_FIELDS'] = fields;
-        this.templateVariables['TEMPLATE_IMPORTS'] = imports;
-        this.templateVariables['TEMPLATE_LIGHTNING_INPUT_CREATE_FIELDS_HTML'] =
-            createFieldsHtml;
-        this.templateVariables['TEMPLATE_LIGHTNING_INPUT_EDIT_FIELDS_HTML'] =
-            editFieldsHtml;
-        this.templateVariables['TEMPLATE_VARIABLES'] = importAliases;
-        this.templateVariables['TEMPLATE_VARIABLE_ASSIGNMENTS'] =
+        this.templateVariables[CodeBuilder.TEMPLATE_FIELDS] = fields;
+        this.templateVariables[CodeBuilder.TEMPLATE_IMPORTS] = imports;
+        this.templateVariables[
+            CodeBuilder.TEMPLATE_LIGHTNING_INPUT_CREATE_FIELDS_HTML
+        ] = createFieldsHtml;
+        this.templateVariables[
+            CodeBuilder.TEMPLATE_LIGHTNING_INPUT_EDIT_FIELDS_HTML
+        ] = editFieldsHtml;
+        this.templateVariables[CodeBuilder.TEMPLATE_VARIABLES] = importAliases;
+        this.templateVariables[CodeBuilder.TEMPLATE_VARIABLE_ASSIGNMENTS] =
             variableAssignments;
     }
 }
