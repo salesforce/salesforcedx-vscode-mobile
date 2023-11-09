@@ -11,6 +11,7 @@ import { CodeBuilder } from '../../../utils/codeBuilder';
 import { Uri } from 'vscode';
 import { afterEach, beforeEach } from 'mocha';
 import * as fs from 'fs';
+import * as path from 'path';
 
 suite('CodeBuilder Test Suite', () => {
     var extensionUri = Uri.parse('file:///tmp/');
@@ -109,35 +110,37 @@ suite('CodeBuilder Test Suite', () => {
         var dirPath = 'force-app/main/default/lwc/viewAccountRecord';
         assert.equal(
             recordedFiles[0].filePath,
-            `${dirPath}/viewAccountRecord.css`
+            path.normalize(`${dirPath}/viewAccountRecord.css`)
         );
         assert.equal(recordedFiles[0].data, SAMPLE_CSS_DATA);
 
         // HTML file
         assert.equal(
             recordedFiles[1].filePath,
-            `${dirPath}/viewAccountRecord.html`
+            path.normalize(`${dirPath}/viewAccountRecord.html`)
         );
         assert.equal(recordedFiles[1].data, SAMPLE_HTML_DATA);
 
         // JS file
         assert.equal(
             recordedFiles[2].filePath,
-            `${dirPath}/viewAccountRecord.js`
+            path.normalize(`${dirPath}/viewAccountRecord.js`)
         );
         assert.equal(recordedFiles[2].data, SAMPLE_JS_DATA);
 
         // XML file
         assert.equal(
             recordedFiles[3].filePath,
-            `${dirPath}/viewAccountRecord.js-meta.xml`
+            path.normalize(`${dirPath}/viewAccountRecord.js-meta.xml`)
         );
         assert.equal(recordedFiles[3].data, SAMPLE_XML_DATA);
 
         // QA file
         assert.equal(
             recordedFiles[4].filePath,
-            'force-app/main/default/quickActions/Account.view.quickAction-meta.xml'
+            path.normalize(
+                'force-app/main/default/quickActions/Account.view.quickAction-meta.xml'
+            )
         );
         assert.equal(recordedFiles[4].data, SAMPLE_QA_DATA);
     });
@@ -165,35 +168,37 @@ suite('CodeBuilder Test Suite', () => {
         var dirPath = 'force-app/main/default/lwc/editAccountRecord';
         assert.equal(
             recordedFiles[0].filePath,
-            `${dirPath}/editAccountRecord.css`
+            path.normalize(`${dirPath}/editAccountRecord.css`)
         );
         assert.equal(recordedFiles[0].data, SAMPLE_CSS_DATA);
 
         // HTML file
         assert.equal(
             recordedFiles[1].filePath,
-            `${dirPath}/editAccountRecord.html`
+            path.normalize(`${dirPath}/editAccountRecord.html`)
         );
         assert.equal(recordedFiles[1].data, SAMPLE_HTML_DATA);
 
         // JS file
         assert.equal(
             recordedFiles[2].filePath,
-            `${dirPath}/editAccountRecord.js`
+            path.normalize(`${dirPath}/editAccountRecord.js`)
         );
         assert.equal(recordedFiles[2].data, SAMPLE_JS_DATA);
 
         // XML file
         assert.equal(
             recordedFiles[3].filePath,
-            `${dirPath}/editAccountRecord.js-meta.xml`
+            path.normalize(`${dirPath}/editAccountRecord.js-meta.xml`)
         );
         assert.equal(recordedFiles[3].data, SAMPLE_XML_DATA);
 
         // QA file
         assert.equal(
             recordedFiles[4].filePath,
-            'force-app/main/default/quickActions/Account.edit.quickAction-meta.xml'
+            path.normalize(
+                'force-app/main/default/quickActions/Account.edit.quickAction-meta.xml'
+            )
         );
         assert.equal(recordedFiles[4].data, SAMPLE_QA_DATA);
     });
@@ -221,35 +226,37 @@ suite('CodeBuilder Test Suite', () => {
         var dirPath = 'force-app/main/default/lwc/createAccountRecord';
         assert.equal(
             recordedFiles[0].filePath,
-            `${dirPath}/createAccountRecord.css`
+            path.normalize(`${dirPath}/createAccountRecord.css`)
         );
         assert.equal(recordedFiles[0].data, SAMPLE_CSS_DATA);
 
         // HTML file
         assert.equal(
             recordedFiles[1].filePath,
-            `${dirPath}/createAccountRecord.html`
+            path.normalize(`${dirPath}/createAccountRecord.html`)
         );
         assert.equal(recordedFiles[1].data, SAMPLE_HTML_DATA);
 
         // JS file
         assert.equal(
             recordedFiles[2].filePath,
-            `${dirPath}/createAccountRecord.js`
+            path.normalize(`${dirPath}/createAccountRecord.js`)
         );
         assert.equal(recordedFiles[2].data, SAMPLE_JS_DATA);
 
         // XML file
         assert.equal(
             recordedFiles[3].filePath,
-            `${dirPath}/createAccountRecord.js-meta.xml`
+            path.normalize(`${dirPath}/createAccountRecord.js-meta.xml`)
         );
         assert.equal(recordedFiles[3].data, SAMPLE_XML_DATA);
 
         // QA file
         assert.equal(
             recordedFiles[4].filePath,
-            'force-app/main/default/quickActions/Account.create.quickAction-meta.xml'
+            path.normalize(
+                'force-app/main/default/quickActions/Account.create.quickAction-meta.xml'
+            )
         );
         assert.equal(recordedFiles[4].data, SAMPLE_QA_DATA);
     });
