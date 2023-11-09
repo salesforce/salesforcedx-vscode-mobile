@@ -19,7 +19,7 @@ export class UEMParser {
             let objectApiName = properties[
                 'objectApiName' as keyof Object
             ] as unknown as string;
-            
+
             // Only include unique values in the array.
             if (!results.includes(objectApiName)) {
                 results.push(objectApiName);

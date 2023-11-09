@@ -10,35 +10,64 @@ import { UEMParser } from '../../../utils/uemParser';
 
 suite('UEM Parser Test Suite', () => {
     test('Empty object returns empty array', async () => {
-        const sObjects = UEMParser.findFieldValues({}, 'objectApiName');
+        const sObjects = UEMParser.findSObjects({});
         assert.equal(sObjects.length, 0);
     });
 
     test('Object with a target field returns array size of one', async () => {
         const landingPage = {
-            objectApiName: 'foo'
+            definition: 'mcf/list',
+            properties: {
+                objectApiName: 'foo'
+            }
         };
 
-        const sObjects = UEMParser.findFieldValues(
-            landingPage,
-            'objectApiName'
-        );
+        const sObjects = UEMParser.findSObjects(landingPage);
         assert.equal(sObjects.length, 1);
         assert.equal(sObjects[0], 'foo');
     });
 
     test('Nested object returns all values of the target field', async () => {
         const landingPage = {
-            objectApiName: 'foo',
+            definition: 'mcf/list',
+            properties: {
+                objectApiName: 'foo'
+            },
             nested: {
-                objectApiName: 'bar'
+                definition: 'mcf/list',
+                properties: {
+                    objectApiName: 'bar'
+                }
             }
         };
 
-        const sObjects = UEMParser.findFieldValues(
-            landingPage,
-            'objectApiName'
-        );
+        const sObjects = UEMParser.findSObjects(landingPage);
+        assert.equal(sObjects.length, 2);
+        assert.equal(sObjects[0], 'foo');
+        assert.equal(sObjects[1], 'bar');
+    });
+
+    test('Duplicate field values are omitted', async () => {
+        const landingPage = {
+            definition: 'mcf/list',
+            properties: {
+                objectApiName: 'foo'
+            },
+            nested: {
+                definition: 'mcf/list',
+                properties: {
+                    objectApiName: 'bar'
+                },
+                anotherNested: {
+                    definition: 'mcf/list',
+                    properties: {
+                        objectApiName: 'bar'
+                    }
+                }
+            }
+        };
+
+        const sObjects = UEMParser.findSObjects(landingPage);
         assert.equal(sObjects.length, 2);
         assert.equal(sObjects[0], 'foo');
         assert.equal(sObjects[1], 'bar');
@@ -46,21 +75,28 @@ suite('UEM Parser Test Suite', () => {
 
     test('Duplicat field values are omitted', async () => {
         const landingPage = {
-            objectApiName: 'foo',
+            definition: 'mcf/list',
+            properties: {
+                objectApiName: 'plain'
+            },
             nested: {
-                objectApiName: 'bar',
+                definition: 'mcf/timedList',
+                properties: {
+                    objectApiName: 'timed'
+                },
                 anotherNested: {
-                    objectApiName: 'bar'
+                    definition: 'mcf/genericLists',
+                    properties: {
+                        objectApiName: 'generic'
+                    }
                 }
             }
         };
 
-        const sObjects = UEMParser.findFieldValues(
-            landingPage,
-            'objectApiName'
-        );
-        assert.equal(sObjects.length, 2);
-        assert.equal(sObjects[0], 'foo');
-        assert.equal(sObjects[1], 'bar');
+        const sObjects = UEMParser.findSObjects(landingPage);
+        assert.equal(sObjects.length, 3);
+        assert.equal(sObjects[0], 'plain');
+        assert.equal(sObjects[1], 'timed');
+        assert.equal(sObjects[2], 'generic');
     });
 });

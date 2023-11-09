@@ -34,8 +34,6 @@ export class LwcGenerationCommand {
 
     static async getSObjectsFromLandingPage(): Promise<GetSObjectsStatus> {
         return new Promise<GetSObjectsStatus>(async (resolve) => {
-            let landingPageExists = true;
-
             const staticResourcesPath =
                 await TemplateChooserCommand.getStaticResourcesDir();
             const landingPageJson = 'landing_page.json';
@@ -50,17 +48,13 @@ export class LwcGenerationCommand {
 
             try {
                 await access(landingPagePath);
+                const uem = CommonUtils.loadJsonFromFile(landingPagePath);
+                getSObjectsStatus.sobjects = UEMParser.findSObjects(uem);
             } catch (err) {
                 console.warn(
                     `File '${landingPageJson}' does not exist at '${staticResourcesPath}'.`
                 );
-                landingPageExists = false;
                 getSObjectsStatus.error = (err as Error).message;
-            }
-
-            if (landingPageExists) {
-                const uem = CommonUtils.loadJsonFromFile(landingPagePath);
-                getSObjectsStatus.sobjects = UEMParser.findSObjects(uem);
             }
 
             resolve(getSObjectsStatus);
