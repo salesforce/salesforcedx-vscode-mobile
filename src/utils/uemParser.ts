@@ -62,7 +62,7 @@ export class UEMParser {
                 );
             }
         }
-        
+
         return results;
     }
 }
