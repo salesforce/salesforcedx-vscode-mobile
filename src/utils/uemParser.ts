@@ -30,34 +30,35 @@ export class UEMParser {
     }
 
     static findObjectsWithValues(
-        json: Object,
+        nestedJsonBlock: any,
         valuesToMatch: string[]
-    ): Array<Object> {
-        const results: Array<Object> = [];
+    ): Array<any> {
+        const results: Array<any> = [];
 
-        if (Array.isArray(json)) {
-            for (const item of json) {
-                results.push(
-                    ...UEMParser.findObjectsWithValues(item, valuesToMatch)
-                );
-            }
-        } else {
-            const values = Object.values(json);
+        if (typeof nestedJsonBlock === 'object') {
+            const values = Object.values(nestedJsonBlock);
 
             const matched = valuesToMatch.some((value) =>
                 values.includes(value)
             );
 
             if (matched) {
-                results.push(json);
+                results.push(nestedJsonBlock);
             }
 
-            for (const key in json) {
+            for (const key in nestedJsonBlock) {
                 results.push(
                     ...UEMParser.findObjectsWithValues(
-                        json[key as keyof Object],
+                        nestedJsonBlock[key as keyof Object],
                         valuesToMatch
                     )
+                );
+            }
+        } else if (Array.isArray(nestedJsonBlock)) {
+            const nestedArrayBlock = nestedJsonBlock as Array<Object>;
+            for (const item of nestedArrayBlock) {
+                results.push(
+                    ...UEMParser.findObjectsWithValues(item, valuesToMatch)
                 );
             }
         }
