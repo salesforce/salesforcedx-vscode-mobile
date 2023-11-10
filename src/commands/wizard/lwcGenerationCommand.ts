@@ -4,6 +4,7 @@ import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { UEMParser } from '../../utils/uemParser';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core';
+import { OrgUtils } from '../../utils/orgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -79,6 +80,17 @@ export class LwcGenerationCommand {
                     {
                         type: 'getQuickActionStatus',
                         action: async (_panel, _data, callback) => {
+                            await OrgUtils.getCompactLayoutForSObject(
+                                'Contact'
+                            );
+
+                            // TODO: Hook this up to function that parses landing_page.json.
+                            const sobjects = [
+                                'Account',
+                                'Contact',
+                                'Opportunity',
+                                'SomeOther'
+                            ];
                             if (callback) {
                                 const quickActionStatus =
                                     await LwcGenerationCommand.checkForExistingQuickActions();

@@ -65,6 +65,48 @@ export class OrgUtils {
         }
     }
 
+    public static async getCompactLayoutForSObject(
+        sObjectName: string
+    ): Promise<string[]> {
+        try {
+            const org = await Org.create();
+            const conn = org.getConnection();
+            const result = await conn.request(
+                `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts`
+            );
+            const fields: string[] = [];
+            const resultObj = result as Object;
+            const compactLayouts = resultObj['compactLayouts' as keyof Object];
+            if (Array.isArray(compactLayouts)) {
+                compactLayouts.forEach((compactLayout) => {
+                    const fieldItems = compactLayout['fieldItems'];
+                    fieldItems.forEach((fieldItem: { [key: string]: any }) => {
+                        const editableForNew = fieldItem['editableForNew'];
+                        const editableForUpdate =
+                            fieldItem['editableForUpdate'];
+                        if (editableForNew && editableForUpdate) {
+                            const layoutComponents =
+                                fieldItem['layoutComponents'];
+                            if (Array.isArray(layoutComponents)) {
+                                const layoutComponent = layoutComponents[0];
+                                const layoutComponentType =
+                                    layoutComponent['type'];
+                                if (layoutComponentType === 'Field') {
+                                    fields.push(layoutComponent['value']);
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+
+            return Promise.resolve(fields);
+        } catch (error) {
+            console.log(error);
+            return Promise.reject(error);
+        }
+    }
+
     public static async getDefaultUser(): Promise<string> {
         const aggregator = await ConfigAggregator.create();
 
