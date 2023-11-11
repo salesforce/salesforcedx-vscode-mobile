@@ -93,7 +93,7 @@ suite('LWC Generation Command Test Suite', () => {
         );
     });
 
-    test('should return error status for landing page with invalid json', async () => {
+    test('Should return error status for landing page with invalid json', async () => {
         const getWorkspaceDirStub = sinon.stub(
             UIUtils,
             'getStaticResourcesDir'
@@ -112,7 +112,7 @@ suite('LWC Generation Command Test Suite', () => {
         fs.unlinkSync(invalidJsonFile);
     });
 
-    test('should return 2 sObjects', async () => {
+    test('Should return 2 sObjects', async () => {
         const getWorkspaceDirStub = sinon.stub(
             UIUtils,
             'getStaticResourcesDir'

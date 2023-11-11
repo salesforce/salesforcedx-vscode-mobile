@@ -7,62 +7,41 @@
 
 export class UEMParser {
     public static findSObjects(json: Object): Array<string> {
-        const sObjects = UEMParser.findObjectsWithValues(json, [
-            'mcf/list',
-            'mcf/timedList',
-            'mcf/genericLists'
-        ]);
-        const results: string[] = [];
+        const sObjects = UEMParser.findObjectsWithKey(json, 'objectApiName');
 
-        sObjects.forEach((obj) => {
-            let properties = obj['properties' as keyof Object];
-            let objectApiName = properties[
-                'objectApiName' as keyof Object
-            ] as unknown as string;
-
-            // Only include unique values in the array.
-            if (!results.includes(objectApiName)) {
-                results.push(objectApiName);
-            }
-        });
-
-        return results;
+        return sObjects;
     }
 
-    static findObjectsWithValues(
+    static findObjectsWithKey(
         nestedJsonBlock: any,
-        valuesToMatch: string[]
-    ): Array<any> {
+        keyToMatch: string
+    ): Array<string> {
         const results: Array<any> = [];
 
         if (typeof nestedJsonBlock === 'object') {
-            const values = Object.values(nestedJsonBlock);
-
-            const matched = valuesToMatch.some((value) =>
-                values.includes(value)
-            );
-
-            if (matched) {
-                results.push(nestedJsonBlock);
-            }
+            const keys = Object.keys(nestedJsonBlock);
 
             for (const key in nestedJsonBlock) {
-                results.push(
-                    ...UEMParser.findObjectsWithValues(
-                        nestedJsonBlock[key as keyof Object],
-                        valuesToMatch
-                    )
-                );
+                const value = nestedJsonBlock[key];
+                if (key === keyToMatch && typeof value === 'string') {
+                    results.push(nestedJsonBlock[key as keyof Object]);
+                } else {
+                    results.push(
+                        ...UEMParser.findObjectsWithKey(
+                            nestedJsonBlock[key as keyof Object],
+                            keyToMatch
+                        )
+                    );
+                }
             }
         } else if (Array.isArray(nestedJsonBlock)) {
-            const nestedArrayBlock = nestedJsonBlock as Array<Object>;
+            const nestedArrayBlock = nestedJsonBlock as Array<any>;
             for (const item of nestedArrayBlock) {
-                results.push(
-                    ...UEMParser.findObjectsWithValues(item, valuesToMatch)
-                );
+                results.push(...UEMParser.findObjectsWithKey(item, keyToMatch));
             }
         }
 
-        return results;
+        // Clean the array to return. Remove duplicate values.
+        return [...new Set(results)];
     }
 }
