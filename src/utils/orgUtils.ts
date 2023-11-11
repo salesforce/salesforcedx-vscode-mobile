@@ -18,6 +18,13 @@ export interface Field {
     label: string;
     type: string;
 }
+
+export interface CompactLayoutField {
+    editableForNew: boolean;
+    editableForUpdate: boolean;
+    label: string;
+}
+
 export class OrgUtils {
     public static async getSobjects(): Promise<SObject[]> {
         try {
@@ -65,39 +72,58 @@ export class OrgUtils {
         }
     }
 
-    public static async getCompactLayoutForSObject(
+    public static async getCompactLayoutFieldsForSObject(
         sObjectName: string
-    ): Promise<string[]> {
+    ): Promise<CompactLayoutField[]> {
         try {
             const org = await Org.create();
             const conn = org.getConnection();
-            const result = await conn.request(
+
+            // Get the compact layout info for a sObject first
+            let result = await conn.request(
                 `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts`
             );
-            const fields: string[] = [];
-            const resultObj = result as Object;
-            const compactLayouts = resultObj['compactLayouts' as keyof Object];
-            if (Array.isArray(compactLayouts)) {
-                compactLayouts.forEach((compactLayout) => {
-                    const fieldItems = compactLayout['fieldItems'];
-                    fieldItems.forEach((fieldItem: { [key: string]: any }) => {
-                        const editableForNew = fieldItem['editableForNew'];
-                        const editableForUpdate =
-                            fieldItem['editableForUpdate'];
-                        if (editableForNew && editableForUpdate) {
-                            const layoutComponents =
-                                fieldItem['layoutComponents'];
-                            if (Array.isArray(layoutComponents)) {
-                                const layoutComponent = layoutComponents[0];
-                                const layoutComponentType =
-                                    layoutComponent['type'];
-                                if (layoutComponentType === 'Field') {
-                                    fields.push(layoutComponent['value']);
-                                }
-                            }
-                        }
-                    });
+
+            const fields: CompactLayoutField[] = [];
+
+            if (result) {
+                const resultObj = result as Object;
+
+                // sObject can have multiple compact layouts associated with it. Get the default.
+                const defaultCompactLayoutId =
+                    resultObj['defaultCompactLayoutId' as keyof Object];
+                const recordTypeCompactLayoutMappings =
+                    resultObj[
+                        'recordTypeCompactLayoutMappings' as keyof Object
+                    ];
+
+                // ID of compact layout need to be normalized
+                const recordTypeCompactLayoutMapping = (
+                    recordTypeCompactLayoutMappings as unknown as Array<Object>
+                ).find((element) => {
+                    return (
+                        element['compactLayoutId' as keyof Object] ===
+                        defaultCompactLayoutId
+                    );
                 });
+
+                if (recordTypeCompactLayoutMapping) {
+                    const recordTypeId =
+                        recordTypeCompactLayoutMapping[
+                            'recordTypeId' as keyof Object
+                        ];
+
+                    // With the compact layout ID mapped back to recordType ID make another network request to get the
+                    // exact compact layout info.
+                    result = await conn.request(
+                        `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts/${recordTypeId}`
+                    );
+                    if (result) {
+                        return result[
+                            'fieldItems' as keyof Object
+                        ] as unknown as CompactLayoutField[];
+                    }
+                }
             }
 
             return Promise.resolve(fields);
