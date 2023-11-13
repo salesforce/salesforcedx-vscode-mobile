@@ -72,17 +72,39 @@ export class OrgUtils {
         }
     }
 
+    private static async getAllCompactLayoutsForSObject(
+        sObjectName: string
+    ): Promise<any> {
+        const org = await Org.create();
+        const conn = org.getConnection();
+
+        const result = await conn.request(
+            `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts`
+        );
+
+        return Promise.resolve(result);
+    }
+
+    private static async getCompactLayoutForSObject(
+        sObjectName: string,
+        recordTypeId: string
+    ): Promise<any> {
+        const org = await Org.create();
+        const conn = org.getConnection();
+
+        const result = await conn.request(
+            `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts/${recordTypeId}`
+        );
+
+        return Promise.resolve(result);
+    }
+
     public static async getCompactLayoutFieldsForSObject(
         sObjectName: string
     ): Promise<CompactLayoutField[]> {
         try {
-            const org = await Org.create();
-            const conn = org.getConnection();
-
-            // Get the compact layout info for a sObject first
-            let result = await conn.request(
-                `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts`
-            );
+            // Get all the compact layouts associated to this sObject first
+            let result = await this.getAllCompactLayoutsForSObject(sObjectName);
 
             const fields: CompactLayoutField[] = [];
 
@@ -92,6 +114,8 @@ export class OrgUtils {
                 // sObject can have multiple compact layouts associated with it. Get the default.
                 const defaultCompactLayoutId =
                     resultObj['defaultCompactLayoutId' as keyof Object];
+
+                // Mapping tab
                 const recordTypeCompactLayoutMappings =
                     resultObj[
                         'recordTypeCompactLayoutMappings' as keyof Object
@@ -101,10 +125,20 @@ export class OrgUtils {
                 const recordTypeCompactLayoutMapping = (
                     recordTypeCompactLayoutMappings as unknown as Array<Object>
                 ).find((element) => {
-                    return (
-                        element['compactLayoutId' as keyof Object] ===
-                        defaultCompactLayoutId
-                    );
+                    if (defaultCompactLayoutId) {
+                        return (
+                            element['compactLayoutId' as keyof Object] ===
+                            defaultCompactLayoutId
+                        );
+                    } else {
+                        // defaultCompactLayoutId can be null when a compact layout is not assigned.
+                        // In that case sObject will always have one default layout called SYSTEM.
+                        // So use that instead.
+                        const compactLayoutName = element[
+                            'compactLayoutName' as keyof Object
+                        ] as unknown as string;
+                        return compactLayoutName === 'SYSTEM';
+                    }
                 });
 
                 if (recordTypeCompactLayoutMapping) {
@@ -113,11 +147,13 @@ export class OrgUtils {
                             'recordTypeId' as keyof Object
                         ];
 
-                    // With the compact layout ID mapped back to recordType ID make another network request to get the
+                    // With the compact layout ID mapped back to the recordType ID, make another network request to get the
                     // exact compact layout info.
-                    result = await conn.request(
-                        `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts/${recordTypeId}`
+                    result = await this.getCompactLayoutForSObject(
+                        sObjectName,
+                        recordTypeId as unknown as string
                     );
+
                     if (result) {
                         return result[
                             'fieldItems' as keyof Object
@@ -128,7 +164,6 @@ export class OrgUtils {
 
             return Promise.resolve(fields);
         } catch (error) {
-            console.log(error);
             return Promise.reject(error);
         }
     }
