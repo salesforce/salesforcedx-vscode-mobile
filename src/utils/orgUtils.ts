@@ -72,13 +72,13 @@ export class OrgUtils {
         }
     }
 
-    public static async getAllCompactLayoutsForSObject(
+    public static async getCompactLayoutsForSObject(
         sObjectName: string
-    ): Promise<any> {
+    ): Promise<Object> {
         const org = await Org.create();
         const conn = org.getConnection();
 
-        const result = await conn.request(
+        const result = await conn.request<Object>(
             `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts`
         );
 
@@ -88,11 +88,11 @@ export class OrgUtils {
     public static async getCompactLayoutForSObject(
         sObjectName: string,
         recordTypeId: string
-    ): Promise<any> {
+    ): Promise<Object> {
         const org = await Org.create();
         const conn = org.getConnection();
 
-        const result = await conn.request(
+        const result = await conn.request<Object>(
             `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts/${recordTypeId}`
         );
 
@@ -106,21 +106,16 @@ export class OrgUtils {
             const fields: CompactLayoutField[] = [];
 
             // Get all the compact layouts associated to this sObject first
-            let result = await this.getAllCompactLayoutsForSObject(sObjectName);
+            let result = await this.getCompactLayoutsForSObject(sObjectName);
 
             if (result) {
-                const resultObj = result as Object;
-
                 // sObject can have multiple compact layouts associated with it. Get the default.
                 const defaultCompactLayoutId =
-                    resultObj['defaultCompactLayoutId' as keyof Object];
+                    result['defaultCompactLayoutId' as keyof Object];
 
                 // Mapping tab
-                console.error(resultObj);
                 const recordTypeCompactLayoutMappings =
-                    resultObj[
-                        'recordTypeCompactLayoutMappings' as keyof Object
-                    ];
+                    result['recordTypeCompactLayoutMappings' as keyof Object];
 
                 // ID of compact layout need to be normalized
                 const recordTypeCompactLayoutMapping = (

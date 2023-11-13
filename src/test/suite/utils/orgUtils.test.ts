@@ -185,7 +185,7 @@ suite('Org Utils Test Suite', () => {
         };
 
         sinon
-            .stub(OrgUtils, 'getAllCompactLayoutsForSObject')
+            .stub(OrgUtils, 'getCompactLayoutsForSObject')
             .returns(Promise.resolve(allCompactLayouts));
         sinon
             .stub(OrgUtils, 'getCompactLayoutForSObject')
@@ -253,7 +253,7 @@ suite('Org Utils Test Suite', () => {
         };
 
         sinon
-            .stub(OrgUtils, 'getAllCompactLayoutsForSObject')
+            .stub(OrgUtils, 'getCompactLayoutsForSObject')
             .returns(Promise.resolve(allCompactLayouts));
         sinon
             .stub(OrgUtils, 'getCompactLayoutForSObject')
