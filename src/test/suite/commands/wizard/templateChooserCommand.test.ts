@@ -158,10 +158,7 @@ suite('Template Chooser Command Test Suite', () => {
     test('Landing page template written to landing page files', async () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(
-            UIUtils,
-            'getWorkspaceDir'
-        );
+        const getWorkspaceDirStub = sinon.stub(UIUtils, 'getWorkspaceDir');
         getWorkspaceDirStub.returns(projectDirMgr.projectDir);
         const staticResourcesAbsPath = path.join(
             projectDirMgr.projectDir,
