@@ -10,7 +10,7 @@ import { access } from 'fs/promises';
 import {
     NoStaticResourcesDirError,
     NoWorkspaceError
-} from '../commands/wizard/templateChooserCommand';
+} from './workspaceUtils';
 import * as path from 'path';
 
 /**
@@ -103,10 +103,10 @@ export class UIUtils {
             try {
                 await access(staticResourcesPath);
             } catch (err) {
-                const accessErrorObj = err as Error;
                 const noAccessError = new NoStaticResourcesDirError(
-                    `Could not read landing page directory at '${staticResourcesPath}': ${accessErrorObj.message}`
+                    `Could not read static resources directory at '${staticResourcesPath}'`
                 );
+                
                 return reject(noAccessError);
             }
             return resolve(staticResourcesPath);

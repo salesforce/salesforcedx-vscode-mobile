@@ -16,11 +16,9 @@ export class UEMParser {
         nestedJsonBlock: any,
         keyToMatch: string
     ): Array<string> {
-        const results: Array<any> = [];
+        const results: Array<string> = [];
 
         if (typeof nestedJsonBlock === 'object') {
-            const keys = Object.keys(nestedJsonBlock);
-
             for (const key in nestedJsonBlock) {
                 const value = nestedJsonBlock[key];
                 if (key === keyToMatch && typeof value === 'string') {
@@ -34,12 +32,7 @@ export class UEMParser {
                     );
                 }
             }
-        } else if (Array.isArray(nestedJsonBlock)) {
-            const nestedArrayBlock = nestedJsonBlock as Array<any>;
-            for (const item of nestedArrayBlock) {
-                results.push(...UEMParser.findObjectsWithKey(item, keyToMatch));
-            }
-        }
+        } 
 
         // Clean the array to return. Remove duplicate values.
         return [...new Set(results)];

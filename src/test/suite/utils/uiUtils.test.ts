@@ -12,7 +12,7 @@ import { UIUtils } from '../../../utils/uiUtils';
 import {
     NoStaticResourcesDirError,
     NoWorkspaceError
-} from '../../../commands/wizard/templateChooserCommand';
+} from '../../../utils/workspaceUtils';
 import { TempProjectDirManager } from '../../TestHelper';
 import { QuickPickItem, window, QuickPick } from 'vscode';
 import { afterEach, beforeEach } from 'mocha';
