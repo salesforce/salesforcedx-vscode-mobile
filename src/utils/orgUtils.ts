@@ -72,7 +72,7 @@ export class OrgUtils {
         }
     }
 
-    private static async getAllCompactLayoutsForSObject(
+    public static async getAllCompactLayoutsForSObject(
         sObjectName: string
     ): Promise<any> {
         const org = await Org.create();
@@ -85,7 +85,7 @@ export class OrgUtils {
         return Promise.resolve(result);
     }
 
-    private static async getCompactLayoutForSObject(
+    public static async getCompactLayoutForSObject(
         sObjectName: string,
         recordTypeId: string
     ): Promise<any> {
@@ -103,10 +103,10 @@ export class OrgUtils {
         sObjectName: string
     ): Promise<CompactLayoutField[]> {
         try {
+            const fields: CompactLayoutField[] = [];
+
             // Get all the compact layouts associated to this sObject first
             let result = await this.getAllCompactLayoutsForSObject(sObjectName);
-
-            const fields: CompactLayoutField[] = [];
 
             if (result) {
                 const resultObj = result as Object;
@@ -116,6 +116,7 @@ export class OrgUtils {
                     resultObj['defaultCompactLayoutId' as keyof Object];
 
                 // Mapping tab
+                console.error(resultObj);
                 const recordTypeCompactLayoutMappings =
                     resultObj[
                         'recordTypeCompactLayoutMappings' as keyof Object
