@@ -25,6 +25,17 @@ export interface CompactLayoutField {
     label: string;
 }
 
+export type SObjectCompactLayoutMapping = {
+    compactLayoutId: string | null;
+    compactLayoutName: string;
+    recordTypeId: string;
+};
+
+export type SObjectCompactLayouts = {
+    defaultCompactLayoutId: string | null;
+    recordTypeCompactLayoutMappings: SObjectCompactLayoutMapping[];
+};
+
 export class OrgUtils {
     public static async getSobjects(): Promise<SObject[]> {
         try {
@@ -74,11 +85,11 @@ export class OrgUtils {
 
     public static async getCompactLayoutsForSObject(
         sObjectName: string
-    ): Promise<Object> {
+    ): Promise<SObjectCompactLayouts> {
         const org = await Org.create();
         const conn = org.getConnection();
 
-        const result = await conn.request<Object>(
+        const result = await conn.request<SObjectCompactLayouts>(
             `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts`
         );
 
@@ -110,32 +121,31 @@ export class OrgUtils {
 
             if (result) {
                 // sObject can have multiple compact layouts associated with it. Get the default.
-                const defaultCompactLayoutId =
-                    result['defaultCompactLayoutId' as keyof Object];
+                const defaultCompactLayoutId = result.defaultCompactLayoutId;
+                result['defaultCompactLayoutId'];
 
                 // Mapping tab
                 const recordTypeCompactLayoutMappings =
-                    result['recordTypeCompactLayoutMappings' as keyof Object];
+                    result.recordTypeCompactLayoutMappings;
 
                 // ID of compact layout need to be normalized
-                const recordTypeCompactLayoutMapping = (
-                    recordTypeCompactLayoutMappings as unknown as Array<Object>
-                ).find((element) => {
-                    if (defaultCompactLayoutId) {
-                        return (
-                            element['compactLayoutId' as keyof Object] ===
-                            defaultCompactLayoutId
-                        );
-                    } else {
-                        // defaultCompactLayoutId can be null when a compact layout is not assigned.
-                        // In that case sObject will always have one default layout called SYSTEM.
-                        // So use that instead.
-                        const compactLayoutName = element[
-                            'compactLayoutName' as keyof Object
-                        ] as unknown as string;
-                        return compactLayoutName === 'SYSTEM';
-                    }
-                });
+                const recordTypeCompactLayoutMapping =
+                    recordTypeCompactLayoutMappings.find((element) => {
+                        if (defaultCompactLayoutId) {
+                            return (
+                                element.compactLayoutId ===
+                                defaultCompactLayoutId
+                            );
+                        } else {
+                            // defaultCompactLayoutId can be null when a compact layout is not assigned.
+                            // In that case sObject will always have one default layout called SYSTEM.
+                            // So use that instead.
+                            const compactLayoutName = element[
+                                'compactLayoutName' as keyof Object
+                            ] as unknown as string;
+                            return compactLayoutName === 'SYSTEM';
+                        }
+                    });
 
                 if (recordTypeCompactLayoutMapping) {
                     const recordTypeId =
@@ -145,13 +155,13 @@ export class OrgUtils {
 
                     // With the compact layout ID mapped back to the recordType ID, make another network request to get the
                     // exact compact layout info.
-                    result = await this.getCompactLayoutForSObject(
+                    const compactLayout = await this.getCompactLayoutForSObject(
                         sObjectName,
                         recordTypeId as unknown as string
                     );
 
-                    if (result) {
-                        return result[
+                    if (compactLayout) {
+                        return compactLayout[
                             'fieldItems' as keyof Object
                         ] as unknown as CompactLayoutField[];
                     }
