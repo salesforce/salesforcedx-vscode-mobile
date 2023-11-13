@@ -159,7 +159,7 @@ suite('Template Chooser Command Test Suite', () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
         const getWorkspaceDirStub = sinon.stub(
-            TemplateChooserCommand,
+            UIUtils,
             'getWorkspaceDir'
         );
         getWorkspaceDirStub.returns(projectDirMgr.projectDir);
