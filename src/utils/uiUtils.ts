@@ -7,10 +7,7 @@
 
 import { window, workspace, QuickPickItem } from 'vscode';
 import { access } from 'fs/promises';
-import {
-    NoStaticResourcesDirError,
-    NoWorkspaceError
-} from './workspaceUtils';
+import { NoStaticResourcesDirError, NoWorkspaceError } from './workspaceUtils';
 import * as path from 'path';
 
 /**
@@ -106,7 +103,7 @@ export class UIUtils {
                 const noAccessError = new NoStaticResourcesDirError(
                     `Could not read static resources directory at '${staticResourcesPath}'`
                 );
-                
+
                 return reject(noAccessError);
             }
             return resolve(staticResourcesPath);

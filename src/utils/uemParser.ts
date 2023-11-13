@@ -32,7 +32,7 @@ export class UEMParser {
                     );
                 }
             }
-        } 
+        }
 
         // Clean the array to return. Remove duplicate values.
         return [...new Set(results)];
