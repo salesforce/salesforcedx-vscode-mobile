@@ -36,6 +36,10 @@ export type SObjectCompactLayouts = {
     recordTypeCompactLayoutMappings: SObjectCompactLayoutMapping[];
 };
 
+export type SObjectCompactLayout = {
+    fieldItems: CompactLayoutField[];
+};
+
 export class OrgUtils {
     public static async getSobjects(): Promise<SObject[]> {
         try {
@@ -99,11 +103,11 @@ export class OrgUtils {
     public static async getCompactLayoutForSObject(
         sObjectName: string,
         recordTypeId: string
-    ): Promise<Object> {
+    ): Promise<SObjectCompactLayout> {
         const org = await Org.create();
         const conn = org.getConnection();
 
-        const result = await conn.request<Object>(
+        const result = await conn.request<SObjectCompactLayout>(
             `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts/${recordTypeId}`
         );
 
@@ -124,9 +128,8 @@ export class OrgUtils {
                 const defaultCompactLayoutId = result.defaultCompactLayoutId;
                 result['defaultCompactLayoutId'];
 
-                // Mapping tab
-                const recordTypeCompactLayoutMappings =
-                    result.recordTypeCompactLayoutMappings;
+                // Mapping table
+                const recordTypeCompactLayoutMappings = result.recordTypeCompactLayoutMappings;
 
                 // ID of compact layout need to be normalized
                 const recordTypeCompactLayoutMapping =
@@ -140,30 +143,20 @@ export class OrgUtils {
                             // defaultCompactLayoutId can be null when a compact layout is not assigned.
                             // In that case sObject will always have one default layout called SYSTEM.
                             // So use that instead.
-                            const compactLayoutName = element[
-                                'compactLayoutName' as keyof Object
-                            ] as unknown as string;
-                            return compactLayoutName === 'SYSTEM';
+                            return element.compactLayoutName === 'SYSTEM';
                         }
                     });
 
                 if (recordTypeCompactLayoutMapping) {
-                    const recordTypeId =
-                        recordTypeCompactLayoutMapping[
-                            'recordTypeId' as keyof Object
-                        ];
-
                     // With the compact layout ID mapped back to the recordType ID, make another network request to get the
                     // exact compact layout info.
                     const compactLayout = await this.getCompactLayoutForSObject(
                         sObjectName,
-                        recordTypeId as unknown as string
+                        recordTypeCompactLayoutMapping.recordTypeId
                     );
 
                     if (compactLayout) {
-                        return compactLayout[
-                            'fieldItems' as keyof Object
-                        ] as unknown as CompactLayoutField[];
+                        return compactLayout.fieldItems;
                     }
                 }
             }
