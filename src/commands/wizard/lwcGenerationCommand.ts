@@ -80,21 +80,17 @@ export class LwcGenerationCommand {
                     {
                         type: 'getQuickActionStatus',
                         action: async (_panel, _data, callback) => {
-                            const layoutFields =
-                                await OrgUtils.getCompactLayoutFieldsForSObject(
-                                    'Contact'
-                                );
-
-                            // TODO: Hook this up to function that parses landing_page.json.
-                            const sobjects = [
-                                'Account',
-                                'Contact',
-                                'Opportunity',
-                                'SomeOther'
-                            ];
                             if (callback) {
                                 const quickActionStatus =
                                     await LwcGenerationCommand.checkForExistingQuickActions();
+
+                                for (const key in quickActionStatus.sobjects) {
+                                    const layoutFields =
+                                        await OrgUtils.getCompactLayoutFieldsForSObject(
+                                            key
+                                        );
+                                }
+
                                 callback(quickActionStatus);
                             }
                         }
