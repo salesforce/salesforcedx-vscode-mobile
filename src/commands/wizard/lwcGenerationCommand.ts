@@ -1,6 +1,11 @@
 import { Uri, l10n } from 'vscode';
+import { access } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
+import { UEMParser } from '../../utils/uemParser';
+import { WorkspaceUtils } from '../../utils/workspaceUtils';
+import { CommonUtils } from '@salesforce/lwc-dev-mobile-core';
 import * as fs from 'fs';
+import * as path from 'path';
 
 export type QuickActionStatus = {
     view: boolean;
@@ -9,9 +14,15 @@ export type QuickActionStatus = {
 };
 
 export type SObjectQuickActionStatus = {
+    error?: string;
     sobjects: {
         [name: string]: QuickActionStatus;
     };
+};
+
+export type GetSObjectsStatus = {
+    error?: string;
+    sobjects: string[];
 };
 
 export class LwcGenerationCommand {
@@ -19,6 +30,35 @@ export class LwcGenerationCommand {
 
     constructor(extensionUri: Uri) {
         this.extensionUri = extensionUri;
+    }
+
+    static async getSObjectsFromLandingPage(): Promise<GetSObjectsStatus> {
+        return new Promise<GetSObjectsStatus>(async (resolve) => {
+            const staticResourcesPath =
+                await WorkspaceUtils.getStaticResourcesDir();
+            const landingPageJson = 'landing_page.json';
+            const landingPagePath = path.join(
+                staticResourcesPath,
+                landingPageJson
+            );
+
+            const getSObjectsStatus: GetSObjectsStatus = {
+                sobjects: []
+            };
+
+            try {
+                await access(landingPagePath);
+                const uem = CommonUtils.loadJsonFromFile(landingPagePath);
+                getSObjectsStatus.sobjects = UEMParser.findSObjects(uem);
+            } catch (err) {
+                console.warn(
+                    `File '${landingPageJson}' does not exist at '${staticResourcesPath}'.`
+                );
+                getSObjectsStatus.error = (err as Error).message;
+            }
+
+            resolve(getSObjectsStatus);
+        });
     }
 
     async createSObjectLwcQuickActions() {
@@ -39,18 +79,9 @@ export class LwcGenerationCommand {
                     {
                         type: 'getQuickActionStatus',
                         action: async (_panel, _data, callback) => {
-                            // TODO: Hook this up to function that parses landing_page.json.
-                            const sobjects = [
-                                'Account',
-                                'Contact',
-                                'Opportunity',
-                                'SomeOther'
-                            ];
                             if (callback) {
                                 const quickActionStatus =
-                                    await LwcGenerationCommand.checkForExistingQuickActions(
-                                        sobjects
-                                    );
+                                    await LwcGenerationCommand.checkForExistingQuickActions();
                                 callback(quickActionStatus);
                             }
                         }
@@ -60,13 +91,17 @@ export class LwcGenerationCommand {
         });
     }
 
-    static async checkForExistingQuickActions(
-        sobjects: string[]
-    ): Promise<SObjectQuickActionStatus> {
+    static async checkForExistingQuickActions(): Promise<SObjectQuickActionStatus> {
         return new Promise<SObjectQuickActionStatus>(async (resolve) => {
             const results: SObjectQuickActionStatus = { sobjects: {} };
 
-            sobjects.forEach((sobject) => {
+            const sObjectsStatus = await this.getSObjectsFromLandingPage();
+            if (sObjectsStatus.error) {
+                results.error = sObjectsStatus.error;
+                return resolve(results);
+            }
+
+            sObjectsStatus.sobjects.forEach((sobject) => {
                 const quickActionStatus: QuickActionStatus = {
                     view: false,
                     edit: false,

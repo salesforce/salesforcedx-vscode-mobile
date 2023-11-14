@@ -35,76 +35,76 @@
 <body>
     <h1>Create sObject LWC Quick Actions</h1>
 
-    <p>
-        The following sObjects are present in your configured landing page:
-    </p>
+        <p id="sobjectDiv">
+            The following sObjects are present in your configured landing page:
+        </p>
 
-    <table id="quickActionStatusTable">
-        <thead>
-            <tr>
-                <th rowspan="2">sObject</th>
-                <th colspan="3">LWC Quick Actions</th>
-            </tr>
-            <tr>
-                <th>view</th>
-                <th>edit</th>
-                <th>create</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- will be filled in programatically below -->
-        </tbody>
-    </table>
+        <table id="quickActionStatusTable">
+            <thead>
+                <tr>
+                    <th rowspan="2">sObject</th>
+                    <th colspan="3">LWC Quick Actions</th>
+                </tr>
+                <tr>
+                    <th>view</th>
+                    <th>edit</th>
+                    <th>create</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- will be filled in programatically below -->
+            </tbody>
+        </table>
 
-    <label style="display: block; margin-top: 10px; margin-bottom: 8px" for="generateLwcQuickActionsButton">
-        Click 'Generate LWC Quick Actions' to create the missing LWC Quick
-        Actions:
-    </label>
-    <button id="generateLwcQuickActionsButton">
-        Generate LWC Quick Actions
-    </button>
-    <script>
-        const generateQuickActionsButtonElement = document.getElementById(
-            'generateLwcQuickActionsButton'
-        );
-        generateQuickActionsButtonElement.addEventListener('click', () => {
-            webviewMessaging.sendMessageRequest(
+        <label
+            style="display: block; margin-top: 10px; margin-bottom: 8px"
+            for="generateLwcQuickActionsButton"
+        >
+            Click 'Generate LWC Quick Actions' to create the missing LWC Quick
+            Actions:
+        </label>
+        <button id="generateLwcQuickActionsButton">
+            Generate LWC Quick Actions
+        </button>
+        <script>
+            const generateQuickActionsButtonElement = document.getElementById(
                 'generateLwcQuickActionsButton'
             );
-        });
+            generateQuickActionsButtonElement.addEventListener('click', () => {
+                webviewMessaging.sendMessageRequest(
+                    'generateLwcQuickActionsButton'
+                );
+            });
 
-        // Wait until all scripts are loaded, before engaging with e.g.
-        // messaging functionality.
-        window.addEventListener('load', () => {
-            // What's the status of the various sobject quick actions in the landing_page.json?
-            webviewMessaging.sendMessageRequest(
-                'getQuickActionStatus',
-                {},
-                handleQuickActionStatusResponse
-            );
+            // Wait until all scripts are loaded, before engaging with e.g.
+            // messaging functionality.
+            window.addEventListener('load', () => {
+                // What's the status of the various sobject quick actions in the landing_page.json?
+                webviewMessaging.sendMessageRequest(
+                    'getQuickActionStatus',
+                    {},
+                    handleQuickActionStatusResponse
+                );
+            });
 
-        });
+            function handleQuickActionStatusResponse(response) {
+                const table = document.getElementById('quickActionStatusTable');
+                for (const sobject in response.sobjects) {
+                    const quickActions = response.sobjects[sobject];
 
-        function handleQuickActionStatusResponse(response) {
-            const table = document.getElementById('quickActionStatusTable');
-            for (const sobject in response.sobjects) {
-                const quickActions = response.sobjects[sobject];
+                    const sobjectRow = table.insertRow();
+                    const name = sobjectRow.insertCell(0);
+                    const view = sobjectRow.insertCell(1);
+                    const edit = sobjectRow.insertCell(2);
+                    const create = sobjectRow.insertCell(3);
 
-                const sobjectRow = table.insertRow();
-                const name = sobjectRow.insertCell(0);
-                const view = sobjectRow.insertCell(1);
-                const edit = sobjectRow.insertCell(2);
-                const create = sobjectRow.insertCell(3);
-
-                name.innerText = sobject;
-                view.innerHTML = quickActions.view == true ? "✅" : "❌";
-                edit.innerHTML = quickActions.edit == true ? "✅" : "❌";
-                create.innerHTML = quickActions.create == true ? "✅" : "❌";
+                    name.innerText = sobject;
+                    view.innerHTML = quickActions.view == true ? "✅" : "❌";
+                    edit.innerHTML = quickActions.edit == true ? "✅" : "❌";
+                    create.innerHTML = quickActions.create == true ? "✅" : "❌";
+                }
             }
-        }
-    </script>
-
-    <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
-</body>
-
+        </script>
+        <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
+    </body>
 </html>

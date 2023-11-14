@@ -12,7 +12,6 @@ import { DeployToOrgCommand } from './deployToOrgCommand';
 import { ConfigureProjectCommand } from './configureProjectCommand';
 import { AuthorizeCommand } from './authorizeCommand';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
-import { LwcGenerationCommand } from './lwcGenerationCommand';
 
 const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
 const onboardingWizardStateKey =

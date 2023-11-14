@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { window, QuickPickItem, QuickPickItemKind, QuickPick } from 'vscode';
+import { window, QuickPickItem } from 'vscode';
 
 /**
  * Convenience wrapper for VS Code UI Extension methods such as showQuickPick().
