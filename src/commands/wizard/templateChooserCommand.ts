@@ -10,7 +10,7 @@ import { ProgressLocation, window, workspace } from 'vscode';
 import * as path from 'path';
 import { access, copyFile } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
-import { UIUtils } from '../../utils/uiUtils';
+import { WorkspaceUtils } from '../../utils/workspaceUtils';
 
 export type LandingPageStatus = {
     exists: boolean;
@@ -105,7 +105,8 @@ export class TemplateChooserCommand {
             }
 
             // If a landing page exists, warn about overwriting it.
-            const staticResourcesPath = await UIUtils.getStaticResourcesDir();
+            const staticResourcesPath =
+                await WorkspaceUtils.getStaticResourcesDir();
             const existingLandingPageFiles = await this.landingPageFilesExist(
                 staticResourcesPath,
                 'existing'
@@ -181,7 +182,8 @@ export class TemplateChooserCommand {
 
             let staticResourcesPath: string;
             try {
-                staticResourcesPath = await UIUtils.getStaticResourcesDir();
+                staticResourcesPath =
+                    await WorkspaceUtils.getStaticResourcesDir();
             } catch (err) {
                 landingPageCollectionStatus.error = (err as Error).message;
                 return resolve(landingPageCollectionStatus);

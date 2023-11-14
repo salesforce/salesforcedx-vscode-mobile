@@ -11,7 +11,8 @@ import { mkdir } from 'fs/promises';
 import { UIUtils } from '../../../utils/uiUtils';
 import {
     NoStaticResourcesDirError,
-    NoWorkspaceError
+    NoWorkspaceError,
+    WorkspaceUtils
 } from '../../../utils/workspaceUtils';
 import { TempProjectDirManager } from '../../TestHelper';
 import { QuickPickItem, window, QuickPick } from 'vscode';
@@ -104,7 +105,7 @@ suite('UIUtils Test Suite', () => {
 
     test('Static resources dir: workspace does not exist', async () => {
         try {
-            await UIUtils.getStaticResourcesDir();
+            await WorkspaceUtils.getStaticResourcesDir();
             assert.fail('There should have been an error thrown.');
         } catch (noWorkspaceErr) {
             assert.ok(
@@ -117,10 +118,13 @@ suite('UIUtils Test Suite', () => {
     test('Static resources dir: static resources dir does not exist', async () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(UIUtils, 'getWorkspaceDir');
+        const getWorkspaceDirStub = sinon.stub(
+            WorkspaceUtils,
+            'getWorkspaceDir'
+        );
         getWorkspaceDirStub.returns(projectDirMgr.projectDir);
         try {
-            await UIUtils.getStaticResourcesDir();
+            await WorkspaceUtils.getStaticResourcesDir();
             assert.fail('There should have been an error thrown.');
         } catch (noStaticDirErr) {
             assert.ok(
@@ -136,17 +140,20 @@ suite('UIUtils Test Suite', () => {
     test('Static resources dir: static resources dir exists', async () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(UIUtils, 'getWorkspaceDir');
+        const getWorkspaceDirStub = sinon.stub(
+            WorkspaceUtils,
+            'getWorkspaceDir'
+        );
         getWorkspaceDirStub.returns(projectDirMgr.projectDir);
 
         const staticResourcesAbsPath = path.join(
             projectDirMgr.projectDir,
-            UIUtils.STATIC_RESOURCES_PATH
+            WorkspaceUtils.STATIC_RESOURCES_PATH
         );
         await mkdir(staticResourcesAbsPath, { recursive: true });
 
         try {
-            const outputDir = await UIUtils.getStaticResourcesDir();
+            const outputDir = await WorkspaceUtils.getStaticResourcesDir();
             assert.equal(outputDir, staticResourcesAbsPath);
         } finally {
             await projectDirMgr.removeDir();

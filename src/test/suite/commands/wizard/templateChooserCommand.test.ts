@@ -17,6 +17,7 @@ import {
 } from '../../../../commands/wizard/templateChooserCommand';
 import { TempProjectDirManager } from '../../../TestHelper';
 import { UIUtils } from '../../../../utils/uiUtils';
+import { WorkspaceUtils } from '../../../../utils/workspaceUtils';
 
 type LandingPageTestIOConfig = {
     [landingPageType in LandingPageType]?: {
@@ -34,11 +35,14 @@ suite('Template Chooser Command Test Suite', () => {
     test('Landing pages exist: existing landing page file combinations', async () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(UIUtils, 'getWorkspaceDir');
+        const getWorkspaceDirStub = sinon.stub(
+            WorkspaceUtils,
+            'getWorkspaceDir'
+        );
         getWorkspaceDirStub.returns(projectDirMgr.projectDir);
         const staticResourcesAbsPath = path.join(
             projectDirMgr.projectDir,
-            UIUtils.STATIC_RESOURCES_PATH
+            WorkspaceUtils.STATIC_RESOURCES_PATH
         );
         await mkdir(staticResourcesAbsPath, { recursive: true });
 
@@ -111,11 +115,14 @@ suite('Template Chooser Command Test Suite', () => {
     test('User is asked to overwrite existing landing page', async () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(UIUtils, 'getWorkspaceDir');
+        const getWorkspaceDirStub = sinon.stub(
+            WorkspaceUtils,
+            'getWorkspaceDir'
+        );
         getWorkspaceDirStub.returns(projectDirMgr.projectDir);
         const staticResourcesAbsPath = path.join(
             projectDirMgr.projectDir,
-            UIUtils.STATIC_RESOURCES_PATH
+            WorkspaceUtils.STATIC_RESOURCES_PATH
         );
         await mkdir(staticResourcesAbsPath, { recursive: true });
         const config: LandingPageTestIOConfig = {
@@ -158,11 +165,14 @@ suite('Template Chooser Command Test Suite', () => {
     test('Landing page template written to landing page files', async () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(UIUtils, 'getWorkspaceDir');
+        const getWorkspaceDirStub = sinon.stub(
+            WorkspaceUtils,
+            'getWorkspaceDir'
+        );
         getWorkspaceDirStub.returns(projectDirMgr.projectDir);
         const staticResourcesAbsPath = path.join(
             projectDirMgr.projectDir,
-            UIUtils.STATIC_RESOURCES_PATH
+            WorkspaceUtils.STATIC_RESOURCES_PATH
         );
         await mkdir(staticResourcesAbsPath, { recursive: true });
 
@@ -230,11 +240,14 @@ suite('Template Chooser Command Test Suite', () => {
     test('Landing page status: various file existence scenarios', async () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(UIUtils, 'getWorkspaceDir');
+        const getWorkspaceDirStub = sinon.stub(
+            WorkspaceUtils,
+            'getWorkspaceDir'
+        );
         getWorkspaceDirStub.returns(projectDirMgr.projectDir);
         const staticResourcesAbsPath = path.join(
             projectDirMgr.projectDir,
-            UIUtils.STATIC_RESOURCES_PATH
+            WorkspaceUtils.STATIC_RESOURCES_PATH
         );
         await mkdir(staticResourcesAbsPath, { recursive: true });
         const landingPageConfig: LandingPageTestIOConfig = {

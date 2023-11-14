@@ -2,7 +2,7 @@ import { Uri, l10n } from 'vscode';
 import { access } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { UEMParser } from '../../utils/uemParser';
-import { UIUtils } from '../../utils/uiUtils';
+import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -34,7 +34,8 @@ export class LwcGenerationCommand {
 
     static async getSObjectsFromLandingPage(): Promise<GetSObjectsStatus> {
         return new Promise<GetSObjectsStatus>(async (resolve) => {
-            const staticResourcesPath = await UIUtils.getStaticResourcesDir();
+            const staticResourcesPath =
+                await WorkspaceUtils.getStaticResourcesDir();
             const landingPageJson = 'landing_page.json';
             const landingPagePath = path.join(
                 staticResourcesPath,
