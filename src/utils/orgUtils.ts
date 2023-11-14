@@ -129,7 +129,8 @@ export class OrgUtils {
                 result['defaultCompactLayoutId'];
 
                 // Mapping table
-                const recordTypeCompactLayoutMappings = result.recordTypeCompactLayoutMappings;
+                const recordTypeCompactLayoutMappings =
+                    result.recordTypeCompactLayoutMappings;
 
                 // ID of compact layout need to be normalized
                 const recordTypeCompactLayoutMapping =
