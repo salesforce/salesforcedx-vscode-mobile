@@ -84,18 +84,12 @@
 
         generateQuickActionsButtonElement.addEventListener('click', () => {
             webviewMessaging.sendMessageRequest(
-                'generateLwcQuickActionsButton',
+                'generateLwcQuickActions',
                 {},
                 handleQuickActionStatusResponse
             );
         });
         
-        generateQuickActionsButtonElement.addEventListener('click', () => {
-            webviewMessaging.sendMessageRequest(
-                'generateLwcQuickActionsButton'
-            );
-        });
-
         continueButtonElement.addEventListener('click', () => {
             webviewMessaging.sendMessageRequest(
                 'continueButton'

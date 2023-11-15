@@ -51,8 +51,8 @@ export class LwcGenerationCommand {
                         }
                     },
                     {
-                        type: 'generateLwcQuickActionsButton',
-                        action: async (panel, _data, callback) => {
+                        type: 'generateLwcQuickActions',
+                        action: async (_panel, _data, callback) => {
                             const quickActionStatus =
                                 await LwcGenerationCommand.checkForExistingQuickActions();
 

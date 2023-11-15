@@ -8,15 +8,13 @@ import * as fs from 'fs';
 import { Uri } from 'vscode';
 import * as path from 'path';
 import { CompactLayoutField } from './orgUtils';
+import { WorkspaceUtils } from './workspaceUtils';
 
 type TemplateVariables = { [name: string]: string };
 
 export class CodeBuilder {
-    static readonly TEMPLATE_DIR = './resources/templates';
     static readonly QUICK_ACTION_TEMPLATE_NAME = 'quickAction.xml';
-    static readonly LWC_DESTINATION_DIR = './force-app/main/default/lwc';
-    static readonly QA_DESTINATION_DIR =
-        './force-app/main/default/quickActions';
+
     static readonly TEMPLATE_FILE_EXTENSIONS = [
         'css',
         'html',
@@ -122,7 +120,7 @@ export class CodeBuilder {
         iconName: string | undefined = undefined
     ) {
         const templateFilePath = path.join(
-            CodeBuilder.TEMPLATE_DIR,
+            WorkspaceUtils.LWC_TEMPLATE_PATH,
             CodeBuilder.QUICK_ACTION_TEMPLATE_NAME
         );
         const fileContents = this.readFileContents(templateFilePath);
@@ -151,7 +149,7 @@ export class CodeBuilder {
         const destinationFile = `${objectApiName}.${label.toLocaleLowerCase()}.quickAction-meta.xml`;
 
         this.writeFileContents(
-            CodeBuilder.QA_DESTINATION_DIR,
+            WorkspaceUtils.QUICK_ACTIONS_PATH,
             destinationFile,
             newFileContents
         );
@@ -164,7 +162,7 @@ export class CodeBuilder {
     ) {
         CodeBuilder.TEMPLATE_FILE_EXTENSIONS.forEach((extension) => {
             const templateFilePath = path.join(
-                CodeBuilder.TEMPLATE_DIR,
+                WorkspaceUtils.LWC_TEMPLATE_PATH,
                 template,
                 `${template}.${extension}`
             );
@@ -178,7 +176,7 @@ export class CodeBuilder {
 
             // copy to destination directory
             const destinationDir = path.join(
-                CodeBuilder.LWC_DESTINATION_DIR,
+                WorkspaceUtils.LWC_PATH,
                 destinationLwc
             );
             const destinationFile = `${destinationLwc}.${extension}`;

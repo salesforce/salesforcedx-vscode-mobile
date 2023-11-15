@@ -10,12 +10,28 @@ import { access } from 'fs/promises';
 import * as path from 'path';
 
 export class WorkspaceUtils {
-    static readonly STATIC_RESOURCES_PATH = path.join(
+    static readonly DEFAULT_APP_PATH = path.join(
         'force-app',
         'main',
-        'default',
+        'default'
+    );
+
+    static readonly STATIC_RESOURCES_PATH = path.join(
+        WorkspaceUtils.DEFAULT_APP_PATH,
         'staticresources'
     );
+
+    static readonly LWC_PATH = path.join(
+        WorkspaceUtils.DEFAULT_APP_PATH,
+        'lwc'
+    );
+
+    static readonly QUICK_ACTIONS_PATH = path.join(
+        WorkspaceUtils.DEFAULT_APP_PATH,
+        'quickActions'
+    );
+
+    static readonly LWC_TEMPLATE_PATH = path.join('resources', 'templates');
 
     static getWorkspaceDir(): string {
         const workspaceFolders = workspace.workspaceFolders;
