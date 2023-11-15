@@ -140,6 +140,132 @@ suite('Org Utils Test Suite', () => {
         assert.equal(sobject.labelPlural, 'Labels');
     });
 
+    test('Returns SYSTEM compact layout', async () => {
+        // Simplified all compact layout data structure
+        const allCompactLayouts = {
+            defaultCompactLayoutId: null,
+            recordTypeCompactLayoutMappings: [
+                {
+                    available: true,
+                    compactLayoutId: null,
+                    compactLayoutName: 'SYSTEM',
+                    recordTypeId: '012000000000000AAA',
+                    recordTypeName: 'Master',
+                    urls: {
+                        compactLayout:
+                            '/services/data/v59.0/sobjects/Contact/describe/compactLayouts/012000000000000AAA'
+                    }
+                }
+            ]
+        };
+
+        // Simplified compact layout data structure
+        const compactLayout = {
+            fieldItems: [
+                {
+                    editableForNew: true,
+                    editableForUpdate: true,
+                    label: 'Name'
+                },
+                {
+                    editableForNew: true,
+                    editableForUpdate: true,
+                    label: 'Title'
+                },
+                {
+                    editableForNew: false,
+                    editableForUpdate: false,
+                    label: 'Contact Owner'
+                }
+            ],
+            id: null,
+            label: 'System Default',
+            name: 'SYSTEM',
+            objectType: 'Contact'
+        };
+
+        sinon
+            .stub(OrgUtils, 'getCompactLayoutsForSObject')
+            .returns(Promise.resolve(allCompactLayouts));
+        sinon
+            .stub(OrgUtils, 'getCompactLayoutForSObject')
+            .returns(Promise.resolve(compactLayout));
+
+        const result =
+            await OrgUtils.getCompactLayoutFieldsForSObject('Contact');
+
+        assert.equal(result, compactLayout.fieldItems);
+    });
+
+    test('Returns Contact compact layout', async () => {
+        // Simplified all compact layout data structure
+        const allCompactLayouts = {
+            defaultCompactLayoutId: '123456789',
+            recordTypeCompactLayoutMappings: [
+                {
+                    available: true,
+                    compactLayoutId: null,
+                    compactLayoutName: 'SYSTEM',
+                    recordTypeId: '012000000000000AAA',
+                    recordTypeName: 'Master',
+                    urls: {
+                        compactLayout:
+                            '/services/data/v59.0/sobjects/Contact/describe/compactLayouts/012000000000000AAA'
+                    }
+                },
+                {
+                    available: true,
+                    compactLayoutId: '123456789',
+                    compactLayoutName: 'Mobile layout',
+                    recordTypeId: '012000000000000BBB',
+                    recordTypeName: 'Contact',
+                    urls: {
+                        compactLayout:
+                            '/services/data/v59.0/sobjects/Contact/describe/compactLayouts/012000000000000BBB'
+                    }
+                }
+            ]
+        };
+
+        // Simplified compact layout data structure
+        const compactLayout = {
+            fieldItems: [
+                {
+                    editableForNew: true,
+                    editableForUpdate: true,
+                    label: 'Name'
+                },
+                {
+                    editableForNew: true,
+                    editableForUpdate: true,
+                    label: 'Title'
+                },
+                {
+                    editableForNew: false,
+                    editableForUpdate: false,
+                    label: 'Contact Owner'
+                }
+            ],
+            id: null,
+            label: 'Mobile layout',
+            name: 'Mobile layout',
+            objectType: 'Contact'
+        };
+
+        sinon
+            .stub(OrgUtils, 'getCompactLayoutsForSObject')
+            .returns(Promise.resolve(allCompactLayouts));
+        sinon
+            .stub(OrgUtils, 'getCompactLayoutForSObject')
+            .withArgs('Contact', '012000000000000BBB')
+            .returns(Promise.resolve(compactLayout));
+
+        const result =
+            await OrgUtils.getCompactLayoutFieldsForSObject('Contact');
+
+        assert.equal(result, compactLayout.fieldItems);
+    });
+
     test('Returns list of fields for given sObject', async () => {
         const sobjectFields: FieldType[] = [
             buildField('City', 'string', 'Label'),

@@ -4,6 +4,7 @@ import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { UEMParser } from '../../utils/uemParser';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core';
+import { OrgUtils } from '../../utils/orgUtils';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -82,6 +83,14 @@ export class LwcGenerationCommand {
                             if (callback) {
                                 const quickActionStatus =
                                     await LwcGenerationCommand.checkForExistingQuickActions();
+
+                                for (const key in quickActionStatus.sobjects) {
+                                    const layoutFields =
+                                        await OrgUtils.getCompactLayoutFieldsForSObject(
+                                            key
+                                        );
+                                }
+
                                 callback(quickActionStatus);
                             }
                         }
