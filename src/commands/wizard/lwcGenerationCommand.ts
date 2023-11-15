@@ -56,16 +56,15 @@ export class LwcGenerationCommand {
                             const quickActionStatus =
                                 await LwcGenerationCommand.checkForExistingQuickActions();
 
-                            await LwcGenerationCommand.generateMissingLwcsAndQuickActions(
-                                extensionUri,
-                                quickActionStatus
-                            );
+                            const newLwcQuickActionStatus =
+                                await LwcGenerationCommand.generateMissingLwcsAndQuickActions(
+                                    extensionUri,
+                                    quickActionStatus
+                                );
 
                             // send back updates so UI can be refreshed
                             if (callback) {
-                                const quickActionStatus =
-                                    await LwcGenerationCommand.checkForExistingQuickActions();
-                                callback(quickActionStatus);
+                                callback(newLwcQuickActionStatus);
                             }
                         }
                     },
@@ -158,36 +157,43 @@ export class LwcGenerationCommand {
     ): Promise<SObjectQuickActionStatus> {
         return new Promise<SObjectQuickActionStatus>(async (resolve) => {
             for (const sobject in quickActionStatus.sobjects) {
-                const quickActions = quickActionStatus.sobjects[sobject];
+                try {
+                    const quickActions = quickActionStatus.sobjects[sobject];
 
-                if (
-                    !quickActions.create ||
-                    !quickActions.edit ||
-                    !quickActions.view
-                ) {
-                    // at least 1 needs to be created
-                    const compactLayoutFields =
-                        await OrgUtils.getCompactLayoutFieldsForSObject(
-                            sobject
+                    if (
+                        !quickActions.create ||
+                        !quickActions.edit ||
+                        !quickActions.view
+                    ) {
+                        // at least 1 needs to be created
+                        const compactLayoutFields =
+                            await OrgUtils.getCompactLayoutFieldsForSObject(
+                                sobject
+                            );
+
+                        const codeBuilder = new CodeBuilder(
+                            extensionUri,
+                            sobject,
+                            compactLayoutFields
                         );
 
-                    const codeBuilder = new CodeBuilder(
-                        extensionUri,
-                        sobject,
-                        compactLayoutFields
+                        if (!quickActions.view) {
+                            await codeBuilder.generateView();
+                        }
+
+                        if (!quickActions.edit) {
+                            await codeBuilder.generateEdit();
+                        }
+
+                        if (!quickActions.create) {
+                            await codeBuilder.generateCreate();
+                        }
+                    }
+                } catch (err) {
+                    console.error(
+                        `Could not generate quick actions for sobject ${sobject}, so skipping`,
+                        err
                     );
-
-                    if (!quickActions.view) {
-                        await codeBuilder.generateView();
-                    }
-
-                    if (!quickActions.edit) {
-                        await codeBuilder.generateEdit();
-                    }
-
-                    if (!quickActions.create) {
-                        await codeBuilder.generateCreate();
-                    }
                 }
             }
 
