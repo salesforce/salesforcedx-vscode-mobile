@@ -78,6 +78,10 @@
             'continueButton'
         );
 
+        const quickActionStatusTable = document.getElementById(
+            'quickActionStatusTable'
+        );
+
         generateQuickActionsButtonElement.addEventListener('click', () => {
             webviewMessaging.sendMessageRequest(
                 'generateLwcQuickActionsButton',
@@ -107,12 +111,10 @@
                 {},
                 handleQuickActionStatusResponse
             );
-            
         });
 
         function handleQuickActionStatusResponse(response) {
-            const table = document.getElementById('quickActionStatusTable');
-            var tbody = table.getElementsByTagName('tbody')[0];
+            var tbody = quickActionStatusTable.getElementsByTagName('tbody')[0];
 
             // remove all table rows first
             while (tbody.firstChild) {

@@ -75,14 +75,6 @@ export class LwcGenerationCommand {
                             if (callback) {
                                 const quickActionStatus =
                                     await LwcGenerationCommand.checkForExistingQuickActions();
-
-                                for (const key in quickActionStatus.sobjects) {
-                                    const layoutFields =
-                                        await OrgUtils.getCompactLayoutFieldsForSObject(
-                                            key
-                                        );
-                                }
-
                                 callback(quickActionStatus);
                             }
                         }
