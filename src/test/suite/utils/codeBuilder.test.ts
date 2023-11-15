@@ -12,6 +12,7 @@ import { Uri } from 'vscode';
 import { afterEach, beforeEach } from 'mocha';
 import * as fs from 'fs';
 import * as path from 'path';
+import { CompactLayoutField } from '../../../utils/orgUtils';
 
 suite('CodeBuilder Test Suite', () => {
     var extensionUri = Uri.parse('file:///tmp/');
@@ -28,7 +29,7 @@ suite('CodeBuilder Test Suite', () => {
         sinon.restore();
     });
 
-    test('All values subtituted before writing', async () => {
+    test('All values substituted before writing', async () => {
         // we will test the qa file with content that includes all template fields. Since all template fields
         // follow the format of "///TEMPLATE_XYZ///" we will just ensure that no "///" value exists in the file
         // which proves that all placeholders were replaced.
@@ -70,10 +71,12 @@ suite('CodeBuilder Test Suite', () => {
             allQaTemplateFieldsContent
         ]);
         const recordedFiles = result[0];
-
-        const codeBuilder = new CodeBuilder(extensionUri, 'Account', [
-            'field1'
-        ]);
+        const compactLayoutFields = buildTestCompactLayoutFields();
+        const codeBuilder = new CodeBuilder(
+            extensionUri,
+            'Account',
+            compactLayoutFields
+        );
 
         await codeBuilder.generateView();
         assert.equal(recordedFiles.length, 5);
@@ -98,9 +101,12 @@ suite('CodeBuilder Test Suite', () => {
         const recordedFiles = result[0];
         const mkdirStub = result[1];
 
-        const codeBuilder = new CodeBuilder(extensionUri, 'Account', [
-            'field1'
-        ]);
+        const compactLayoutFields = buildTestCompactLayoutFields();
+        const codeBuilder = new CodeBuilder(
+            extensionUri,
+            'Account',
+            compactLayoutFields
+        );
 
         await codeBuilder.generateView();
         assert.equal(recordedFiles.length, 5);
@@ -156,9 +162,12 @@ suite('CodeBuilder Test Suite', () => {
         const recordedFiles = result[0];
         const mkdirStub = result[1];
 
-        const codeBuilder = new CodeBuilder(extensionUri, 'Account', [
-            'field1'
-        ]);
+        const compactLayoutFields = buildTestCompactLayoutFields();
+        const codeBuilder = new CodeBuilder(
+            extensionUri,
+            'Account',
+            compactLayoutFields
+        );
 
         await codeBuilder.generateEdit();
         assert.equal(recordedFiles.length, 5);
@@ -214,9 +223,12 @@ suite('CodeBuilder Test Suite', () => {
         const recordedFiles = result[0];
         const mkdirStub = result[1];
 
-        const codeBuilder = new CodeBuilder(extensionUri, 'Account', [
-            'field1'
-        ]);
+        const compactLayoutFields = buildTestCompactLayoutFields();
+        const codeBuilder = new CodeBuilder(
+            extensionUri,
+            'Account',
+            compactLayoutFields
+        );
 
         await codeBuilder.generateCreate();
         assert.equal(recordedFiles.length, 5);
@@ -261,10 +273,27 @@ suite('CodeBuilder Test Suite', () => {
         assert.equal(recordedFiles[4].data, SAMPLE_QA_DATA);
     });
 
-    test('Template variables are populated in constructor', async () => {
-        const codeBuilder = new CodeBuilder(extensionUri, 'Account', [
-            'field1'
-        ]);
+    test('Field names are populated in constructor', () => {
+        const compactLayoutFields = buildTestCompactLayoutFields();
+        const codeBuilder = new CodeBuilder(
+            extensionUri,
+            'Account',
+            compactLayoutFields
+        );
+
+        const fieldNames = codeBuilder.fieldNames;
+        assert.equal(fieldNames.length, 1);
+        assert.equal(fieldNames[0], 'field1');
+    });
+
+    test('Template variables are populated in constructor', () => {
+        const compactLayoutFields = buildTestCompactLayoutFields();
+        const codeBuilder = new CodeBuilder(
+            extensionUri,
+            'Account',
+            compactLayoutFields
+        );
+
         const templateVars = codeBuilder.templateVariables;
 
         assert.equal(
@@ -317,6 +346,21 @@ suite('CodeBuilder Test Suite', () => {
             )
         );
     });
+
+    function buildTestCompactLayoutFields() {
+        const compactLayoutFields: CompactLayoutField[] = [];
+        compactLayoutFields.push({
+            editableForNew: true,
+            editableForUpdate: true,
+            label: 'Name',
+            layoutComponents: [
+                {
+                    value: 'field1'
+                }
+            ]
+        });
+        return compactLayoutFields;
+    }
 
     /**
      * Helper function to set up stubbing of the filesystem.

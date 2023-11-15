@@ -21,14 +21,14 @@ export interface Field {
 
 export interface CompactLayoutFieldComponents {
     value: string;
-};
+}
 
 export interface CompactLayoutField {
     editableForNew: boolean;
     editableForUpdate: boolean;
     label: string;
     layoutComponents: CompactLayoutFieldComponents[];
-};
+}
 
 export type SObjectCompactLayoutMapping = {
     compactLayoutId: string | null;

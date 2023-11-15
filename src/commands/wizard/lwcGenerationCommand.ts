@@ -91,7 +91,7 @@ export class LwcGenerationCommand {
             );
         });
     }
-    
+
     static async getSObjectsFromLandingPage(): Promise<GetSObjectsStatus> {
         return new Promise<GetSObjectsStatus>(async (resolve) => {
             const staticResourcesPath =
@@ -174,9 +174,16 @@ export class LwcGenerationCommand {
                     !quickActions.view
                 ) {
                     // at least 1 needs to be created
-                    const compactLayoutFields = await OrgUtils.getCompactLayoutFieldsForSObject(sobject);
+                    const compactLayoutFields =
+                        await OrgUtils.getCompactLayoutFieldsForSObject(
+                            sobject
+                        );
 
-                    const codeBuilder = new CodeBuilder(extensionUri, sobject, compactLayoutFields);
+                    const codeBuilder = new CodeBuilder(
+                        extensionUri,
+                        sobject,
+                        compactLayoutFields
+                    );
 
                     if (!quickActions.view) {
                         await codeBuilder.generateView();

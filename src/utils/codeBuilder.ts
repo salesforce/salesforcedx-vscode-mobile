@@ -44,8 +44,8 @@ export class CodeBuilder {
 
     private extensionUri: Uri;
     private objectApiName: string;
-    private templateVariables: TemplateVariables;
-    private fieldNames: string[]
+    templateVariables: TemplateVariables;
+    fieldNames: string[];
 
     constructor(
         extensionUri: Uri,
@@ -56,34 +56,38 @@ export class CodeBuilder {
         this.objectApiName = objectApiName;
 
         this.fieldNames = this.getFieldNames(compactLayoutFields);
-        this.templateVariables = this.generateTemplateVariables(this.fieldNames);
+        this.templateVariables = this.generateTemplateVariables(
+            this.fieldNames
+        );
     }
 
     async generateView(): Promise<boolean> {
         return new Promise(async (resolve) => {
             const lwcName = `view${this.objectApiName}Record`;
-            this.copyTemplateFiles(this.templateVariables, 'viewRecord', lwcName);
+            this.copyTemplateFiles(
+                this.templateVariables,
+                'viewRecord',
+                lwcName
+            );
             this.createQuickAction(this.templateVariables, 'View', lwcName);
             resolve(true);
         });
     }
 
-    getFieldNames(compactLayoutFields: CompactLayoutField[]) {
-        const fieldNames: string[] = [];
-        compactLayoutFields.forEach((field) => {
-
-            field.layoutComponents.forEach((component) => {
-                fieldNames.push(component.value);
-            });
-        });
-        return fieldNames;
-    }
-
     async generateEdit(): Promise<boolean> {
         return new Promise(async (resolve) => {
             const lwcName = `edit${this.objectApiName}Record`;
-            this.copyTemplateFiles(this.templateVariables, 'editRecord', lwcName);
-            this.createQuickAction(this.templateVariables, 'Edit', lwcName, 'editActionIcon');
+            this.copyTemplateFiles(
+                this.templateVariables,
+                'editRecord',
+                lwcName
+            );
+            this.createQuickAction(
+                this.templateVariables,
+                'Edit',
+                lwcName,
+                'editActionIcon'
+            );
             resolve(true);
         });
     }
@@ -91,10 +95,24 @@ export class CodeBuilder {
     async generateCreate(): Promise<boolean> {
         return new Promise(async (resolve) => {
             const lwcName = `create${this.objectApiName}Record`;
-            this.copyTemplateFiles(this.templateVariables, 'createRecord', lwcName);
+            this.copyTemplateFiles(
+                this.templateVariables,
+                'createRecord',
+                lwcName
+            );
             this.createQuickAction(this.templateVariables, 'Create', lwcName);
             resolve(true);
         });
+    }
+
+    private getFieldNames(compactLayoutFields: CompactLayoutField[]) {
+        const fieldNames: string[] = [];
+        compactLayoutFields.forEach((field) => {
+            field.layoutComponents.forEach((component) => {
+                fieldNames.push(component.value);
+            });
+        });
+        return fieldNames;
     }
 
     private createQuickAction(
@@ -112,7 +130,7 @@ export class CodeBuilder {
         const quickActionVariables: TemplateVariables = {};
         quickActionVariables[CodeBuilder.TEMPLATE_QUICK_ACTION_LABEL] = label;
         quickActionVariables[CodeBuilder.TEMPLATE_LWC_NAME] = name;
-        if (iconName != undefined && iconName !== '') {
+        if (iconName !== undefined && iconName !== '') {
             quickActionVariables[
                 CodeBuilder.TEMPLATE_QUICK_ACTION_ICON
             ] = `<icon>${iconName}</icon>`;
@@ -143,7 +161,7 @@ export class CodeBuilder {
         templateVariables: TemplateVariables,
         template: string,
         destinationLwc: string
-        ) {
+    ) {
         CodeBuilder.TEMPLATE_FILE_EXTENSIONS.forEach((extension) => {
             const templateFilePath = path.join(
                 CodeBuilder.TEMPLATE_DIR,
@@ -226,9 +244,7 @@ export class CodeBuilder {
     /**
      * Ensure all the TEMPLATE_* variables have a value.
      */
-    private generateTemplateVariables(
-        fieldNames: string[]
-    ): TemplateVariables {
+    private generateTemplateVariables(fieldNames: string[]): TemplateVariables {
         const templateVariables: TemplateVariables = {};
         templateVariables[CodeBuilder.TEMPLATE_OBJECT_API_NAME] =
             this.objectApiName;
@@ -287,7 +303,7 @@ export class CodeBuilder {
         templateVariables[CodeBuilder.TEMPLATE_VARIABLES] = importAliases;
         templateVariables[CodeBuilder.TEMPLATE_VARIABLE_ASSIGNMENTS] =
             variableAssignments;
-            
+
         return templateVariables;
     }
 }
