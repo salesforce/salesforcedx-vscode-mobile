@@ -84,11 +84,13 @@
                 {},
                 handleQuickActionStatusResponse
             );
-            generateQuickActionsButtonElement.addEventListener('click', () => {
-                webviewMessaging.sendMessageRequest(
-                    'generateLwcQuickActionsButton'
-                );
-            });
+        });
+        
+        generateQuickActionsButtonElement.addEventListener('click', () => {
+            webviewMessaging.sendMessageRequest(
+                'generateLwcQuickActionsButton'
+            );
+        });
 
         continueButtonElement.addEventListener('click', () => {
             webviewMessaging.sendMessageRequest(
@@ -105,11 +107,8 @@
                 {},
                 handleQuickActionStatusResponse
             );
-
-            function handleQuickActionStatusResponse(response) {
-                const table = document.getElementById('quickActionStatusTable');
-                for (const sobject in response.sobjects) {
-                    const quickActions = response.sobjects[sobject];
+            
+        });
 
         function handleQuickActionStatusResponse(response) {
             const table = document.getElementById('quickActionStatusTable');
@@ -135,6 +134,7 @@
                 edit.innerHTML = quickActions.edit == true ? "✅" : "❌";
                 create.innerHTML = quickActions.create == true ? "✅" : "❌";
             }
+        }
         </script>
         <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
     </body>

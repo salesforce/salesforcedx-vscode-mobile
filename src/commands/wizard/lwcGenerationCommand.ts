@@ -35,12 +35,63 @@ export type GetSObjectsStatus = {
 };
 
 export class LwcGenerationCommand {
-    extensionUri: Uri;
+    static async createSObjectLwcQuickActions(extensionUri: Uri) {
+        return new Promise<void>((resolve) => {
+            new InstructionsWebviewProvider(
+                extensionUri
+            ).showInstructionWebview(
+                l10n.t('Offline Starter Kit: Create sObject LWC Quick Actions'),
+                'resources/instructions/createSObjectLwcQuickActions.html',
+                [
+                    {
+                        type: 'continueButton',
+                        action: (panel) => {
+                            panel.dispose();
+                            return resolve();
+                        }
+                    },
+                    {
+                        type: 'generateLwcQuickActionsButton',
+                        action: async (panel, _data, callback) => {
+                            const quickActionStatus =
+                                await LwcGenerationCommand.checkForExistingQuickActions();
 
-    constructor(extensionUri: Uri) {
-        this.extensionUri = extensionUri;
+                            await LwcGenerationCommand.generateMissingLwcsAndQuickActions(
+                                extensionUri,
+                                quickActionStatus
+                            );
+
+                            // send back updates so UI can be refreshed
+                            if (callback) {
+                                const quickActionStatus =
+                                    await LwcGenerationCommand.checkForExistingQuickActions();
+                                callback(quickActionStatus);
+                            }
+                        }
+                    },
+                    {
+                        type: 'getQuickActionStatus',
+                        action: async (_panel, _data, callback) => {
+                            if (callback) {
+                                const quickActionStatus =
+                                    await LwcGenerationCommand.checkForExistingQuickActions();
+
+                                for (const key in quickActionStatus.sobjects) {
+                                    const layoutFields =
+                                        await OrgUtils.getCompactLayoutFieldsForSObject(
+                                            key
+                                        );
+                                }
+
+                                callback(quickActionStatus);
+                            }
+                        }
+                    }
+                ]
+            );
+        });
     }
-
+    
     static async getSObjectsFromLandingPage(): Promise<GetSObjectsStatus> {
         return new Promise<GetSObjectsStatus>(async (resolve) => {
             const staticResourcesPath =
@@ -67,74 +118,6 @@ export class LwcGenerationCommand {
             }
 
             resolve(getSObjectsStatus);
-        });
-    }
-
-    async createSObjectLwcQuickActions() {
-        return new Promise<void>((resolve) => {
-            new InstructionsWebviewProvider(
-                extensionUri
-            ).showInstructionWebview(
-                l10n.t('Offline Starter Kit: Create sObject LWC Quick Actions'),
-                'resources/instructions/createSObjectLwcQuickActions.html',
-                [
-                    {
-                        type: 'continueButton',
-                        action: (panel) => {
-                            panel.dispose();
-                            return resolve();
-                        }
-                    },
-                    {
-                        type: 'generateLwcQuickActionsButton',
-                        action: async (panel, _data, callback) => {
-                            // TODO: Hook this up to function that parses landing_page.json.
-                            const sobjects = [
-                                'Account',
-                                'Contact',
-                                'Opportunity',
-                                'SomeOther'
-                            ];
-                            const quickActionStatus =
-                                await LwcGenerationCommand.checkForExistingQuickActions(
-                                    sobjects
-                                );
-
-                            await this.generateMissingLwcsAndQuickActions(
-                                extensionUri,
-                                quickActionStatus
-                            );
-
-                            // send back updates so UI can be refreshed
-                            if (callback) {
-                                const quickActionStatus =
-                                    await LwcGenerationCommand.checkForExistingQuickActions(
-                                        sobjects
-                                    );
-                                callback(quickActionStatus);
-                            }
-                        }
-                    },
-                    {
-                        type: 'getQuickActionStatus',
-                        action: async (_panel, _data, callback) => {
-                            if (callback) {
-                                const quickActionStatus =
-                                    await LwcGenerationCommand.checkForExistingQuickActions();
-
-                                for (const key in quickActionStatus.sobjects) {
-                                    const layoutFields =
-                                        await OrgUtils.getCompactLayoutFieldsForSObject(
-                                            key
-                                        );
-                                }
-
-                                callback(quickActionStatus);
-                            }
-                        }
-                    }
-                ]
-            );
         });
     }
 
@@ -213,9 +196,7 @@ export class LwcGenerationCommand {
 
             // Just double check now that things have been created.
             const newStatus =
-                await LwcGenerationCommand.checkForExistingQuickActions(
-                    Object.keys(quickActionStatus.sobjects)
-                );
+                await LwcGenerationCommand.checkForExistingQuickActions();
             resolve(newStatus);
         });
     }
