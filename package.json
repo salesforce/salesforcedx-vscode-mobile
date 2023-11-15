@@ -52,7 +52,7 @@
     "test": "node ./out/test/runTest.js",
     "test-coverage": "node ./out/test/runTest.js --coverage",
     "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
-    "prettier:verify": "prettier --list-different \"{src, resources/instructions}/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
+    "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
     "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
     "vscode:prepublish": "npm run clean && npm run bundle:extension"
   },
