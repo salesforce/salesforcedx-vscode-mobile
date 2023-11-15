@@ -117,7 +117,7 @@ export class CodeBuilder {
         templateVariables: TemplateVariables,
         label: string,
         name: string,
-        iconName: string | undefined = undefined
+        iconName?: string | undefined
     ) {
         const templateFilePath = path.join(
             WorkspaceUtils.LWC_TEMPLATE_PATH,
