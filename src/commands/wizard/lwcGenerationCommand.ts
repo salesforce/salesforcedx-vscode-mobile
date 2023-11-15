@@ -173,12 +173,10 @@ export class LwcGenerationCommand {
                     !quickActions.edit ||
                     !quickActions.view
                 ) {
-                    // at least 1 needs to be creaed
-                    // TODO: Hook up to compact layout to obtain list of field names to use
-                    const codeBuilder = new CodeBuilder(extensionUri, sobject, [
-                        'Name',
-                        'AccountId'
-                    ]);
+                    // at least 1 needs to be created
+                    const compactLayoutFields = await OrgUtils.getCompactLayoutFieldsForSObject(sobject);
+
+                    const codeBuilder = new CodeBuilder(extensionUri, sobject, compactLayoutFields);
 
                     if (!quickActions.view) {
                         await codeBuilder.generateView();

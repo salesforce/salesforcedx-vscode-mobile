@@ -7,6 +7,7 @@
 import * as fs from 'fs';
 import { Uri } from 'vscode';
 import * as path from 'path';
+import { CompactLayoutField } from './orgUtils';
 
 type TemplateVariables = { [name: string]: string };
 
@@ -43,35 +44,46 @@ export class CodeBuilder {
 
     private extensionUri: Uri;
     private objectApiName: string;
-    private fieldNames: string[];
-
-    templateVariables: TemplateVariables = {};
+    private templateVariables: TemplateVariables;
+    private fieldNames: string[]
 
     constructor(
         extensionUri: Uri,
         objectApiName: string,
-        fieldNames: string[]
+        compactLayoutFields: CompactLayoutField[]
     ) {
         this.extensionUri = extensionUri;
         this.objectApiName = objectApiName;
-        this.fieldNames = fieldNames;
-        this.generateTemplateVariables();
+
+        this.fieldNames = this.getFieldNames(compactLayoutFields);
+        this.templateVariables = this.generateTemplateVariables(this.fieldNames);
     }
 
     async generateView(): Promise<boolean> {
         return new Promise(async (resolve) => {
             const lwcName = `view${this.objectApiName}Record`;
-            this.copyTemplateFiles('viewRecord', lwcName);
-            this.createQuickAction('View', lwcName);
+            this.copyTemplateFiles(this.templateVariables, 'viewRecord', lwcName);
+            this.createQuickAction(this.templateVariables, 'View', lwcName);
             resolve(true);
         });
+    }
+
+    getFieldNames(compactLayoutFields: CompactLayoutField[]) {
+        const fieldNames: string[] = [];
+        compactLayoutFields.forEach((field) => {
+
+            field.layoutComponents.forEach((component) => {
+                fieldNames.push(component.value);
+            });
+        });
+        return fieldNames;
     }
 
     async generateEdit(): Promise<boolean> {
         return new Promise(async (resolve) => {
             const lwcName = `edit${this.objectApiName}Record`;
-            this.copyTemplateFiles('editRecord', lwcName);
-            this.createQuickAction('Edit', lwcName, 'editActionIcon');
+            this.copyTemplateFiles(this.templateVariables, 'editRecord', lwcName);
+            this.createQuickAction(this.templateVariables, 'Edit', lwcName, 'editActionIcon');
             resolve(true);
         });
     }
@@ -79,16 +91,17 @@ export class CodeBuilder {
     async generateCreate(): Promise<boolean> {
         return new Promise(async (resolve) => {
             const lwcName = `create${this.objectApiName}Record`;
-            this.copyTemplateFiles('createRecord', lwcName);
-            this.createQuickAction('Create', lwcName);
+            this.copyTemplateFiles(this.templateVariables, 'createRecord', lwcName);
+            this.createQuickAction(this.templateVariables, 'Create', lwcName);
             resolve(true);
         });
     }
 
     private createQuickAction(
+        templateVariables: TemplateVariables,
         label: string,
         name: string,
-        iconName: string = ''
+        iconName: string | undefined = undefined
     ) {
         const templateFilePath = path.join(
             CodeBuilder.TEMPLATE_DIR,
@@ -99,7 +112,7 @@ export class CodeBuilder {
         const quickActionVariables: TemplateVariables = {};
         quickActionVariables[CodeBuilder.TEMPLATE_QUICK_ACTION_LABEL] = label;
         quickActionVariables[CodeBuilder.TEMPLATE_LWC_NAME] = name;
-        if (iconName !== '') {
+        if (iconName != undefined && iconName !== '') {
             quickActionVariables[
                 CodeBuilder.TEMPLATE_QUICK_ACTION_ICON
             ] = `<icon>${iconName}</icon>`;
@@ -109,13 +122,13 @@ export class CodeBuilder {
 
         // do substitutions
         const newFileContents = this.replaceAllTemplateVariables(fileContents, {
-            ...this.templateVariables,
+            ...templateVariables,
             ...quickActionVariables
         });
 
         // copy to destination directory
         const objectApiName =
-            this.templateVariables[CodeBuilder.TEMPLATE_OBJECT_API_NAME];
+            templateVariables[CodeBuilder.TEMPLATE_OBJECT_API_NAME];
         // file name convention example: Account.view.quickAction-meta.xml
         const destinationFile = `${objectApiName}.${label.toLocaleLowerCase()}.quickAction-meta.xml`;
 
@@ -126,7 +139,11 @@ export class CodeBuilder {
         );
     }
 
-    private copyTemplateFiles(template: string, destinationLwc: string) {
+    private copyTemplateFiles(
+        templateVariables: TemplateVariables,
+        template: string,
+        destinationLwc: string
+        ) {
         CodeBuilder.TEMPLATE_FILE_EXTENSIONS.forEach((extension) => {
             const templateFilePath = path.join(
                 CodeBuilder.TEMPLATE_DIR,
@@ -138,7 +155,7 @@ export class CodeBuilder {
             // do substitutions
             const newFileContents = this.replaceAllTemplateVariables(
                 fileContents,
-                this.templateVariables
+                templateVariables
             );
 
             // copy to destination directory
@@ -209,18 +226,21 @@ export class CodeBuilder {
     /**
      * Ensure all the TEMPLATE_* variables have a value.
      */
-    private generateTemplateVariables() {
-        this.templateVariables[CodeBuilder.TEMPLATE_OBJECT_API_NAME] =
+    private generateTemplateVariables(
+        fieldNames: string[]
+    ): TemplateVariables {
+        const templateVariables: TemplateVariables = {};
+        templateVariables[CodeBuilder.TEMPLATE_OBJECT_API_NAME] =
             this.objectApiName;
 
         // Labels
-        this.templateVariables[
+        templateVariables[
             CodeBuilder.TEMPLATE_CREATE_LWC_LABEL
         ] = `LWC for creating a/an ${this.objectApiName} instance.`;
-        this.templateVariables[
+        templateVariables[
             CodeBuilder.TEMPLATE_EDIT_LWC_LABEL
         ] = `LWC for editing a/an ${this.objectApiName} instance.`;
-        this.templateVariables[
+        templateVariables[
             CodeBuilder.TEMPLATE_VIEW_LWC_LABEL
         ] = `LWC for viewing a/an ${this.objectApiName} instance.`;
 
@@ -245,7 +265,7 @@ export class CodeBuilder {
         var importAliases = '';
         var variableAssignments = '';
 
-        this.fieldNames.forEach((field) => {
+        fieldNames.forEach((field) => {
             var fieldNameImport = `${field.toUpperCase()}_FIELD`;
             fields += `${fieldNameImport}, `;
             imports += `import ${fieldNameImport} from "@salesforce/schema/${this.objectApiName}.${field}";\n`;
@@ -256,16 +276,18 @@ export class CodeBuilder {
             createFieldsHtml += `<lightning-input-field field-name={${fieldNameVariable}} value={${field.toLowerCase()}}></lightning-input-field>\n\t\t\t\t`;
             editFieldsHtml += `<lightning-input-field field-name={${fieldNameVariable}}></lightning-input-field>\n\t\t\t\t`;
         });
-        this.templateVariables[CodeBuilder.TEMPLATE_FIELDS] = fields;
-        this.templateVariables[CodeBuilder.TEMPLATE_IMPORTS] = imports;
-        this.templateVariables[
+        templateVariables[CodeBuilder.TEMPLATE_FIELDS] = fields;
+        templateVariables[CodeBuilder.TEMPLATE_IMPORTS] = imports;
+        templateVariables[
             CodeBuilder.TEMPLATE_LIGHTNING_INPUT_CREATE_FIELDS_HTML
         ] = createFieldsHtml;
-        this.templateVariables[
+        templateVariables[
             CodeBuilder.TEMPLATE_LIGHTNING_INPUT_EDIT_FIELDS_HTML
         ] = editFieldsHtml;
-        this.templateVariables[CodeBuilder.TEMPLATE_VARIABLES] = importAliases;
-        this.templateVariables[CodeBuilder.TEMPLATE_VARIABLE_ASSIGNMENTS] =
+        templateVariables[CodeBuilder.TEMPLATE_VARIABLES] = importAliases;
+        templateVariables[CodeBuilder.TEMPLATE_VARIABLE_ASSIGNMENTS] =
             variableAssignments;
+            
+        return templateVariables;
     }
 }
