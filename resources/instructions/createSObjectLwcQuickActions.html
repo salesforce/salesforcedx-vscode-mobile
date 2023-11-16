@@ -1,39 +1,38 @@
 <!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Offline Starter Kit: Create sObject LWC Quick Actions</title>
+    </head>
+    <style>
+        h1 {
+            font-size: 16px;
+        }
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Offline Starter Kit: Create sObject LWC Quick Actions</title>
-</head>
-<style>
-    h1 {
-        font-size: 16px;
-    }
+        h2 {
+            font-size: 14px;
+        }
 
-    h2 {
-        font-size: 14px;
-    }
+        table {
+            border-collapse: collapse;
+        }
 
-    table {
-        border-collapse: collapse;
-    }
+        table,
+        th,
+        td {
+            border-width: 1px;
+            border-style: solid;
+        }
 
-    table,
-    th,
-    td {
-        border-width: 1px;
-        border-style: solid;
-    }
+        th,
+        td {
+            text-align: center;
+        }
+    </style>
 
-    th,
-    td {
-        text-align: center;
-    }
-</style>
-
-<body>
-    <h1>Create sObject LWC Quick Actions</h1>
+    <body>
+        <h1>Create sObject LWC Quick Actions</h1>
 
         <p id="sobjectDiv">
             The following sObjects are present in your configured landing page:
@@ -56,81 +55,81 @@
             </tbody>
         </table>
 
-    <label style="display: block; margin-top: 10px; margin-bottom: 8px" for="generateLwcQuickActionsButton">
-        Click 'Generate LWC Quick Actions' to create the missing LWC Quick
-        Actions:
-    </label>
+        <label
+            style="display: block; margin-top: 10px; margin-bottom: 8px"
+            for="generateLwcQuickActionsButton"
+        >
+            Click 'Generate LWC Quick Actions' to create the missing LWC Quick
+            Actions:
+        </label>
 
-    <button id="generateLwcQuickActionsButton">
-        Generate LWC Quick Actions
-    </button>
+        <button id="generateLwcQuickActionsButton">
+            Generate LWC Quick Actions
+        </button>
 
-    <button id="continueButton">
-        Continue
-    </button>
+        <button id="continueButton">Continue</button>
 
-    <script>
-        const generateQuickActionsButtonElement = document.getElementById(
-            'generateLwcQuickActionsButton'
-        );
-
-        const continueButtonElement = document.getElementById(
-            'continueButton'
-        );
-
-        const quickActionStatusTable = document.getElementById(
-            'quickActionStatusTable'
-        );
-
-        generateQuickActionsButtonElement.addEventListener('click', () => {
-            webviewMessaging.sendMessageRequest(
-                'generateLwcQuickActions',
-                {},
-                handleQuickActionStatusResponse
+        <script>
+            const generateQuickActionsButtonElement = document.getElementById(
+                'generateLwcQuickActionsButton'
             );
-        });
-        
-        continueButtonElement.addEventListener('click', () => {
-            webviewMessaging.sendMessageRequest(
-                'continueButton'
+
+            const continueButtonElement =
+                document.getElementById('continueButton');
+
+            const quickActionStatusTable = document.getElementById(
+                'quickActionStatusTable'
             );
-        });
 
-        // Wait until all scripts are loaded, before engaging with e.g.
-        // messaging functionality.
-        window.addEventListener('load', () => {
-            // What's the status of the various sobject quick actions in the landing_page.json?
-            webviewMessaging.sendMessageRequest(
-                'getQuickActionStatus',
-                {},
-                handleQuickActionStatusResponse
-            );
-        });
+            generateQuickActionsButtonElement.addEventListener('click', () => {
+                webviewMessaging.sendMessageRequest(
+                    'generateLwcQuickActions',
+                    {},
+                    handleQuickActionStatusResponse
+                );
+            });
 
-        function handleQuickActionStatusResponse(response) {
-            var tbody = quickActionStatusTable.getElementsByTagName('tbody')[0];
+            continueButtonElement.addEventListener('click', () => {
+                webviewMessaging.sendMessageRequest('continueButton');
+            });
 
-            // remove all table rows first
-            while (tbody.firstChild) {
-                tbody.removeChild(tbody.firstChild);
+            // Wait until all scripts are loaded, before engaging with e.g.
+            // messaging functionality.
+            window.addEventListener('load', () => {
+                // What's the status of the various sobject quick actions in the landing_page.json?
+                webviewMessaging.sendMessageRequest(
+                    'getQuickActionStatus',
+                    {},
+                    handleQuickActionStatusResponse
+                );
+            });
+
+            function handleQuickActionStatusResponse(response) {
+                var tbody =
+                    quickActionStatusTable.getElementsByTagName('tbody')[0];
+
+                // remove all table rows first
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+
+                // now re-populate the table body with updated results
+                for (const sobject in response.sobjects) {
+                    const quickActions = response.sobjects[sobject];
+
+                    const sobjectRow = tbody.insertRow();
+                    const name = sobjectRow.insertCell(0);
+                    const view = sobjectRow.insertCell(1);
+                    const edit = sobjectRow.insertCell(2);
+                    const create = sobjectRow.insertCell(3);
+
+                    name.innerText = sobject;
+                    view.innerHTML = quickActions.view == true ? '✅' : '❌';
+                    edit.innerHTML = quickActions.edit == true ? '✅' : '❌';
+                    create.innerHTML =
+                        quickActions.create == true ? '✅' : '❌';
+                }
             }
-
-            // now re-populate the table body with updated results
-            for (const sobject in response.sobjects) {
-                const quickActions = response.sobjects[sobject];
-
-                const sobjectRow = tbody.insertRow();
-                const name = sobjectRow.insertCell(0);
-                const view = sobjectRow.insertCell(1);
-                const edit = sobjectRow.insertCell(2);
-                const create = sobjectRow.insertCell(3);
-
-                name.innerText = sobject;
-                view.innerHTML = quickActions.view == true ? "✅" : "❌";
-                edit.innerHTML = quickActions.edit == true ? "✅" : "❌";
-                create.innerHTML = quickActions.create == true ? "✅" : "❌";
-            }
-        }
         </script>
         <script src="--- MESSAGING_SCRIPT_SRC ---"></script>
     </body>
