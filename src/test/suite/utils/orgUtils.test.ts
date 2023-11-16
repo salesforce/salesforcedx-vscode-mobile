@@ -165,17 +165,20 @@ suite('Org Utils Test Suite', () => {
                 {
                     editableForNew: true,
                     editableForUpdate: true,
-                    label: 'Name'
+                    label: 'Name',
+                    layoutComponents: []
                 },
                 {
                     editableForNew: true,
                     editableForUpdate: true,
-                    label: 'Title'
+                    label: 'Title',
+                    layoutComponents: []
                 },
                 {
                     editableForNew: false,
                     editableForUpdate: false,
-                    label: 'Contact Owner'
+                    label: 'Contact Owner',
+                    layoutComponents: []
                 }
             ],
             id: null,
@@ -233,17 +236,20 @@ suite('Org Utils Test Suite', () => {
                 {
                     editableForNew: true,
                     editableForUpdate: true,
-                    label: 'Name'
+                    label: 'Name',
+                    layoutComponents: []
                 },
                 {
                     editableForNew: true,
                     editableForUpdate: true,
-                    label: 'Title'
+                    label: 'Title',
+                    layoutComponents: []
                 },
                 {
                     editableForNew: false,
                     editableForUpdate: false,
-                    label: 'Contact Owner'
+                    label: 'Contact Owner',
+                    layoutComponents: []
                 }
             ],
             id: null,
