@@ -42,11 +42,7 @@ async function main() {
         // extension. Bail if there's an error.
         const installExtensionDepsOuput = spawnSync(
             cliPath,
-            [
-                ...args,
-                '--install-extension',
-                CORE_EXTENSION_ID
-            ],
+            [...args, '--install-extension', CORE_EXTENSION_ID],
             { stdio: 'inherit', encoding: 'utf-8' }
         );
         if (installExtensionDepsOuput.error) {

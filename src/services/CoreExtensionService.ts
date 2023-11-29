@@ -7,10 +7,7 @@
 
 import { extensions } from 'vscode';
 import { satisfies, valid } from 'semver';
-import type {
-    CoreExtensionApi,
-    WorkspaceContext
-} from '../types';
+import type { CoreExtensionApi, WorkspaceContext } from '../types';
 import {
     CORE_EXTENSION_ID,
     MINIMUM_REQUIRED_VERSION_CORE_EXTENSION
