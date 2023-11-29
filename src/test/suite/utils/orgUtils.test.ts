@@ -13,7 +13,6 @@ import { afterEach, beforeEach } from 'mocha';
 import {
     ConfigAggregator,
     Connection,
-    Org,
     OrgConfigProperties
 } from '@salesforce/core';
 import {
@@ -21,6 +20,7 @@ import {
     DescribeSObjectResult,
     Field as FieldType
 } from 'jsforce';
+import { CoreExtensionService } from '../../../services';
 
 suite('Org Utils Test Suite', () => {
     const describeGlobalResult: DescribeGlobalResult = {
@@ -118,17 +118,10 @@ suite('Org Utils Test Suite', () => {
     });
 
     test('Returns list of sobjects', async () => {
-        const orgStub: SinonStub = sinon.stub(Org, 'create');
-        const stubConnection = sinon.createStubInstance(Connection);
+        const stubConnection = stubWorkspaceContextConnection();
         stubConnection.describeGlobal.returns(
             Promise.resolve(describeGlobalResult)
         );
-
-        orgStub.returns({
-            getConnection: () => {
-                return stubConnection;
-            }
-        });
 
         const sobjects = await OrgUtils.getSobjects();
 
@@ -293,17 +286,10 @@ suite('Org Utils Test Suite', () => {
             supportedScopes: null
         };
 
-        const orgStub: SinonStub = sinon.stub(Org, 'create');
-        const stubConnection = sinon.createStubInstance(Connection);
+        const stubConnection = stubWorkspaceContextConnection();
         stubConnection.describe
             .withArgs('SomeObject')
             .returns(Promise.resolve(describeSobjectResult));
-
-        orgStub.returns({
-            getConnection: () => {
-                return stubConnection;
-            }
-        });
 
         const fields = await OrgUtils.getFieldsForSObject(
             describeSobjectResult.name
@@ -379,5 +365,24 @@ suite('Org Utils Test Suite', () => {
             updateable: true,
             writeRequiresMasterRead: true
         };
+    }
+
+    function stubWorkspaceContextConnection(): sinon.SinonStubbedInstance<
+        Connection<any>
+    > {
+        const stubConnection = sinon.createStubInstance(Connection);
+        const getWorkspaceContextInstance = {
+            getConnection: () => {
+                return Promise.resolve(stubConnection);
+            },
+            onOrgChange: sinon.stub(),
+            getInstance: sinon.stub(),
+            username: sinon.stub(),
+            alias: sinon.stub()
+        };
+        sinon
+            .stub(CoreExtensionService, 'getWorkspaceContext')
+            .returns(getWorkspaceContextInstance);
+        return stubConnection;
     }
 });

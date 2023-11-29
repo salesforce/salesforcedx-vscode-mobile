@@ -29,6 +29,9 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "extensionDependencies": [
+    "salesforce.salesforcedx-vscode-core"
+  ],
   "main": "./out/extension.js",
   "l10n": "./l10n",
   "contributes": {

@@ -10,6 +10,8 @@ import { mkdtemp, rm, stat } from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
 import * as process from 'process';
+import * as sinon from 'sinon';
+import { WorkspaceUtils } from '../utils/workspaceUtils';
 
 export class TempProjectDirManager {
     readonly projectDir: string;
@@ -64,4 +66,14 @@ export function createPlatformAbsolutePath(...pathArgs: string[]): string {
         absPath = firstChar + absPath.slice(1);
     }
     return absPath;
+}
+
+// Create a stub of WorkspaceUtis.getWorkspaceDir() that returns a path to
+// a temporary directory.
+export function setupTempWorkspaceDirectoryStub(
+    projectDirManager: TempProjectDirManager
+): sinon.SinonStub<[], string> {
+    const getWorkspaceDirStub = sinon.stub(WorkspaceUtils, 'getWorkspaceDir');
+    getWorkspaceDirStub.returns(projectDirManager.projectDir);
+    return getWorkspaceDirStub;
 }

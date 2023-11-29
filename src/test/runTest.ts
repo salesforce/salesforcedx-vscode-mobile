@@ -7,7 +7,13 @@
 
 import * as path from 'path';
 
-import { runTests } from '@vscode/test-electron';
+import {
+    downloadAndUnzipVSCode,
+    resolveCliArgsFromVSCodeExecutablePath,
+    runTests
+} from '@vscode/test-electron';
+import { spawnSync } from 'child_process';
+import { CORE_EXTENSION_ID } from '../utils/constants';
 
 async function main() {
     try {
@@ -24,8 +30,42 @@ async function main() {
             process.env['CODE_COVERAGE'] = '1';
         }
 
-        // Download VS Code, unzip it and run the integration test
-        await runTests({ extensionDevelopmentPath, extensionTestsPath });
+        // Download VS Code, unzip it and run the integration tests.
+        // NB: We'll use the 'stable' version of VSCode for tests, to catch
+        // potential incompatibilities in newer versions than the minmum we
+        // support in the `engines` section of our package.
+        const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+        const [cliPath, ...args] =
+            resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
+
+        // Install the Salesforce Extensions, which is a pre-req for our
+        // extension. Bail if there's an error.
+        const installExtensionDepsOuput = spawnSync(
+            cliPath,
+            [...args, '--install-extension', CORE_EXTENSION_ID],
+            { stdio: 'inherit', encoding: 'utf-8' }
+        );
+        if (installExtensionDepsOuput.error) {
+            console.error(
+                `Error installing Salesforce Extensions in test: ${installExtensionDepsOuput.error.message}`
+            );
+            throw installExtensionDepsOuput.error;
+        }
+        if (
+            installExtensionDepsOuput.status &&
+            installExtensionDepsOuput.status !== 0
+        ) {
+            const installNonZeroError = `Install of Salesforce Extensions finished with status ${installExtensionDepsOuput.status}. See console output for more information.`;
+            console.error(installNonZeroError);
+            throw new Error(installNonZeroError);
+        }
+
+        // All clear! Should be able to run the tests.
+        await runTests({
+            extensionDevelopmentPath,
+            extensionTestsPath,
+            vscodeExecutablePath
+        });
     } catch (err) {
         console.error('Failed to run tests', err);
         process.exit(1);

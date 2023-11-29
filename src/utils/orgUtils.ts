@@ -5,7 +5,8 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { ConfigAggregator, Org, OrgConfigProperties } from '@salesforce/core';
+import { ConfigAggregator, OrgConfigProperties } from '@salesforce/core';
+import { CoreExtensionService } from '../services/CoreExtensionService';
 
 export interface SObject {
     apiName: string;
@@ -48,8 +49,8 @@ export type SObjectCompactLayout = {
 export class OrgUtils {
     public static async getSobjects(): Promise<SObject[]> {
         try {
-            const org = await Org.create();
-            const conn = org.getConnection();
+            const conn =
+                await CoreExtensionService.getWorkspaceContext().getConnection();
             const result = await conn.describeGlobal();
 
             const sobjects = result.sobjects
@@ -71,8 +72,8 @@ export class OrgUtils {
 
     public static async getFieldsForSObject(apiName: string): Promise<Field[]> {
         try {
-            const org = await Org.create();
-            const conn = org.getConnection();
+            const conn =
+                await CoreExtensionService.getWorkspaceContext().getConnection();
             const result = await conn.describe(apiName);
 
             const fields = result.fields
@@ -95,9 +96,13 @@ export class OrgUtils {
     public static async getCompactLayoutsForSObject(
         sObjectName: string
     ): Promise<SObjectCompactLayouts> {
-        const org = await Org.create();
-        const conn = org.getConnection();
+        const conn =
+            await CoreExtensionService.getWorkspaceContext().getConnection();
 
+        // TODO: We should probably tack to an approach that uses the underlying
+        // `jsforce` functions for getting compact layouts. For example, something
+        // based on
+        // https://github.com/jsforce/jsforce/blob/c04515846e91f84affa4eb87a7b2adb1f58bf04d/lib/sobject.js#L441-L444
         const result = await conn.request<SObjectCompactLayouts>(
             `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts`
         );
@@ -109,9 +114,8 @@ export class OrgUtils {
         sObjectName: string,
         recordTypeId: string
     ): Promise<SObjectCompactLayout> {
-        const org = await Org.create();
-        const conn = org.getConnection();
-
+        const conn =
+            await CoreExtensionService.getWorkspaceContext().getConnection();
         const result = await conn.request<SObjectCompactLayout>(
             `/services/data/v59.0/sobjects/${sObjectName}/describe/compactLayouts/${recordTypeId}`
         );

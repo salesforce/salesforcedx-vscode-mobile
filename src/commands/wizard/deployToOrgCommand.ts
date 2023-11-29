@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import path = require('path');
+import * as path from 'path';
 import { Uri, commands, window, workspace, l10n } from 'vscode';
 
 export class DeployToOrgCommand {
