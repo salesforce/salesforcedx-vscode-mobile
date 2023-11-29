@@ -13,19 +13,36 @@ import {
     NoWorkspaceError,
     WorkspaceUtils
 } from '../../../utils/workspaceUtils';
-import { TempProjectDirManager } from '../../TestHelper';
+import {
+    TempProjectDirManager,
+    setupTempWorkspaceDirectoryStub
+} from '../../TestHelper';
 import { afterEach, beforeEach } from 'mocha';
 import sinon = require('sinon');
 
 suite('Workspace Test Suite', () => {
-    beforeEach(function () {});
+    let getWorkspaceDirStub: sinon.SinonStub<[], string>;
+    let tempProjectDirManager: TempProjectDirManager;
 
-    afterEach(function () {
+    beforeEach(async function () {
+        tempProjectDirManager =
+            await TempProjectDirManager.createTempProjectDir();
+        getWorkspaceDirStub = setupTempWorkspaceDirectoryStub(
+            tempProjectDirManager
+        );
+    });
+
+    afterEach(async function () {
+        getWorkspaceDirStub.restore();
+        await tempProjectDirManager.removeDir();
         sinon.restore();
     });
 
     test('Static resources dir: workspace does not exist', async () => {
         try {
+            // Currently, the only time we *don't* want to stub
+            // WorkspaceUtils.getWorkspaceDir().
+            getWorkspaceDirStub.restore();
             await WorkspaceUtils.getStaticResourcesDir();
             assert.fail('There should have been an error thrown.');
         } catch (noWorkspaceErr) {
@@ -33,17 +50,14 @@ suite('Workspace Test Suite', () => {
                 noWorkspaceErr instanceof NoWorkspaceError,
                 'No workspace should be defined in this test.'
             );
+        } finally {
+            getWorkspaceDirStub = setupTempWorkspaceDirectoryStub(
+                tempProjectDirManager
+            );
         }
     });
 
     test('Static resources dir: static resources dir does not exist', async () => {
-        const projectDirMgr =
-            await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(
-            WorkspaceUtils,
-            'getWorkspaceDir'
-        );
-        getWorkspaceDirStub.returns(projectDirMgr.projectDir);
         try {
             await WorkspaceUtils.getStaticResourcesDir();
             assert.fail('There should have been an error thrown.');
@@ -52,33 +66,17 @@ suite('Workspace Test Suite', () => {
                 noStaticDirErr instanceof NoStaticResourcesDirError,
                 'No static resources dir should be defined in this test.'
             );
-        } finally {
-            await projectDirMgr.removeDir();
-            getWorkspaceDirStub.restore();
         }
     });
 
     test('Static resources dir: static resources dir exists', async () => {
-        const projectDirMgr =
-            await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(
-            WorkspaceUtils,
-            'getWorkspaceDir'
-        );
-        getWorkspaceDirStub.returns(projectDirMgr.projectDir);
-
         const staticResourcesAbsPath = path.join(
-            projectDirMgr.projectDir,
+            tempProjectDirManager.projectDir,
             WorkspaceUtils.STATIC_RESOURCES_PATH
         );
         await mkdir(staticResourcesAbsPath, { recursive: true });
 
-        try {
-            const outputDir = await WorkspaceUtils.getStaticResourcesDir();
-            assert.equal(outputDir, staticResourcesAbsPath);
-        } finally {
-            await projectDirMgr.removeDir();
-            getWorkspaceDirStub.restore();
-        }
+        const outputDir = await WorkspaceUtils.getStaticResourcesDir();
+        assert.equal(outputDir, staticResourcesAbsPath);
     });
 });

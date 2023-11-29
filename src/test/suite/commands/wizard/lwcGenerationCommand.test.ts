@@ -8,12 +8,14 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import * as fs from 'fs';
+import * as path from 'path';
 import { afterEach, beforeEach } from 'mocha';
 import {
     LwcGenerationCommand,
     SObjectQuickActionStatus
 } from '../../../../commands/wizard/lwcGenerationCommand';
 import { WorkspaceUtils } from '../../../../utils/workspaceUtils';
+import { TempProjectDirManager } from '../../../TestHelper';
 
 suite('LWC Generation Command Test Suite', () => {
     beforeEach(function () {});
@@ -94,43 +96,57 @@ suite('LWC Generation Command Test Suite', () => {
     });
 
     test('Should return error status for landing page with invalid json', async () => {
+        const dirManager = await TempProjectDirManager.createTempProjectDir();
         const getWorkspaceDirStub = sinon.stub(
             WorkspaceUtils,
             'getStaticResourcesDir'
         );
-        getWorkspaceDirStub.returns(Promise.resolve('.'));
-        const fsAccess = sinon.stub(fs, 'access');
-        fsAccess.returns();
-        const invalidJsonFile = 'landing_page.json';
-        const invalidJsonContents = 'invalid_json_here';
-        fs.writeFileSync(invalidJsonFile, invalidJsonContents, 'utf8');
+        try {
+            getWorkspaceDirStub.returns(Promise.resolve(dirManager.projectDir));
+            const invalidJsonFile = 'landing_page.json';
+            const invalidJsonContents = 'invalid_json_here';
+            fs.writeFileSync(
+                path.join(dirManager.projectDir, invalidJsonFile),
+                invalidJsonContents,
+                'utf8'
+            );
 
-        const status = await LwcGenerationCommand.getSObjectsFromLandingPage();
+            const status =
+                await LwcGenerationCommand.getSObjectsFromLandingPage();
 
-        assert.ok(status.error && status.error.length > 0);
-
-        fs.unlinkSync(invalidJsonFile);
+            assert.ok(status.error && status.error.length > 0);
+        } finally {
+            getWorkspaceDirStub.restore();
+            await dirManager.removeDir();
+        }
     });
 
     test('Should return 2 sObjects', async () => {
+        const dirManager = await TempProjectDirManager.createTempProjectDir();
         const getWorkspaceDirStub = sinon.stub(
             WorkspaceUtils,
             'getStaticResourcesDir'
         );
-        getWorkspaceDirStub.returns(Promise.resolve('.'));
-        const fsAccess = sinon.stub(fs, 'access');
-        fsAccess.returns();
-        const validJsonFile = 'landing_page.json';
-        const jsonContents =
-            '{ "definition": "mcf/list", "properties": { "objectApiName": "Account" }, "nested": { "definition": "mcf/timedList", "properties": { "objectApiName": "Contact"} } }';
-        fs.writeFileSync(validJsonFile, jsonContents, 'utf8');
+        try {
+            getWorkspaceDirStub.returns(Promise.resolve(dirManager.projectDir));
+            const validJsonFile = 'landing_page.json';
+            const jsonContents =
+                '{ "definition": "mcf/list", "properties": { "objectApiName": "Account" }, "nested": { "definition": "mcf/timedList", "properties": { "objectApiName": "Contact"} } }';
+            fs.writeFileSync(
+                path.join(dirManager.projectDir, validJsonFile),
+                jsonContents,
+                'utf8'
+            );
 
-        const status = await LwcGenerationCommand.getSObjectsFromLandingPage();
+            const status =
+                await LwcGenerationCommand.getSObjectsFromLandingPage();
 
-        assert.equal(status.sobjects.length, 2);
-        assert.equal(status.sobjects[0], 'Account');
-        assert.equal(status.sobjects[1], 'Contact');
-
-        fs.unlinkSync(validJsonFile);
+            assert.equal(status.sobjects.length, 2);
+            assert.equal(status.sobjects[0], 'Account');
+            assert.equal(status.sobjects[1], 'Contact');
+        } finally {
+            getWorkspaceDirStub.restore();
+            await dirManager.removeDir();
+        }
     });
 });
