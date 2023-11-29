@@ -10,7 +10,7 @@ import { mkdtemp, rm, stat } from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
 import * as process from 'process';
-import sinon = require('sinon');
+import * as sinon from 'sinon';
 import { WorkspaceUtils } from '../utils/workspaceUtils';
 
 export class TempProjectDirManager {

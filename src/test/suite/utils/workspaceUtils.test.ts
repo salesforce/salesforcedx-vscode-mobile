@@ -18,7 +18,7 @@ import {
     setupTempWorkspaceDirectoryStub
 } from '../../TestHelper';
 import { afterEach, beforeEach } from 'mocha';
-import sinon = require('sinon');
+import * as sinon from 'sinon';
 
 suite('Workspace Test Suite', () => {
     let getWorkspaceDirStub: sinon.SinonStub<[], string>;

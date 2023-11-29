@@ -9,7 +9,7 @@ import * as assert from 'assert';
 import { UIUtils } from '../../../utils/uiUtils';
 import { QuickPickItem, window, QuickPick } from 'vscode';
 import { afterEach, beforeEach } from 'mocha';
-import sinon = require('sinon');
+import * as sinon from 'sinon';
 
 suite('UIUtils Test Suite', () => {
     beforeEach(function () {});
