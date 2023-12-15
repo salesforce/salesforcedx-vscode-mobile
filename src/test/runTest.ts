@@ -15,6 +15,13 @@ import {
 import { spawnSync } from 'child_process';
 import { CORE_EXTENSION_ID } from '../utils/constants';
 
+// There's a known issue (https://github.com/microsoft/vscode/issues/200895)
+// with VSCode 1.85.1 and running tests on Windows. We'll stick with an
+// explicit working version for now. TODO: change this back to 'stable' when
+// the problem is resolved.
+// const VSCODE_VERSION = 'stable';
+const VSCODE_TEST_VERSION = '1.84.2';
+
 async function main() {
     try {
         // The folder containing the Extension Manifest package.json
@@ -34,7 +41,8 @@ async function main() {
         // NB: We'll use the 'stable' version of VSCode for tests, to catch
         // potential incompatibilities in newer versions than the minmum we
         // support in the `engines` section of our package.
-        const vscodeExecutablePath = await downloadAndUnzipVSCode('stable');
+        const vscodeExecutablePath =
+            await downloadAndUnzipVSCode(VSCODE_TEST_VERSION);
         const [cliPath, ...args] =
             resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 
