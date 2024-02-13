@@ -112,6 +112,58 @@ suite('Template Chooser Command Test Suite', () => {
         assert.ok(await TemplateChooserCommand.onLandingPageChosen(choiceData));
     });
 
+    test('User is asked to overwrite existing landing page and dialog is cancelled', async () => {
+        const projectDirMgr =
+            await TempProjectDirManager.createTempProjectDir();
+        const getWorkspaceDirStub = sinon.stub(
+            WorkspaceUtils,
+            'getWorkspaceDir'
+        );
+        getWorkspaceDirStub.returns(projectDirMgr.projectDir);
+        const staticResourcesAbsPath = path.join(
+            projectDirMgr.projectDir,
+            WorkspaceUtils.STATIC_RESOURCES_PATH
+        );
+        await mkdir(staticResourcesAbsPath, { recursive: true });
+        const config: LandingPageTestIOConfig = {
+            existing: {
+                jsonExists: true,
+                metaExists: false
+            }
+        };
+        createLandingPageContent(config, staticResourcesAbsPath);
+
+        const askUserToOverwriteStub = sinon.stub(
+            TemplateChooserCommand,
+            'askUserToOverwriteLandingPage'
+        );
+        askUserToOverwriteStub.returns(
+            new Promise((resolve) => {
+                // user selects CANCEL
+                return resolve(undefined);
+            })
+        );
+        const choiceData: { landingPageType: LandingPageType } = {
+            landingPageType: 'caseManagement'
+        };
+        const pageChosen =
+            await TemplateChooserCommand.onLandingPageChosen(choiceData);
+        assert.ok(
+            askUserToOverwriteStub.called,
+            'User should have been asked if they wanted to overwrite the existing landing page.'
+        );
+        assert.equal(
+            pageChosen,
+            false,
+            'Choice was to cancel the dialog for overwriting existing page.'
+        );
+
+        askUserToOverwriteStub.restore();
+        await projectDirMgr.removeDir();
+        getWorkspaceDirStub.restore();
+    });
+
+
     test('User is asked to overwrite existing landing page', async () => {
         const projectDirMgr =
             await TempProjectDirManager.createTempProjectDir();
@@ -139,6 +191,7 @@ suite('Template Chooser Command Test Suite', () => {
         );
         askUserToOverwriteStub.returns(
             new Promise((resolve) => {
+                // User selects NO
                 return resolve('No');
             })
         );
