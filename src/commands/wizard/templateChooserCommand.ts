@@ -117,7 +117,10 @@ export class TemplateChooserCommand {
             ) {
                 const confirmOverwrite =
                     await this.askUserToOverwriteLandingPage();
-                if (confirmOverwrite === l10n.t('No')) {
+                if (
+                    confirmOverwrite === l10n.t('No') ||
+                    confirmOverwrite === undefined
+                ) {
                     console.info(
                         'User chose not to overwrite their existing landing page.'
                     );
