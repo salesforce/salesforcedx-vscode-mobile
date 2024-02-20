@@ -40,6 +40,11 @@
         "command": "salesforcedx-vscode-offline-app.onboardingWizard",
         "title": "%extension.commands.config-wizard.title%",
         "category": "%extension.commands.config-wizard.category%"
+      },
+      {
+        "command": "'salesforcedx-vscode-offline-app.configureLintTools'",
+        "title": "%extension.commands.config-linting-tools.title%",
+        "category": "%extension.commands.config-wizard.category%"
       }
     ]
   },

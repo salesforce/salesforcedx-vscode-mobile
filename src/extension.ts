@@ -9,6 +9,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as onboardingWizard from './commands/wizard/onboardingWizard';
+import * as configureLintingToolsCommand from './commands/lint/configureLintingToolsCommand';
 import { CoreExtensionService } from './services/CoreExtensionService';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -28,6 +29,9 @@ export function activate(context: vscode.ExtensionContext) {
 
     onboardingWizard.registerCommand(context);
     onboardingWizard.onActivate(context);
+
+    configureLintingToolsCommand.registerCommand(context);
+    configureLintingToolsCommand.onActivate(context);
 }
 
 // This method is called when your extension is deactivated

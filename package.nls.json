@@ -1,6 +1,7 @@
 {
     "extension.commands.config-wizard.title": "Configuration Wizard",
     "extension.commands.config-wizard.category": "Offline Starter Kit",
+    "extension.commands.config-linting-tools.title": "Configure Linting Tools",
     "extension.displayName": "Salesforce Mobile Extensions for Visual Studio Code",
     "extension.description": "Tools to help developers create their Salesforce Mobile experiences in a VSCode development environment."
 }
