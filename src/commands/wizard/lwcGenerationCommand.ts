@@ -23,14 +23,12 @@ export type QuickActionStatus = {
 };
 
 export type SObjectQuickActionStatus = {
-    error?: string;
     sobjects: {
         [name: string]: QuickActionStatus;
     };
 };
 
 export type GetSObjectsStatus = {
-    error?: string;
     sobjects: string[];
 };
 
@@ -54,17 +52,29 @@ export class LwcGenerationCommand {
                         type: 'generateLwcQuickActions',
                         action: async (_panel, _data, callback) => {
                             const quickActionStatus =
-                                await LwcGenerationCommand.checkForExistingQuickActions();
+                                await LwcGenerationCommand.checkForExistingQuickActions().catch(
+                                    (error) => {
+                                        if (callback) {
+                                            callback({ error: error });
+                                        }
+                                        return;
+                                    }
+                                );
 
                             const newLwcQuickActionStatus =
                                 await LwcGenerationCommand.generateMissingLwcsAndQuickActions(
                                     extensionUri,
-                                    quickActionStatus
-                                );
+                                    quickActionStatus!
+                                ).catch((error) => {
+                                    if (callback) {
+                                        callback({ error: error });
+                                    }
+                                    return;
+                                });
 
                             // send back updates so UI can be refreshed
                             if (callback) {
-                                callback(newLwcQuickActionStatus);
+                                callback(newLwcQuickActionStatus!);
                             }
                         }
                     },
@@ -73,8 +83,13 @@ export class LwcGenerationCommand {
                         action: async (_panel, _data, callback) => {
                             if (callback) {
                                 const quickActionStatus =
-                                    await LwcGenerationCommand.checkForExistingQuickActions();
-                                callback(quickActionStatus);
+                                    await LwcGenerationCommand.checkForExistingQuickActions().catch(
+                                        (error) => {
+                                            callback({ error: error });
+                                            return;
+                                        }
+                                    );
+                                callback(quickActionStatus!);
                             }
                         }
                     }
@@ -84,7 +99,7 @@ export class LwcGenerationCommand {
     }
 
     static async getSObjectsFromLandingPage(): Promise<GetSObjectsStatus> {
-        return new Promise<GetSObjectsStatus>(async (resolve) => {
+        return new Promise<GetSObjectsStatus>(async (resolve, reject) => {
             const staticResourcesPath =
                 await WorkspaceUtils.getStaticResourcesDir();
             const landingPageJson = 'landing_page.json';
@@ -101,107 +116,117 @@ export class LwcGenerationCommand {
                 await access(landingPagePath);
                 const uem = CommonUtils.loadJsonFromFile(landingPagePath);
                 getSObjectsStatus.sobjects = UEMParser.findSObjects(uem);
+                resolve(getSObjectsStatus);
             } catch (err) {
                 console.warn(
                     `File '${landingPageJson}' does not exist at '${staticResourcesPath}'.`
                 );
-                getSObjectsStatus.error = (err as Error).message;
+                reject((err as Error).message);
             }
-
-            resolve(getSObjectsStatus);
         });
     }
 
     static async checkForExistingQuickActions(): Promise<SObjectQuickActionStatus> {
-        return new Promise<SObjectQuickActionStatus>(async (resolve) => {
-            const results: SObjectQuickActionStatus = { sobjects: {} };
+        return new Promise<SObjectQuickActionStatus>(
+            async (resolve, reject) => {
+                const results: SObjectQuickActionStatus = { sobjects: {} };
 
-            const sObjectsStatus = await this.getSObjectsFromLandingPage();
-            if (sObjectsStatus.error) {
-                results.error = sObjectsStatus.error;
+                const sObjectsStatus =
+                    await this.getSObjectsFromLandingPage().catch((error) => {
+                        return reject(error);
+                    });
+
+                sObjectsStatus!.sobjects.forEach((sobject) => {
+                    const quickActionStatus: QuickActionStatus = {
+                        view: false,
+                        edit: false,
+                        create: false
+                    };
+                    quickActionStatus.view =
+                        LwcGenerationCommand.checkForExistingQuickAction(
+                            sobject,
+                            'view'
+                        );
+                    quickActionStatus.edit =
+                        LwcGenerationCommand.checkForExistingQuickAction(
+                            sobject,
+                            'edit'
+                        );
+                    quickActionStatus.create =
+                        LwcGenerationCommand.checkForExistingQuickAction(
+                            sobject,
+                            'create'
+                        );
+
+                    results.sobjects[sobject] = quickActionStatus;
+                });
+
                 return resolve(results);
             }
-
-            sObjectsStatus.sobjects.forEach((sobject) => {
-                const quickActionStatus: QuickActionStatus = {
-                    view: false,
-                    edit: false,
-                    create: false
-                };
-                quickActionStatus.view =
-                    LwcGenerationCommand.checkForExistingQuickAction(
-                        sobject,
-                        'view'
-                    );
-                quickActionStatus.edit =
-                    LwcGenerationCommand.checkForExistingQuickAction(
-                        sobject,
-                        'edit'
-                    );
-                quickActionStatus.create =
-                    LwcGenerationCommand.checkForExistingQuickAction(
-                        sobject,
-                        'create'
-                    );
-
-                results.sobjects[sobject] = quickActionStatus;
-            });
-
-            return resolve(results);
-        });
+        );
     }
 
     static async generateMissingLwcsAndQuickActions(
         extensionUri: Uri,
         quickActionStatus: SObjectQuickActionStatus
     ): Promise<SObjectQuickActionStatus> {
-        return new Promise<SObjectQuickActionStatus>(async (resolve) => {
-            for (const sobject in quickActionStatus.sobjects) {
-                try {
-                    const quickActions = quickActionStatus.sobjects[sobject];
+        return new Promise<SObjectQuickActionStatus>(
+            async (resolve, reject) => {
+                for (const sobject in quickActionStatus.sobjects) {
+                    try {
+                        const quickActions =
+                            quickActionStatus.sobjects[sobject];
 
-                    if (
-                        !quickActions.create ||
-                        !quickActions.edit ||
-                        !quickActions.view
-                    ) {
-                        // at least 1 needs to be created
-                        const compactLayoutFields =
-                            await OrgUtils.getCompactLayoutFieldsForSObject(
-                                sobject
+                        if (
+                            !quickActions.create ||
+                            !quickActions.edit ||
+                            !quickActions.view
+                        ) {
+                            // at least 1 needs to be created
+                            const compactLayoutFields =
+                                await OrgUtils.getCompactLayoutFieldsForSObject(
+                                    sobject
+                                ).catch((err) => {
+                                    reject(
+                                        `An error occurred while obtaining layout for ${sobject} : ${
+                                            (err as Error).message
+                                        }`
+                                    );
+                                    return;
+                                });
+
+                            const codeBuilder = new CodeBuilder(
+                                extensionUri,
+                                sobject,
+                                compactLayoutFields!
                             );
 
-                        const codeBuilder = new CodeBuilder(
-                            extensionUri,
-                            sobject,
-                            compactLayoutFields
+                            if (!quickActions.view) {
+                                await codeBuilder.generateView();
+                            }
+
+                            if (!quickActions.edit) {
+                                await codeBuilder.generateEdit();
+                            }
+
+                            if (!quickActions.create) {
+                                await codeBuilder.generateCreate();
+                            }
+                        }
+                    } catch (err) {
+                        console.error(
+                            `Could not generate quick actions for sobject ${sobject}, so skipping`,
+                            err
                         );
-
-                        if (!quickActions.view) {
-                            await codeBuilder.generateView();
-                        }
-
-                        if (!quickActions.edit) {
-                            await codeBuilder.generateEdit();
-                        }
-
-                        if (!quickActions.create) {
-                            await codeBuilder.generateCreate();
-                        }
                     }
-                } catch (err) {
-                    console.error(
-                        `Could not generate quick actions for sobject ${sobject}, so skipping`,
-                        err
-                    );
                 }
-            }
 
-            // Just double check now that things have been created.
-            const newStatus =
-                await LwcGenerationCommand.checkForExistingQuickActions();
-            resolve(newStatus);
-        });
+                // Just double check now that things have been created.
+                const newStatus =
+                    await LwcGenerationCommand.checkForExistingQuickActions();
+                resolve(newStatus);
+            }
+        );
     }
 
     private static checkForExistingQuickAction(
