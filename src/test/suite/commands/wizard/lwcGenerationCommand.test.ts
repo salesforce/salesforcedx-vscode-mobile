@@ -16,18 +16,26 @@ import {
 } from '../../../../commands/wizard/lwcGenerationCommand';
 import { WorkspaceUtils } from '../../../../utils/workspaceUtils';
 import { TempProjectDirManager } from '../../../TestHelper';
+import { Uri } from 'vscode';
+import { CompactLayoutField, OrgUtils } from '../../../../utils/orgUtils';
+import { CodeBuilder } from '../../../../utils/codeBuilder';
+import { create } from 'domain';
 
 suite('LWC Generation Command Test Suite', () => {
-    beforeEach(function () {});
+    let sandbox: sinon.SinonSandbox;
+
+    beforeEach(function () {
+        sandbox = sinon.createSandbox();
+    });
 
     afterEach(function () {
-        sinon.restore();
+        sandbox.restore();
     });
 
     test('Quick Action directories check', async () => {
         const baseDir = 'force-app/main/default/quickActions';
-        const statSyncStub = sinon.stub(fs, 'statSync');
-        const statsStub = sinon.createStubInstance(fs.Stats);
+        const statSyncStub = sandbox.stub(fs, 'statSync');
+        const statsStub = sandbox.createStubInstance(fs.Stats);
         statsStub.isFile.returns(true);
 
         // stub the file system responses - any return value is a positive hit, an exception is a negative hit
@@ -51,7 +59,7 @@ suite('LWC Generation Command Test Suite', () => {
             .withArgs(`${baseDir}/sobject2.create.quickAction-meta.xml`)
             .throws('error');
 
-        const getSObjectsStub = sinon.stub(
+        const getSObjectsStub = sandbox.stub(
             LwcGenerationCommand,
             'getSObjectsFromLandingPage'
         );
@@ -97,7 +105,7 @@ suite('LWC Generation Command Test Suite', () => {
 
     test('Should return error status for landing page with invalid json', async () => {
         const dirManager = await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(
+        const getWorkspaceDirStub = sandbox.stub(
             WorkspaceUtils,
             'getStaticResourcesDir'
         );
@@ -112,13 +120,16 @@ suite('LWC Generation Command Test Suite', () => {
             );
 
             const status =
-                await LwcGenerationCommand.getSObjectsFromLandingPage().then(results => {
-                    // an error should have occurred
-                    assert.fail('Invalid JSON should have caused a rejection of the promise.');
-                }).catch(error => {
-                    assert.ok(error && error.length > 0);
-                });
-
+                await LwcGenerationCommand.getSObjectsFromLandingPage()
+                    .then((results) => {
+                        // an error should have occurred
+                        assert.fail(
+                            'Invalid JSON should have caused a rejection of the promise.'
+                        );
+                    })
+                    .catch((error) => {
+                        assert.ok(error && error.length > 0);
+                    });
         } finally {
             getWorkspaceDirStub.restore();
             await dirManager.removeDir();
@@ -127,7 +138,7 @@ suite('LWC Generation Command Test Suite', () => {
 
     test('Should return 2 sObjects', async () => {
         const dirManager = await TempProjectDirManager.createTempProjectDir();
-        const getWorkspaceDirStub = sinon.stub(
+        const getWorkspaceDirStub = sandbox.stub(
             WorkspaceUtils,
             'getStaticResourcesDir'
         );
@@ -152,5 +163,52 @@ suite('LWC Generation Command Test Suite', () => {
             getWorkspaceDirStub.restore();
             await dirManager.removeDir();
         }
+    });
+
+    test('Should generate view, create, and edit quick actions', async () => {
+        const extensionUri = Uri.file('whateva');
+        const quickActionStatus: SObjectQuickActionStatus = {
+            sobjects: {
+                account: {
+                    view: false,
+                    edit: false,
+                    create: false
+                }
+            }
+        };
+
+        // stubs for OrgUtils.getCompactLayoutFieldsForSObject()
+        const compactLayoutFields: CompactLayoutField[] = [
+            {
+                editableForNew: true,
+                editableForUpdate: true,
+                label: 'label',
+                layoutComponents: [
+                    {
+                        value: 'field1'
+                    }
+                ]
+            }
+        ];
+        const compactLayoutFieldsStub = sandbox
+            .stub(OrgUtils, 'getCompactLayoutFieldsForSObject')
+            .resolves(compactLayoutFields);
+        const quickActionStatusStub = sandbox.stub(
+            LwcGenerationCommand,
+            'checkForExistingQuickActions'
+        );
+        quickActionStatusStub.resolves(quickActionStatus);
+        const codeBuilderStub = sandbox.stub(CodeBuilder.prototype);
+
+        // act
+        const abc =
+            await LwcGenerationCommand.generateMissingLwcsAndQuickActions(
+                extensionUri,
+                quickActionStatus
+            );
+
+        sandbox.assert.calledOnce(codeBuilderStub.generateCreate);
+        sandbox.assert.calledOnce(codeBuilderStub.generateEdit);
+        sandbox.assert.calledOnce(codeBuilderStub.generateView);
     });
 });
