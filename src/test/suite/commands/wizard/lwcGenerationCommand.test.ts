@@ -112,9 +112,13 @@ suite('LWC Generation Command Test Suite', () => {
             );
 
             const status =
-                await LwcGenerationCommand.getSObjectsFromLandingPage();
+                await LwcGenerationCommand.getSObjectsFromLandingPage().then(results => {
+                    // an error should have occurred
+                    assert.fail('Invalid JSON should have caused a rejection of the promise.');
+                }).catch(error => {
+                    assert.ok(error && error.length > 0);
+                });
 
-            assert.ok(status.error && status.error.length > 0);
         } finally {
             getWorkspaceDirStub.restore();
             await dirManager.removeDir();
