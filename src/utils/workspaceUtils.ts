@@ -5,8 +5,10 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { workspace } from 'vscode';
+import { workspace, WorkspaceFolder } from 'vscode';
 import { access } from 'fs/promises';
+import { PACKAGE_JSON, SFDX_PROJECT_FILE } from './constants';
+import * as fs from 'fs';
 import * as path from 'path';
 
 export class WorkspaceUtils {
@@ -66,6 +68,57 @@ export class WorkspaceUtils {
             }
             return resolve(staticResourcesPath);
         });
+    }
+
+    static hasRootWorkspace(ws: typeof workspace = workspace): boolean {
+        return (ws?.workspaceFolders?.length ?? 0) > 0;
+    }
+
+    static getRootWorkspace(): WorkspaceFolder {
+        return this.hasRootWorkspace()
+            ? workspace.workspaceFolders![0]
+            : ({} as WorkspaceFolder);
+    }
+
+    static getRootWorkspacePath(): string {
+        return this.getRootWorkspace().uri
+            ? this.getRootWorkspace().uri.fsPath
+            : '';
+    }
+
+    static getPackageJson(): object {
+        return JSON.parse(fs.readFileSync(path.join(
+            WorkspaceUtils.getRootWorkspacePath(),
+            'package.json'
+        ), 'utf8'));
+    }
+
+    static setPackageJson(packageJson: object) {
+        fs.writeFileSync(path.join(
+            WorkspaceUtils.getRootWorkspacePath(),
+            'package.json'), JSON.stringify(packageJson, null, 2)
+        );
+    }
+
+    static packageJsonExists(): boolean {
+        return fs.existsSync(
+            path.join(WorkspaceUtils.getRootWorkspacePath(), PACKAGE_JSON)
+        );
+    }
+    
+    static lwcFolderExists(): boolean {
+        return fs.existsSync(
+            WorkspaceUtils.LWC_PATH
+        );
+    }
+
+    static isSfdxProjectOpened(): boolean {
+        return (
+            WorkspaceUtils.hasRootWorkspace() &&
+            fs.existsSync(
+                path.join(WorkspaceUtils.getRootWorkspacePath(), SFDX_PROJECT_FILE)
+            )
+        );
     }
 }
 

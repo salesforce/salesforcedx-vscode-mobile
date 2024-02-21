@@ -7,3 +7,5 @@
 
 export const MINIMUM_REQUIRED_VERSION_CORE_EXTENSION = '58.4.1';
 export const CORE_EXTENSION_ID = 'salesforce.salesforcedx-vscode-core';
+export const SFDX_PROJECT_FILE = 'sfdx-project.json';
+export const PACKAGE_JSON = 'package.json';
