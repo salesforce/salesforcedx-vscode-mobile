@@ -87,16 +87,21 @@ export class WorkspaceUtils {
     }
 
     static getPackageJson(): object {
-        return JSON.parse(fs.readFileSync(path.join(
-            WorkspaceUtils.getRootWorkspacePath(),
-            'package.json'
-        ), 'utf8'));
+        return JSON.parse(
+            fs.readFileSync(
+                path.join(
+                    WorkspaceUtils.getRootWorkspacePath(),
+                    'package.json'
+                ),
+                'utf8'
+            )
+        );
     }
 
     static setPackageJson(packageJson: object) {
-        fs.writeFileSync(path.join(
-            WorkspaceUtils.getRootWorkspacePath(),
-            'package.json'), JSON.stringify(packageJson, null, 2)
+        fs.writeFileSync(
+            path.join(WorkspaceUtils.getRootWorkspacePath(), 'package.json'),
+            JSON.stringify(packageJson, null, 2)
         );
     }
 
@@ -105,18 +110,19 @@ export class WorkspaceUtils {
             path.join(WorkspaceUtils.getRootWorkspacePath(), PACKAGE_JSON)
         );
     }
-    
+
     static lwcFolderExists(): boolean {
-        return fs.existsSync(
-            WorkspaceUtils.LWC_PATH
-        );
+        return fs.existsSync(WorkspaceUtils.LWC_PATH);
     }
 
     static isSfdxProjectOpened(): boolean {
         return (
             WorkspaceUtils.hasRootWorkspace() &&
             fs.existsSync(
-                path.join(WorkspaceUtils.getRootWorkspacePath(), SFDX_PROJECT_FILE)
+                path.join(
+                    WorkspaceUtils.getRootWorkspacePath(),
+                    SFDX_PROJECT_FILE
+                )
             )
         );
     }

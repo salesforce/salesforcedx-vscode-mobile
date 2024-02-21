@@ -10,13 +10,15 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
 
-const configureLintingToolsCommand = 'salesforcedx-vscode-offline-app.configureLintingTools';
+const configureLintingToolsCommand =
+    'salesforcedx-vscode-offline-app.configureLintingTools';
 const eslintDependencies = [
-    ["@salesforce/eslint-plugin-lwc-graph-analyzer", "^0.9.0"],
-    ["eslint", "^8.47.0"]
+    ['@salesforce/eslint-plugin-lwc-graph-analyzer', '^0.9.0'],
+    ['eslint', '^8.47.0']
 ];
-const lwcGraphAnalyzerRecommended: string = "plugin:@salesforce/lwc-graph-analyzer/recommended";
-const eslintRecommended = "eslint:recommended";
+const lwcGraphAnalyzerRecommended: string =
+    'plugin:@salesforce/lwc-graph-analyzer/recommended';
+const eslintRecommended = 'eslint:recommended';
 
 interface PackageJson {
     devDependencies?: Record<string, string>;
@@ -38,16 +40,16 @@ function updateDevDependencies() {
     let modified = false;
 
     if (devDependencies) {
-        eslintDependencies.forEach(nameValuePair => {
+        eslintDependencies.forEach((nameValuePair) => {
             const [name, value] = nameValuePair;
             if (!devDependencies[name]) {
-                devDependencies[name] = value; 
+                devDependencies[name] = value;
                 packageJson.devDependencies = devDependencies;
                 modified = true;
             }
         });
     }
-    
+
     if (modified) {
         WorkspaceUtils.setPackageJson(packageJson);
     }
@@ -55,7 +57,7 @@ function updateDevDependencies() {
 
 function updateEslintrc() {
     const eslintrcPath = path.join(WorkspaceUtils.LWC_PATH, '.eslintrc.json');
-    
+
     if (fs.existsSync(eslintrcPath)) {
         const eslintrc = JSON.parse(fs.readFileSync(eslintrcPath, 'utf-8'));
         if (eslintrc && eslintrc.extends) {
@@ -72,56 +74,63 @@ function updateEslintrc() {
             }
 
             if (modified) {
-                fs.writeFileSync(eslintrcPath, JSON.stringify(eslintrc, null, 2));
+                fs.writeFileSync(
+                    eslintrcPath,
+                    JSON.stringify(eslintrc, null, 2)
+                );
             }
         }
     } else {
         // Create eslintrc
-        fs.writeFile(eslintrcPath, `{"extends":["${eslintRecommended}", "${lwcGraphAnalyzerRecommended}"]}`, (err) => {
-            if (err) {
-                throw err;
+        fs.writeFile(
+            eslintrcPath,
+            `{"extends":["${eslintRecommended}", "${lwcGraphAnalyzerRecommended}"]}`,
+            (err) => {
+                if (err) {
+                    throw err;
+                }
             }
-        });   
+        );
     }
 }
 
 export function registerCommand(context: vscode.ExtensionContext) {
-    vscode.commands.registerCommand(
-        configureLintingToolsCommand,
-        async () => {
-            if (!WorkspaceUtils.lwcFolderExists()) {
-                return Promise.reject("no lwc folder");
-            }
-
-            if (!WorkspaceUtils.packageJsonExists()) {
-                return Promise.reject("no package.json");
-            }
-
-            // Ask user to add eslint plugin 
-            const result = await vscode.window.showInformationMessage(
-                vscode.l10n.t('Do you want to add eslint plugin for LWC data graph anaylsis to your package.json?'),
-                { title: vscode.l10n.t('Yes') },
-                { title: vscode.l10n.t('No') }
-            );
-
-            if (!result || result.title === vscode.l10n.t('No')) {
-                return Promise.resolve(false);
-            } else {
-                try {
-                    updateDevDependencies();
-                } catch (error) {
-                    return Promise.reject(`Error updating package.json: ${error}`);
-                }
-    
-                try {
-                    updateEslintrc();
-                } catch (error) {
-                    return Promise.reject(`Error updating .eslintrc.json: ${error}`);
-                }
-                
-                return Promise.resolve();
-            }
+    vscode.commands.registerCommand(configureLintingToolsCommand, async () => {
+        if (!WorkspaceUtils.lwcFolderExists()) {
+            return Promise.reject('no lwc folder');
         }
-    );
+
+        if (!WorkspaceUtils.packageJsonExists()) {
+            return Promise.reject('no package.json');
+        }
+
+        // Ask user to add eslint plugin
+        const result = await vscode.window.showInformationMessage(
+            vscode.l10n.t(
+                'Do you want to add eslint plugin for LWC data graph anaylsis to your package.json?'
+            ),
+            { title: vscode.l10n.t('Yes') },
+            { title: vscode.l10n.t('No') }
+        );
+
+        if (!result || result.title === vscode.l10n.t('No')) {
+            return Promise.resolve(false);
+        } else {
+            try {
+                updateDevDependencies();
+            } catch (error) {
+                return Promise.reject(`Error updating package.json: ${error}`);
+            }
+
+            try {
+                updateEslintrc();
+            } catch (error) {
+                return Promise.reject(
+                    `Error updating .eslintrc.json: ${error}`
+                );
+            }
+
+            return Promise.resolve();
+        }
+    });
 }
- 
