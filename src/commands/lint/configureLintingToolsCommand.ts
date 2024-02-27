@@ -19,14 +19,13 @@ const eslintDependencies = [
 const lwcGraphAnalyzerRecommended: string =
     'plugin:@salesforce/lwc-graph-analyzer/recommended';
 const eslintRecommended = 'eslint:recommended';
+const tabSpaces = 2;
 
 interface PackageJson {
     devDependencies?: Record<string, string>;
 }
 
 export function onActivate(context: vscode.ExtensionContext) {
-    console.log('Activated');
-
     vscode.commands.executeCommand(
         'setContext',
         'sfdx_project_opened',
@@ -44,13 +43,13 @@ function updateDevDependencies() {
             const [name, value] = nameValuePair;
             if (!devDependencies[name]) {
                 devDependencies[name] = value;
-                packageJson.devDependencies = devDependencies;
                 modified = true;
             }
         });
     }
 
     if (modified) {
+        // Save json only if the content was modified.
         WorkspaceUtils.setPackageJson(packageJson);
     }
 }
@@ -60,23 +59,26 @@ function updateEslintrc() {
 
     if (fs.existsSync(eslintrcPath)) {
         const eslintrc = JSON.parse(fs.readFileSync(eslintrcPath, 'utf-8'));
-        if (eslintrc && eslintrc.extends) {
+        const eslintrcExtends = eslintrc.extends as Array<string>;
+
+        if (eslintrc && eslintrcExtends) {
             let modified = false;
 
-            if (!eslintrc.extends[eslintRecommended]) {
-                eslintrc.extends.push(eslintRecommended);
+            if (!eslintrcExtends.includes(eslintRecommended)) {
+                eslintrcExtends.push(eslintRecommended);
                 modified = true;
             }
 
-            if (!eslintrc.extends[lwcGraphAnalyzerRecommended]) {
+            if (!eslintrcExtends.includes(lwcGraphAnalyzerRecommended)) {
                 eslintrc.extends.push(lwcGraphAnalyzerRecommended);
                 modified = true;
             }
 
             if (modified) {
+                // Save json only if the content was modified.
                 fs.writeFileSync(
                     eslintrcPath,
-                    JSON.stringify(eslintrc, null, 2)
+                    JSON.stringify(eslintrc, null, tabSpaces)
                 );
             }
         }
@@ -84,7 +86,7 @@ function updateEslintrc() {
         // Create eslintrc
         fs.writeFile(
             eslintrcPath,
-            `{"extends":["${eslintRecommended}", "${lwcGraphAnalyzerRecommended}"]}`,
+            `{"extends": ["${eslintRecommended}", "${lwcGraphAnalyzerRecommended}"]}`,
             (err) => {
                 if (err) {
                     throw err;
@@ -97,11 +99,11 @@ function updateEslintrc() {
 export function registerCommand(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(configureLintingToolsCommand, async () => {
         if (!WorkspaceUtils.lwcFolderExists()) {
-            return Promise.reject('no lwc folder');
+            return Promise.reject('LWC folder does not exist.');
         }
 
         if (!WorkspaceUtils.packageJsonExists()) {
-            return Promise.reject('no package.json');
+            return Promise.reject('The project does not contain package.json.');
         }
 
         // Ask user to add eslint plugin
@@ -130,6 +132,12 @@ export function registerCommand(context: vscode.ExtensionContext) {
                 );
             }
 
+            await vscode.window.showInformationMessage(
+                vscode.l10n.t(
+                    `Updated developer dependency in package.json. Run package manager such as npmr/yarn/pnpm to update node modules.`
+                ),
+                { title: vscode.l10n.t('OK') }
+            );
             return Promise.resolve();
         }
     });
