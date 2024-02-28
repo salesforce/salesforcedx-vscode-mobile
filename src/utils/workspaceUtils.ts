@@ -7,7 +7,7 @@
 
 import { workspace, WorkspaceFolder } from 'vscode';
 import { access } from 'fs/promises';
-import { PACKAGE_JSON, SFDX_PROJECT_FILE } from './constants';
+import { PACKAGE_JSON, SFDX_PROJECT_FILE, TAB_SPACES } from './constants';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -70,29 +70,10 @@ export class WorkspaceUtils {
         });
     }
 
-    static hasRootWorkspace(ws: typeof workspace = workspace): boolean {
-        return (ws?.workspaceFolders?.length ?? 0) > 0;
-    }
-
-    static getRootWorkspace(): WorkspaceFolder {
-        return this.hasRootWorkspace()
-            ? workspace.workspaceFolders![0]
-            : ({} as WorkspaceFolder);
-    }
-
-    static getRootWorkspacePath(): string {
-        return this.getRootWorkspace().uri
-            ? this.getRootWorkspace().uri.fsPath
-            : '';
-    }
-
     static getPackageJson(): object {
         return JSON.parse(
             fs.readFileSync(
-                path.join(
-                    WorkspaceUtils.getRootWorkspacePath(),
-                    'package.json'
-                ),
+                path.join(this.getWorkspaceDir(), PACKAGE_JSON),
                 'utf8'
             )
         );
@@ -100,30 +81,24 @@ export class WorkspaceUtils {
 
     static setPackageJson(packageJson: object) {
         fs.writeFileSync(
-            path.join(WorkspaceUtils.getRootWorkspacePath(), 'package.json'),
-            JSON.stringify(packageJson, null, 2)
+            path.join(this.getWorkspaceDir(), PACKAGE_JSON),
+            JSON.stringify(packageJson, null, TAB_SPACES)
         );
     }
 
     static packageJsonExists(): boolean {
-        return fs.existsSync(
-            path.join(WorkspaceUtils.getRootWorkspacePath(), PACKAGE_JSON)
-        );
+        return fs.existsSync(path.join(this.getWorkspaceDir(), PACKAGE_JSON));
     }
 
     static lwcFolderExists(): boolean {
-        return fs.existsSync(WorkspaceUtils.LWC_PATH);
+        return fs.existsSync(
+            path.join(this.getWorkspaceDir(), WorkspaceUtils.LWC_PATH)
+        );
     }
 
     static isSfdxProjectOpened(): boolean {
-        return (
-            WorkspaceUtils.hasRootWorkspace() &&
-            fs.existsSync(
-                path.join(
-                    WorkspaceUtils.getRootWorkspacePath(),
-                    SFDX_PROJECT_FILE
-                )
-            )
+        return fs.existsSync(
+            path.join(this.getWorkspaceDir(), SFDX_PROJECT_FILE)
         );
     }
 }

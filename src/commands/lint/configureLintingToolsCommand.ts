@@ -5,10 +5,11 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import * as vscode from 'vscode';
+import { commands, l10n, window, ExtensionContext } from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
+import { TAB_SPACES } from '../../utils/constants';
 
 const configureLintingToolsCommand =
     'salesforcedx-vscode-offline-app.configureLintingTools';
@@ -19,14 +20,13 @@ const eslintDependencies = [
 const lwcGraphAnalyzerRecommended: string =
     'plugin:@salesforce/lwc-graph-analyzer/recommended';
 const eslintRecommended = 'eslint:recommended';
-const tabSpaces = 2;
 
 interface PackageJson {
     devDependencies?: Record<string, string>;
 }
 
-export function onActivate(context: vscode.ExtensionContext) {
-    vscode.commands.executeCommand(
+export function onActivate(context: ExtensionContext) {
+    commands.executeCommand(
         'setContext',
         'sfdx_project_opened',
         WorkspaceUtils.isSfdxProjectOpened()
@@ -78,67 +78,89 @@ function updateEslintrc() {
                 // Save json only if the content was modified.
                 fs.writeFileSync(
                     eslintrcPath,
-                    JSON.stringify(eslintrc, null, tabSpaces)
+                    JSON.stringify(eslintrc, null, TAB_SPACES)
                 );
             }
         }
     } else {
         // Create eslintrc
-        fs.writeFile(
+        fs.writeFileSync(
             eslintrcPath,
-            `{"extends": ["${eslintRecommended}", "${lwcGraphAnalyzerRecommended}"]}`,
-            (err) => {
-                if (err) {
-                    throw err;
-                }
-            }
+            `{"extends": ["${eslintRecommended}", "${lwcGraphAnalyzerRecommended}"]}`
         );
     }
 }
 
-export function registerCommand(context: vscode.ExtensionContext) {
-    vscode.commands.registerCommand(configureLintingToolsCommand, async () => {
-        if (!WorkspaceUtils.lwcFolderExists()) {
-            return Promise.reject('LWC folder does not exist.');
-        }
+async function showSimpleErrorMessage(message: string) {
+    await window.showErrorMessage(l10n.t(message), {
+        title: l10n.t('OK')
+    });
+}
 
-        if (!WorkspaceUtils.packageJsonExists()) {
-            return Promise.reject('The project does not contain package.json.');
-        }
-
-        // Ask user to add eslint plugin
-        const result = await vscode.window.showInformationMessage(
-            vscode.l10n.t(
-                'Do you want to add eslint plugin for LWC data graph anaylsis to your package.json?'
-            ),
-            { title: vscode.l10n.t('Yes') },
-            { title: vscode.l10n.t('No') }
-        );
-
-        if (!result || result.title === vscode.l10n.t('No')) {
-            return Promise.resolve(false);
-        } else {
-            try {
-                updateDevDependencies();
-            } catch (error) {
-                return Promise.reject(`Error updating package.json: ${error}`);
+export class ConfigureLintingToolsCommand {
+    static async configure(): Promise<boolean> {
+        try {
+            if (!WorkspaceUtils.lwcFolderExists()) {
+                await showSimpleErrorMessage('LWC folder does not exist.');
+                return Promise.resolve(false);
             }
 
-            try {
-                updateEslintrc();
-            } catch (error) {
-                return Promise.reject(
-                    `Error updating .eslintrc.json: ${error}`
+            if (!WorkspaceUtils.packageJsonExists()) {
+                await showSimpleErrorMessage(
+                    'The project does not contain package.json.'
                 );
+                return Promise.resolve(false);
             }
 
-            await vscode.window.showInformationMessage(
-                vscode.l10n.t(
-                    `Updated developer dependency in package.json. Run package manager such as npmr/yarn/pnpm to update node modules.`
+            // Ask user to add eslint plugin
+            const result = await window.showInformationMessage(
+                l10n.t(
+                    'Do you want to add eslint plugin for LWC data graph anaylsis to your package.json?'
                 ),
-                { title: vscode.l10n.t('OK') }
+                { title: l10n.t('Yes') },
+                { title: l10n.t('No') }
             );
-            return Promise.resolve();
+
+            if (!result || result.title === l10n.t('No')) {
+                return Promise.resolve(false);
+            } else {
+                try {
+                    updateDevDependencies();
+                } catch (error) {
+                    await showSimpleErrorMessage(
+                        `Error updating package.json: ${error}`
+                    );
+                    return Promise.resolve(false);
+                }
+
+                try {
+                    updateEslintrc();
+                } catch (error) {
+                    await showSimpleErrorMessage(
+                        `Error updating .eslintrc.json: ${error}`
+                    );
+                    return Promise.resolve(false);
+                }
+
+                await window.showInformationMessage(
+                    l10n.t(
+                        `Updated developer dependency in package.json. Run package manager such as npmr/yarn/pnpm to update node modules.`
+                    ),
+                    { title: l10n.t('OK') }
+                );
+                return Promise.resolve(true);
+            }
+        } catch (error) {
+            await showSimpleErrorMessage(
+                `There was an error trying to update developer dependency in package.json: ${error}`
+            );
+            return Promise.resolve(false);
         }
+    }
+}
+
+export function registerCommand(context: ExtensionContext) {
+    commands.registerCommand(configureLintingToolsCommand, async () => {
+        await ConfigureLintingToolsCommand.configure();
     });
 }
