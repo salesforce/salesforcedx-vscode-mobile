@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { workspace, WorkspaceFolder } from 'vscode';
+import { workspace } from 'vscode';
 import { access } from 'fs/promises';
 import { PACKAGE_JSON, SFDX_PROJECT_FILE, TAB_SPACES } from './constants';
 import * as fs from 'fs';

@@ -39,14 +39,13 @@
       {
         "command": "salesforcedx-vscode-offline-app.onboardingWizard",
         "title": "%extension.commands.config-wizard.title%",
-        "category": "%extension.commands.config-wizard.category%",
-        "when": "sfdx_project_opened && resource =~ /.*\\/lwc\\/[^\\/]+(\\/[^\\/]+\\.(html|css|js))?$/"
+        "category": "%extension.commands.config-wizard.category%"
       },
       {
         "command": "salesforcedx-vscode-offline-app.configureLintingTools",
         "title": "%extension.commands.config-linting-tools.title%",
         "category": "%extension.commands.config-wizard.category%",
-        "when": "sfdx_project_opened && resource =~ /.*\\/lwc\\/[^\\/]+(\\/[^\\/]+\\.(html|css|js))?$/"
+        "when": "sfdx_project_opened"
       }
     ]
   },

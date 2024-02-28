@@ -20,7 +20,7 @@ import {
 } from '../../TestHelper';
 import { afterEach, beforeEach } from 'mocha';
 import * as sinon from 'sinon';
-import { PACKAGE_JSON, SFDX_PROJECT_FILE } from '../../../utils/constants';
+import { SFDX_PROJECT_FILE } from '../../../utils/constants';
 
 suite('Workspace Test Suite', () => {
     let getWorkspaceDirStub: sinon.SinonStub<[], string>;
