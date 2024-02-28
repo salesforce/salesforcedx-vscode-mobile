@@ -25,6 +25,12 @@ interface PackageJson {
     devDependencies?: Record<string, string>;
 }
 
+enum MessageType {
+    Error,
+    InformationYesNo,
+    InformationOk
+}
+
 export function onActivate(context: ExtensionContext) {
     commands.executeCommand(
         'setContext',
@@ -33,7 +39,7 @@ export function onActivate(context: ExtensionContext) {
     );
 }
 
-function updateDevDependencies() {
+function updateDevDependencies(): boolean {
     const packageJson: PackageJson = WorkspaceUtils.getPackageJson();
     const devDependencies = packageJson.devDependencies;
     let modified = false;
@@ -52,6 +58,8 @@ function updateDevDependencies() {
         // Save json only if the content was modified.
         WorkspaceUtils.setPackageJson(packageJson);
     }
+
+    return modified;
 }
 
 function updateEslintrc() {
@@ -91,67 +99,85 @@ function updateEslintrc() {
     }
 }
 
-async function showSimpleErrorMessage(message: string) {
-    await window.showErrorMessage(l10n.t(message), {
-        title: l10n.t('OK')
-    });
+async function showMessage(
+    message: string,
+    messageType: MessageType = MessageType.Error
+): Promise<{ title: string } | undefined> {
+    const localizedMessage = l10n.t(message);
+    switch (messageType) {
+        case MessageType.Error:
+            return await window.showErrorMessage(localizedMessage, {
+                title: l10n.t('OK')
+            });
+        case MessageType.InformationYesNo:
+            return await window.showInformationMessage(
+                localizedMessage,
+                { title: l10n.t('Yes') },
+                { title: l10n.t('No') }
+            );
+        case MessageType.InformationOk:
+            return await await window.showInformationMessage(localizedMessage, {
+                title: l10n.t('OK')
+            });
+    }
 }
 
 export class ConfigureLintingToolsCommand {
     static async configure(): Promise<boolean> {
         try {
             if (!WorkspaceUtils.lwcFolderExists()) {
-                await showSimpleErrorMessage('LWC folder does not exist.');
+                await showMessage('LWC folder does not exist.');
                 return Promise.resolve(false);
             }
 
             if (!WorkspaceUtils.packageJsonExists()) {
-                await showSimpleErrorMessage(
-                    'The project does not contain package.json.'
-                );
+                await showMessage('The project does not contain package.json.');
                 return Promise.resolve(false);
             }
 
             // Ask user to add eslint plugin
-            const result = await window.showInformationMessage(
-                l10n.t(
-                    'Do you want to add eslint plugin for LWC data graph anaylsis to your package.json?'
-                ),
-                { title: l10n.t('Yes') },
-                { title: l10n.t('No') }
+            const result = await showMessage(
+                'Do you want to add eslint plugin for LWC data graph anaylsis to your package.json?',
+                MessageType.InformationYesNo
             );
 
             if (!result || result.title === l10n.t('No')) {
                 return Promise.resolve(false);
             } else {
+                let modified = false;
+
                 try {
-                    updateDevDependencies();
+                    modified = updateDevDependencies();
                 } catch (error) {
-                    await showSimpleErrorMessage(
-                        `Error updating package.json: ${error}`
-                    );
+                    await showMessage(`Error updating package.json: ${error}`);
                     return Promise.resolve(false);
                 }
 
                 try {
                     updateEslintrc();
                 } catch (error) {
-                    await showSimpleErrorMessage(
+                    await showMessage(
                         `Error updating .eslintrc.json: ${error}`
                     );
                     return Promise.resolve(false);
                 }
 
-                await window.showInformationMessage(
-                    l10n.t(
-                        `Updated developer dependency in package.json. Run package manager such as npmr/yarn/pnpm to update node modules.`
-                    ),
-                    { title: l10n.t('OK') }
-                );
+                if (modified) {
+                    await showMessage(
+                        `Updated developer dependency in package.json. Run package manager such as npmr/yarn/pnpm to update node modules.`,
+                        MessageType.InformationOk
+                    );
+                } else {
+                    await showMessage(
+                        `No update was made in package.json. It already includes eslint plugin for LWC data graph analysis.`,
+                        MessageType.InformationOk
+                    );
+                }
+
                 return Promise.resolve(true);
             }
         } catch (error) {
-            await showSimpleErrorMessage(
+            await showMessage(
                 `There was an error trying to update developer dependency in package.json: ${error}`
             );
             return Promise.resolve(false);
