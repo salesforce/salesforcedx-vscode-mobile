@@ -31,14 +31,6 @@ enum MessageType {
     InformationOk
 }
 
-export function onActivate(context: ExtensionContext) {
-    commands.executeCommand(
-        'setContext',
-        'sfdx_project_opened',
-        WorkspaceUtils.isSfdxProjectOpened()
-    );
-}
-
 export class ConfigureLintingToolsCommand {
     static async configure(): Promise<boolean> {
         try {

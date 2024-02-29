@@ -52,8 +52,7 @@
       {
         "command": "salesforcedx-vscode-offline-app.configureLintingTools",
         "title": "%extension.commands.config-linting-tools.title%",
-        "category": "%extension.commands.config-wizard.category%",
-        "when": "sfdx_project_opened"
+        "category": "%extension.commands.config-wizard.category%"
       }
     ]
   },
