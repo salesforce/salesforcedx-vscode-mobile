@@ -87,19 +87,33 @@ export class WorkspaceUtils {
     }
 
     static packageJsonExists(): boolean {
-        return fs.existsSync(path.join(this.getWorkspaceDir(), PACKAGE_JSON));
+        try {
+            return fs.existsSync(
+                path.join(this.getWorkspaceDir(), PACKAGE_JSON)
+            );
+        } catch {
+            return false;
+        }
     }
 
     static lwcFolderExists(): boolean {
-        return fs.existsSync(
-            path.join(this.getWorkspaceDir(), WorkspaceUtils.LWC_PATH)
-        );
+        try {
+            return fs.existsSync(
+                path.join(this.getWorkspaceDir(), WorkspaceUtils.LWC_PATH)
+            );
+        } catch {
+            return false;
+        }
     }
 
     static isSfdxProjectOpened(): boolean {
-        return fs.existsSync(
-            path.join(this.getWorkspaceDir(), SFDX_PROJECT_FILE)
-        );
+        try {
+            return fs.existsSync(
+                path.join(this.getWorkspaceDir(), SFDX_PROJECT_FILE)
+            );
+        } catch {
+            return false;
+        }
     }
 }
 

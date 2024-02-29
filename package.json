@@ -35,6 +35,14 @@
   "main": "./out/extension.js",
   "l10n": "./l10n",
   "contributes": {
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "salesforcedx-vscode-offline-app.configureLintingTools",
+          "when": "sfdx_project_opened"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "salesforcedx-vscode-offline-app.onboardingWizard",
