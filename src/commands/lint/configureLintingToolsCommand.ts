@@ -90,7 +90,7 @@ export class ConfigureLintingToolsCommand {
             }
         } catch (error) {
             await this.showMessage(
-                `There was an error trying to update developer dependency in package.json: ${error}`
+                `There was an error trying to update either the offline linting dependencies or linting configuration: ${error}`
             );
             return Promise.resolve(false);
         }
