@@ -76,7 +76,7 @@ export class ConfigureLintingToolsCommand {
 
                 if (modified) {
                     await this.showMessage(
-                        `Updated developer dependency in package.json. Run package manager such as npmr/yarn/pnpm to update node modules.`,
+                        `Updated package.json to include offline linting packages and dependencies. In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, "npm install" or "yarn install".`,
                         MessageType.InformationOk
                     );
                 } else {
