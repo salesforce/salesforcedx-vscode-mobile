@@ -81,7 +81,7 @@ export class ConfigureLintingToolsCommand {
                     );
                 } else {
                     await this.showMessage(
-                        `No update was made in package.json. It already includes eslint plugin for LWC data graph analysis.`,
+                        `All offline linting packages and dependencies are already configured in your project. No update has been made to package.json.`,
                         MessageType.InformationOk
                     );
                 }
