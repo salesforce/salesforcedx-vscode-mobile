@@ -2,6 +2,9 @@
     "extension.commands.config-wizard.title": "Configuration Wizard",
     "extension.commands.config-wizard.category": "Offline Starter Kit",
     "extension.commands.config-linting-tools.title": "Configure Linting Tools",
+    "extension.commands.salesforce-mobile-offline.category": "Salesforce Mobile Offline",
+    "extension.commands.salesforce-mobile-offline.komaci.version": "Version of ESLint Plugin LWC Graph Analyzer to include in devDependencies",
+    "salesforce.mobile.extensions": "Salesforce Mobile Extensions",
     "extension.displayName": "Salesforce Mobile Extensions for Visual Studio Code",
     "extension.description": "Tools to help developers create their Salesforce Mobile experiences in a VSCode development environment."
 }

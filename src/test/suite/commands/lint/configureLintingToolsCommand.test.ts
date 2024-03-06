@@ -100,7 +100,9 @@ suite('Configure Linting Tools Command Test Suite', () => {
         sinon
             .stub(ConfigureLintingToolsCommand, 'updateDevDependencies')
             .returns(false);
-        sinon.stub(ConfigureLintingToolsCommand, 'updateEslintrc').returns();
+        sinon
+            .stub(ConfigureLintingToolsCommand, 'updateEslintrc')
+            .returns(false);
         showInformationMessageStub = sinon.stub(window, 'showErrorMessage');
         showInformationMessageStub.onCall(0).resolves({ title: 'OK' });
         const result = await ConfigureLintingToolsCommand.configure();

@@ -7,7 +7,11 @@
 
 import { workspace } from 'vscode';
 import { access } from 'fs/promises';
-import { PACKAGE_JSON, SFDX_PROJECT_FILE, TAB_SPACES } from './constants';
+import {
+    PACKAGE_JSON,
+    SFDX_PROJECT_FILE,
+    JSON_INDENTATION_SPACES
+} from './constants';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -82,7 +86,7 @@ export class WorkspaceUtils {
     static setPackageJson(packageJson: object) {
         fs.writeFileSync(
             path.join(this.getWorkspaceDir(), PACKAGE_JSON),
-            JSON.stringify(packageJson, null, TAB_SPACES)
+            JSON.stringify(packageJson, null, JSON_INDENTATION_SPACES)
         );
     }
 

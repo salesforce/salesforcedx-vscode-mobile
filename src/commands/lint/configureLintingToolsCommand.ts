@@ -5,18 +5,29 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { commands, l10n, window, ExtensionContext } from 'vscode';
+import { commands, l10n, window, workspace, ExtensionContext } from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
-import { TAB_SPACES } from '../../utils/constants';
+import { JSON_INDENTATION_SPACES } from '../../utils/constants';
+import * as vscode from 'vscode';
+
+const config = vscode.workspace.getConfiguration();
+const eslintPluginLwcGraphAnalyzer =
+    '@salesforce/eslint-plugin-lwc-graph-analyzer';
+const eslintPluginLwcGraphAnalyzerVersion = config.get(
+    eslintPluginLwcGraphAnalyzer
+) as string;
+const eslint = 'eslint';
+const eslintVersion = config.get(eslint) as string;
 
 const configureLintingToolsCommand =
     'salesforcedx-vscode-offline-app.configureLintingTools';
 const eslintDependencies = [
-    ['@salesforce/eslint-plugin-lwc-graph-analyzer', '^0.9.0'],
-    ['eslint', '^8.47.0']
+    [eslintPluginLwcGraphAnalyzer, eslintPluginLwcGraphAnalyzerVersion],
+    [eslint, eslintVersion]
 ];
+
 const lwcGraphAnalyzerRecommended: string =
     'plugin:@salesforce/lwc-graph-analyzer/recommended';
 const eslintRecommended = 'eslint:recommended';
@@ -35,13 +46,15 @@ export class ConfigureLintingToolsCommand {
     static async configure(): Promise<boolean> {
         try {
             if (!WorkspaceUtils.lwcFolderExists()) {
-                await this.showMessage('LWC folder does not exist.');
+                await this.showMessage(
+                    'LWC folder does not exist. The folder is required to create a configuration file for eslint.'
+                );
                 return Promise.resolve(false);
             }
 
             if (!WorkspaceUtils.packageJsonExists()) {
                 await this.showMessage(
-                    'The project does not contain package.json.'
+                    'The sfdx project does not contain package.json. It is required to specify dependent eslint packages.'
                 );
                 return Promise.resolve(false);
             }
@@ -55,9 +68,9 @@ export class ConfigureLintingToolsCommand {
             if (!result || result.title === l10n.t('No')) {
                 return Promise.resolve(false);
             } else {
-                let modified = false;
+                let modifiedDevDependencies = false;
                 try {
-                    modified = this.updateDevDependencies();
+                    modifiedDevDependencies = this.updateDevDependencies();
                 } catch (error) {
                     await this.showMessage(
                         `Error updating package.json: ${error}`
@@ -65,8 +78,9 @@ export class ConfigureLintingToolsCommand {
                     return Promise.resolve(false);
                 }
 
+                let modifiedEslintrc = false;
                 try {
-                    this.updateEslintrc();
+                    modifiedEslintrc = this.updateEslintrc();
                 } catch (error) {
                     await this.showMessage(
                         `Error updating .eslintrc.json: ${error}`
@@ -74,13 +88,22 @@ export class ConfigureLintingToolsCommand {
                     return Promise.resolve(false);
                 }
 
-                if (modified) {
-                    await this.showMessage(
+                if (modifiedDevDependencies) {
+                    this.showMessage(
                         `Updated package.json to include offline linting packages and dependencies. In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, "npm install" or "yarn install".`,
                         MessageType.InformationOk
                     );
-                } else {
-                    await this.showMessage(
+                }
+
+                if (modifiedEslintrc) {
+                    this.showMessage(
+                        `Updated .eslintrc.json to include recommended linting rules.`,
+                        MessageType.InformationOk
+                    );
+                }
+
+                if (!modifiedDevDependencies && !modifiedEslintrc) {
+                    this.showMessage(
                         `All offline linting packages and dependencies are already configured in your project. No update has been made to package.json.`,
                         MessageType.InformationOk
                     );
@@ -119,7 +142,7 @@ export class ConfigureLintingToolsCommand {
         return modified;
     }
 
-    static updateEslintrc() {
+    static updateEslintrc(): boolean {
         const eslintrcPath = path.join(
             WorkspaceUtils.getWorkspaceDir(),
             WorkspaceUtils.LWC_PATH,
@@ -128,35 +151,51 @@ export class ConfigureLintingToolsCommand {
 
         if (fs.existsSync(eslintrcPath)) {
             const eslintrc = JSON.parse(fs.readFileSync(eslintrcPath, 'utf-8'));
+
+            if (!eslintrc.extends) {
+                eslintrc.extends = [];
+            }
+
             const eslintrcExtends = eslintrc.extends as Array<string>;
 
-            if (eslintrc && eslintrcExtends) {
-                let modified = false;
+            let modified = false;
 
-                if (!eslintrcExtends.includes(eslintRecommended)) {
-                    eslintrcExtends.push(eslintRecommended);
-                    modified = true;
-                }
-
-                if (!eslintrcExtends.includes(lwcGraphAnalyzerRecommended)) {
-                    eslintrc.extends.push(lwcGraphAnalyzerRecommended);
-                    modified = true;
-                }
-
-                if (modified) {
-                    // Save json only if the content was modified.
-                    fs.writeFileSync(
-                        eslintrcPath,
-                        JSON.stringify(eslintrc, null, TAB_SPACES)
-                    );
-                }
+            if (!eslintrcExtends.includes(eslintRecommended)) {
+                eslintrcExtends.push(eslintRecommended);
+                modified = true;
             }
+
+            if (!eslintrcExtends.includes(lwcGraphAnalyzerRecommended)) {
+                eslintrc.extends.push(lwcGraphAnalyzerRecommended);
+                modified = true;
+            }
+
+            if (modified) {
+                // Save json only if the content was modified.
+                fs.writeFileSync(
+                    eslintrcPath,
+                    JSON.stringify(eslintrc, null, JSON_INDENTATION_SPACES)
+                );
+            }
+
+            return modified;
         } else {
             // Create eslintrc
-            fs.writeFileSync(
-                eslintrcPath,
-                `{"extends": ["${eslintRecommended}", "${lwcGraphAnalyzerRecommended}"]}`
+            const eslintrc = {
+                extends: [
+                    `${eslintRecommended}`,
+                    `${lwcGraphAnalyzerRecommended}`
+                ]
+            };
+            const jsonString = JSON.stringify(
+                eslintrc,
+                null,
+                JSON_INDENTATION_SPACES
             );
+
+            fs.writeFileSync(eslintrcPath, jsonString);
+
+            return true;
         }
     }
 
@@ -177,12 +216,9 @@ export class ConfigureLintingToolsCommand {
                     { title: l10n.t('No') }
                 );
             case MessageType.InformationOk:
-                return await await window.showInformationMessage(
-                    localizedMessage,
-                    {
-                        title: l10n.t('OK')
-                    }
-                );
+                return await window.showInformationMessage(localizedMessage, {
+                    title: l10n.t('OK')
+                });
         }
     }
 }

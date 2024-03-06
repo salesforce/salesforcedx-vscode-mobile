@@ -52,9 +52,24 @@
       {
         "command": "salesforcedx-vscode-offline-app.configureLintingTools",
         "title": "%extension.commands.config-linting-tools.title%",
-        "category": "%extension.commands.config-wizard.category%"
+        "category": "%extension.commands.salesforce-mobile-offline.category%"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "%salesforce.mobile.extensions%",
+      "properties": {
+        "@salesforce/eslint-plugin-lwc-graph-analyzer": {
+          "type": "string",
+          "default": "^0.9.0",
+          "description": "%extension.commands.salesforce-mobile-offline.komaci.version%"
+        },
+        "eslint": {
+          "type": "string",
+          "default": "^8.47.0",
+          "description": "%extension.commands.salesforce-mobile-offline.komaci.version%"
+        }
+      }
+    }
   },
   "volta": {
     "node": "18.17.1"
