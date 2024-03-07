@@ -15,11 +15,15 @@ import * as vscode from 'vscode';
 const config = vscode.workspace.getConfiguration();
 const eslintPluginLwcGraphAnalyzer =
     '@salesforce/eslint-plugin-lwc-graph-analyzer';
+const eslintPluginLwcGraphAnalyzerConfig =
+    'mobileOfflineLinting.eslint-plugin-lwc-graph-analyzer';
 const eslintPluginLwcGraphAnalyzerVersion = config.get(
-    eslintPluginLwcGraphAnalyzer
+    eslintPluginLwcGraphAnalyzerConfig
 ) as string;
+
 const eslint = 'eslint';
-const eslintVersion = config.get(eslint) as string;
+const eslintConfig = 'mobileOfflineLinting.eslint';
+const eslintVersion = config.get(eslintConfig) as string;
 
 const configureLintingToolsCommand =
     'salesforcedx-vscode-offline-app.configureLintingTools';
@@ -90,7 +94,7 @@ export class ConfigureLintingToolsCommand {
 
                 if (modifiedDevDependencies) {
                     this.showMessage(
-                        `Updated package.json to include offline linting packages and dependencies. In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, "npm install" or "yarn install".`,
+                        `Updated package.json to include offline linting packages and dependencies.`,
                         MessageType.InformationOk
                     );
                 }
@@ -98,6 +102,13 @@ export class ConfigureLintingToolsCommand {
                 if (modifiedEslintrc) {
                     this.showMessage(
                         `Updated .eslintrc.json to include recommended linting rules.`,
+                        MessageType.InformationOk
+                    );
+                }
+
+                if (modifiedDevDependencies || modifiedEslintrc) {
+                    this.showMessage(
+                        `In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, "npm install" or "yarn install".`,
                         MessageType.InformationOk
                     );
                 }
