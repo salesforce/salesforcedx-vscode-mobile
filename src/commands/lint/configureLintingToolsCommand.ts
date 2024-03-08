@@ -10,9 +10,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import { JSON_INDENTATION_SPACES } from '../../utils/constants';
-import * as vscode from 'vscode';
 
-const config = vscode.workspace.getConfiguration();
+const config = workspace.getConfiguration();
 const eslintPluginLwcGraphAnalyzer =
     '@salesforce/eslint-plugin-lwc-graph-analyzer';
 const eslintPluginLwcGraphAnalyzerConfig =
