@@ -7,6 +7,7 @@
 
 import * as assert from 'assert';
 import * as path from 'path';
+import * as fs from 'fs';
 import { mkdir } from 'fs/promises';
 import {
     NoStaticResourcesDirError,
@@ -19,6 +20,7 @@ import {
 } from '../../TestHelper';
 import { afterEach, beforeEach } from 'mocha';
 import * as sinon from 'sinon';
+import { SFDX_PROJECT_FILE } from '../../../utils/constants';
 
 suite('Workspace Test Suite', () => {
     let getWorkspaceDirStub: sinon.SinonStub<[], string>;
@@ -78,5 +80,47 @@ suite('Workspace Test Suite', () => {
 
         const outputDir = await WorkspaceUtils.getStaticResourcesDir();
         assert.equal(outputDir, staticResourcesAbsPath);
+    });
+
+    test('Existence of package.json can be determined', () => {
+        let exists = WorkspaceUtils.packageJsonExists();
+        assert.equal(exists, false);
+
+        const packageJson = { a: 'b' };
+        WorkspaceUtils.setPackageJson(packageJson);
+
+        exists = WorkspaceUtils.packageJsonExists();
+        assert.equal(exists, true);
+
+        const content = WorkspaceUtils.getPackageJson();
+        assert.equal(JSON.stringify(content), JSON.stringify(packageJson));
+    });
+
+    test('Existence of LWC folder can be determined', async () => {
+        let exists = WorkspaceUtils.lwcFolderExists();
+        assert.equal(exists, false);
+
+        const lwcPath = path.join(
+            tempProjectDirManager.projectDir,
+            WorkspaceUtils.LWC_PATH
+        );
+        await mkdir(lwcPath, { recursive: true });
+
+        exists = WorkspaceUtils.lwcFolderExists();
+        assert.equal(exists, true);
+    });
+
+    test('Sfdx project is opened', () => {
+        let opened = WorkspaceUtils.isSfdxProjectOpened();
+        assert.equal(opened, false);
+
+        const sfdxJson = path.join(
+            tempProjectDirManager.projectDir,
+            SFDX_PROJECT_FILE
+        );
+        fs.writeFileSync(sfdxJson, '');
+
+        opened = WorkspaceUtils.isSfdxProjectOpened();
+        assert.equal(opened, true);
     });
 });

@@ -7,6 +7,12 @@
 
 import { workspace } from 'vscode';
 import { access } from 'fs/promises';
+import {
+    PACKAGE_JSON,
+    SFDX_PROJECT_FILE,
+    JSON_INDENTATION_SPACES
+} from './constants';
+import * as fs from 'fs';
 import * as path from 'path';
 
 export class WorkspaceUtils {
@@ -66,6 +72,52 @@ export class WorkspaceUtils {
             }
             return resolve(staticResourcesPath);
         });
+    }
+
+    static getPackageJson(): object {
+        return JSON.parse(
+            fs.readFileSync(
+                path.join(this.getWorkspaceDir(), PACKAGE_JSON),
+                'utf8'
+            )
+        );
+    }
+
+    static setPackageJson(packageJson: object) {
+        fs.writeFileSync(
+            path.join(this.getWorkspaceDir(), PACKAGE_JSON),
+            JSON.stringify(packageJson, null, JSON_INDENTATION_SPACES)
+        );
+    }
+
+    static packageJsonExists(): boolean {
+        try {
+            return fs.existsSync(
+                path.join(this.getWorkspaceDir(), PACKAGE_JSON)
+            );
+        } catch {
+            return false;
+        }
+    }
+
+    static lwcFolderExists(): boolean {
+        try {
+            return fs.existsSync(
+                path.join(this.getWorkspaceDir(), WorkspaceUtils.LWC_PATH)
+            );
+        } catch {
+            return false;
+        }
+    }
+
+    static isSfdxProjectOpened(): boolean {
+        try {
+            return fs.existsSync(
+                path.join(this.getWorkspaceDir(), SFDX_PROJECT_FILE)
+            );
+        } catch {
+            return false;
+        }
     }
 }
 

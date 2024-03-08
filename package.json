@@ -35,13 +35,41 @@
   "main": "./out/extension.js",
   "l10n": "./l10n",
   "contributes": {
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "salesforcedx-vscode-offline-app.configureLintingTools",
+          "when": "sfdx_project_opened"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "salesforcedx-vscode-offline-app.onboardingWizard",
         "title": "%extension.commands.config-wizard.title%",
         "category": "%extension.commands.config-wizard.category%"
+      },
+      {
+        "command": "salesforcedx-vscode-offline-app.configureLintingTools",
+        "title": "%extension.commands.config-linting-tools.title%",
+        "category": "%extension.commands.salesforce-mobile-offline.category%"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "%salesforce.mobile.extensions%",
+      "properties": {
+        "mobileOfflineLinting.eslint-plugin-lwc-graph-analyzer": {
+          "type": "string",
+          "default": "^0.9.0",
+          "description": "%extension.commands.salesforce-mobile-offline.komaci.version%"
+        },
+        "mobileOfflineLinting.eslint": {
+          "type": "string",
+          "default": "^8.47.0",
+          "description": "%extension.commands.salesforce-mobile-offline.eslint.version%"
+        }
+      }
+    }
   },
   "volta": {
     "node": "18.17.1"
