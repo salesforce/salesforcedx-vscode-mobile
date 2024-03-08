@@ -51,7 +51,7 @@ export class ConfigureLintingToolsCommand {
         try {
             if (!WorkspaceUtils.lwcFolderExists()) {
                 await this.showMessage(
-                    'LWC folder does not exist. The folder is required to create a configuration file for eslint.'
+                    'The "force-app/main/default/lwc" folder does not exist in your project. This folder is required to create a configuration file for ESLint.'
                 );
                 return Promise.resolve(false);
             }
