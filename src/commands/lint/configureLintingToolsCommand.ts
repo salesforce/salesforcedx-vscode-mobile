@@ -58,7 +58,7 @@ export class ConfigureLintingToolsCommand {
 
             if (!WorkspaceUtils.packageJsonExists()) {
                 await this.showMessage(
-                    'The sfdx project does not contain package.json. It is required to specify dependent eslint packages.'
+                    'Your project does not contain a "package.json" specification. You must have a package specification to configure these ESLint packages and their dependencies in your project.'
                 );
                 return Promise.resolve(false);
             }
