@@ -109,5 +109,7 @@ jobs:
             - name: Publish to VSCode Marketplace
               env:
                   VSCE_PERSONAL_ACCESS_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
+                  OPEN_VSX_PERSONAL_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_PERSONAL_ACCESS_TOKEN }}
               run: |
                   npx vsce publish -p ${{ env.VSCE_PERSONAL_ACCESS_TOKEN }} --packagePath ${{ steps.get_package_name.outputs.result }}
+                  npx ovsx publish ${{ steps.get_package_name.outputs.result }} -p ${{ env.OPEN_VSX_PERSONAL_ACCESS_TOKEN }}

@@ -2,7 +2,7 @@
   "name": "salesforcedx-vscode-mobile",
   "displayName": "%extension.displayName%",
   "description": "%extension.description%",
-  "version": "0.2.0",
+  "version": "0.3.0-beta1",
   "publisher": "salesforce",
   "engines": {
     "vscode": "^1.77.0",
@@ -109,7 +109,8 @@
     "prettier": "^3.0.3",
     "rimraf": "^5.0.5",
     "sinon": "^17.0.0",
-    "typescript": "^5.2.2"
+    "typescript": "^5.2.2",
+    "ovsx": "^0.8.4"
   },
   "dependencies": {
     "@salesforce/core": "^5.3.12",
