@@ -35,10 +35,7 @@ export class DeployToOrgCommand {
             currentWorkspace.workspaceFolders[0].uri.fsPath;
         const forceAppPath = path.join(workspaceFolderPath, 'force-app');
         const forceAppUri = Uri.file(forceAppPath);
-        await commands.executeCommand(
-            'sfdx.force.source.deploy.source.path',
-            forceAppUri
-        );
+        await commands.executeCommand('sf.deploy.source.path', forceAppUri);
         return Promise.resolve(true);
     }
 }
