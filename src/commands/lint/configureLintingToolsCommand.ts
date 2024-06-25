@@ -18,19 +18,21 @@ const config = workspace.getConfiguration();
 
 class EslintDependencyConfig {
     readonly name: string;
-    readonly packageJsonPropertyId: string;
-    readonly version: string;
-    readonly eslintrcExtend: string;
+    readonly packageConfigPropertyId: string;
+    readonly eslintConfigToExtend: string;
 
     constructor(
         name: string,
-        packageJsonPropertyId: string,
-        eslintrcExtend: string
+        packageConfigPropertyId: string,
+        eslintConfigToExtend: string
     ) {
         this.name = name;
-        this.packageJsonPropertyId = packageJsonPropertyId;
-        this.eslintrcExtend = eslintrcExtend;
-        this.version = config.get(this.packageJsonPropertyId) as string;
+        this.packageConfigPropertyId = packageConfigPropertyId;
+        this.eslintConfigToExtend = eslintConfigToExtend;
+    }
+
+    getVersion(): string {
+        return config.get(this.packageConfigPropertyId) as string;
     }
 }
 
@@ -81,7 +83,7 @@ export class ConfigureLintingToolsCommand {
 
             // Ask user to add eslint plugin
             const result = await this.showMessage(
-                'Do you want to add the ESLint plugins related to LWC offline capabilities to your project? This will give you linting feedback on code patterns that will not support your LWCs working offline, for mobile use cases.',
+                'Do you want to add Salesforce code linting guidance for Mobile and Offline capabilities? These tools will identify code patterns that cause problems in Mobile and Offline use cases.',
                 MessageType.InformationYesNo
             );
 
@@ -153,9 +155,9 @@ export class ConfigureLintingToolsCommand {
 
         if (devDependencies) {
             eslintDependencies.forEach((dependencyConfig) => {
-                const { name, version } = dependencyConfig;
+                const { name } = dependencyConfig;
                 if (!devDependencies[name]) {
-                    devDependencies[name] = version;
+                    devDependencies[name] = dependencyConfig.getVersion();
                     modified = true;
                 }
             });
@@ -188,8 +190,8 @@ export class ConfigureLintingToolsCommand {
             let modified = false;
 
             eslintDependencies.forEach((config) => {
-                if (!eslintrcExtends.includes(config.eslintrcExtend)) {
-                    eslintrcExtends.push(config.eslintrcExtend);
+                if (!eslintrcExtends.includes(config.eslintConfigToExtend)) {
+                    eslintrcExtends.push(config.eslintConfigToExtend);
                     modified = true;
                 }
             });
@@ -207,7 +209,7 @@ export class ConfigureLintingToolsCommand {
             // Create eslintrc
             const eslintrc = {
                 extends: eslintDependencies.map((config) => {
-                    return `${config.eslintrcExtend}`;
+                    return `${config.eslintConfigToExtend}`;
                 })
             };
 
