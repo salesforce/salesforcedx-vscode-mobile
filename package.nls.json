@@ -3,6 +3,7 @@
     "extension.commands.config-wizard.category": "Offline Starter Kit",
     "extension.commands.config-linting-tools.title": "Configure Linting Tools",
     "extension.commands.salesforce-mobile-offline.category": "Salesforce Mobile Offline",
+    "extension.commands.salesforce-mobile-offline.lwc-mobile.version": "Version of ESLint Plugin LWC Mobile to include in devDependencies",
     "extension.commands.salesforce-mobile-offline.komaci.version": "Version of ESLint Plugin LWC Graph Analyzer to include in devDependencies",
     "extension.commands.salesforce-mobile-offline.eslint.version": "Version of ESLint to include in devDependencies",
     "salesforce.mobile.extensions": "Salesforce Mobile Extensions",
