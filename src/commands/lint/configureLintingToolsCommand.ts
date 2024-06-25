@@ -81,7 +81,7 @@ export class ConfigureLintingToolsCommand {
 
             // Ask user to add eslint plugin
             const result = await this.showMessage(
-                'Do you want to add the ESLint plugin for LWC graph analysis to your project? This will give you linting feedback on code patterns that will not support your LWCs working offline, for mobile use cases.',
+                'Do you want to add the ESLint plugins related to LWC offline capabilities to your project? This will give you linting feedback on code patterns that will not support your LWCs working offline, for mobile use cases.',
                 MessageType.InformationYesNo
             );
 
