@@ -11,29 +11,48 @@ import * as path from 'path';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import { JSON_INDENTATION_SPACES } from '../../utils/constants';
 
-const config = workspace.getConfiguration();
-const eslintPluginLwcGraphAnalyzer =
-    '@salesforce/eslint-plugin-lwc-graph-analyzer';
-const eslintPluginLwcGraphAnalyzerConfig =
-    'mobileOfflineLinting.eslint-plugin-lwc-graph-analyzer';
-const eslintPluginLwcGraphAnalyzerVersion = config.get(
-    eslintPluginLwcGraphAnalyzerConfig
-) as string;
-
-const eslint = 'eslint';
-const eslintConfig = 'mobileOfflineLinting.eslint';
-const eslintVersion = config.get(eslintConfig) as string;
-
 const configureLintingToolsCommand =
     'salesforcedx-vscode-offline-app.configureLintingTools';
-const eslintDependencies = [
-    [eslintPluginLwcGraphAnalyzer, eslintPluginLwcGraphAnalyzerVersion],
-    [eslint, eslintVersion]
-];
 
-const lwcGraphAnalyzerRecommended: string =
-    'plugin:@salesforce/lwc-graph-analyzer/recommended';
-const eslintRecommended = 'eslint:recommended';
+const config = workspace.getConfiguration();
+
+class EslintDependencyConfig {
+    readonly name: string;
+    readonly packageConfigPropertyId: string;
+    readonly eslintConfigToExtend: string;
+
+    constructor(
+        name: string,
+        packageConfigPropertyId: string,
+        eslintConfigToExtend: string
+    ) {
+        this.name = name;
+        this.packageConfigPropertyId = packageConfigPropertyId;
+        this.eslintConfigToExtend = eslintConfigToExtend;
+    }
+
+    getVersion(): string {
+        return config.get(this.packageConfigPropertyId) as string;
+    }
+}
+
+const eslintDependencies: EslintDependencyConfig[] = [
+    new EslintDependencyConfig(
+        '@salesforce/eslint-plugin-lwc-mobile',
+        'mobileOfflineLinting.eslint-plugin-lwc-mobile',
+        'plugin:@salesforce/lwc-mobile/recommended'
+    ),
+    new EslintDependencyConfig(
+        '@salesforce/eslint-plugin-lwc-graph-analyzer',
+        'mobileOfflineLinting.eslint-plugin-lwc-graph-analyzer',
+        'plugin:@salesforce/lwc-graph-analyzer/recommended'
+    ),
+    new EslintDependencyConfig(
+        'eslint',
+        'mobileOfflineLinting.eslint',
+        'eslint:recommended'
+    )
+];
 
 interface PackageJson {
     devDependencies?: Record<string, string>;
@@ -64,7 +83,7 @@ export class ConfigureLintingToolsCommand {
 
             // Ask user to add eslint plugin
             const result = await this.showMessage(
-                'Do you want to add the ESLint plugin for LWC graph analysis to your project? This will give you linting feedback on code patterns that will not support your LWCs working offline, for mobile use cases.',
+                'Do you want to add Salesforce code linting guidance for Mobile and Offline capabilities? These tools will identify code patterns that cause problems in Mobile and Offline use cases.',
                 MessageType.InformationYesNo
             );
 
@@ -135,10 +154,10 @@ export class ConfigureLintingToolsCommand {
         let modified = false;
 
         if (devDependencies) {
-            eslintDependencies.forEach((nameValuePair) => {
-                const [name, value] = nameValuePair;
+            eslintDependencies.forEach((dependencyConfig) => {
+                const { name } = dependencyConfig;
                 if (!devDependencies[name]) {
-                    devDependencies[name] = value;
+                    devDependencies[name] = dependencyConfig.getVersion();
                     modified = true;
                 }
             });
@@ -170,15 +189,12 @@ export class ConfigureLintingToolsCommand {
 
             let modified = false;
 
-            if (!eslintrcExtends.includes(eslintRecommended)) {
-                eslintrcExtends.push(eslintRecommended);
-                modified = true;
-            }
-
-            if (!eslintrcExtends.includes(lwcGraphAnalyzerRecommended)) {
-                eslintrc.extends.push(lwcGraphAnalyzerRecommended);
-                modified = true;
-            }
+            eslintDependencies.forEach((config) => {
+                if (!eslintrcExtends.includes(config.eslintConfigToExtend)) {
+                    eslintrcExtends.push(config.eslintConfigToExtend);
+                    modified = true;
+                }
+            });
 
             if (modified) {
                 // Save json only if the content was modified.
@@ -192,11 +208,11 @@ export class ConfigureLintingToolsCommand {
         } else {
             // Create eslintrc
             const eslintrc = {
-                extends: [
-                    `${eslintRecommended}`,
-                    `${lwcGraphAnalyzerRecommended}`
-                ]
+                extends: eslintDependencies.map((config) => {
+                    return `${config.eslintConfigToExtend}`;
+                })
             };
+
             const jsonString = JSON.stringify(
                 eslintrc,
                 null,
