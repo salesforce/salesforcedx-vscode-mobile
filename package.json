@@ -1,126 +1,126 @@
 {
-  "name": "salesforcedx-vscode-mobile",
-  "displayName": "%extension.displayName%",
-  "description": "%extension.description%",
-  "version": "0.3.0",
-  "publisher": "salesforce",
-  "engines": {
-    "vscode": "^1.77.0",
-    "node": ">=18"
-  },
-  "categories": [
-    "Other"
-  ],
-  "qna": "https://github.com/salesforce/salesforcedx-vscode-mobile/issues",
-  "homepage": "https://github.com/salesforce/salesforcedx-vscode-mobile/blob/main/README.md",
-  "bugs": {
-    "url": "https://github.com/salesforce/salesforcedx-vscode-mobile/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/salesforce/salesforcedx-vscode-mobile.git"
-  },
-  "license": "SEE LICENSE IN LICENSE.txt",
-  "icon": "images/package-icon.png",
-  "galleryBanner": {
-    "color": "#ECECEC",
-    "theme": "light"
-  },
-  "activationEvents": [
-    "onStartupFinished"
-  ],
-  "extensionDependencies": [
-    "salesforce.salesforcedx-vscode-core"
-  ],
-  "main": "./out/extension.js",
-  "l10n": "./l10n",
-  "contributes": {
-    "menus": {
-      "commandPalette": [
-        {
-          "command": "salesforcedx-vscode-offline-app.configureLintingTools",
-          "when": "sfdx_project_opened"
-        }
-      ]
+    "name": "salesforcedx-vscode-mobile",
+    "displayName": "%extension.displayName%",
+    "description": "%extension.description%",
+    "version": "0.3.0",
+    "publisher": "salesforce",
+    "engines": {
+        "vscode": "^1.77.0",
+        "node": ">=18"
     },
-    "commands": [
-      {
-        "command": "salesforcedx-vscode-offline-app.onboardingWizard",
-        "title": "%extension.commands.config-wizard.title%",
-        "category": "%extension.commands.config-wizard.category%"
-      },
-      {
-        "command": "salesforcedx-vscode-offline-app.configureLintingTools",
-        "title": "%extension.commands.config-linting-tools.title%",
-        "category": "%extension.commands.salesforce-mobile-offline.category%"
-      }
+    "categories": [
+        "Other"
     ],
-    "configuration": {
-      "title": "%salesforce.mobile.extensions%",
-      "properties": {
-        "mobileOfflineLinting.eslint-plugin-lwc-mobile": {
-          "type": "string",
-          "default": "^1.0.0",
-          "description": "%extension.commands.salesforce-mobile-offline.lwc-mobile.version%"
+    "qna": "https://github.com/salesforce/salesforcedx-vscode-mobile/issues",
+    "homepage": "https://github.com/salesforce/salesforcedx-vscode-mobile/blob/main/README.md",
+    "bugs": {
+        "url": "https://github.com/salesforce/salesforcedx-vscode-mobile/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/salesforce/salesforcedx-vscode-mobile.git"
+    },
+    "license": "SEE LICENSE IN LICENSE.txt",
+    "icon": "images/package-icon.png",
+    "galleryBanner": {
+        "color": "#ECECEC",
+        "theme": "light"
+    },
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "extensionDependencies": [
+        "salesforce.salesforcedx-vscode-core"
+    ],
+    "main": "./out/extension.js",
+    "l10n": "./l10n",
+    "contributes": {
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "salesforcedx-vscode-offline-app.configureLintingTools",
+                    "when": "sfdx_project_opened"
+                }
+            ]
         },
-        "mobileOfflineLinting.eslint-plugin-lwc-graph-analyzer": {
-          "type": "string",
-          "default": "^0.9.0",
-          "description": "%extension.commands.salesforce-mobile-offline.komaci.version%"
-        },
-        "mobileOfflineLinting.eslint": {
-          "type": "string",
-          "default": "^8.47.0",
-          "description": "%extension.commands.salesforce-mobile-offline.eslint.version%"
+        "commands": [
+            {
+                "command": "salesforcedx-vscode-offline-app.onboardingWizard",
+                "title": "%extension.commands.config-wizard.title%",
+                "category": "%extension.commands.config-wizard.category%"
+            },
+            {
+                "command": "salesforcedx-vscode-offline-app.configureLintingTools",
+                "title": "%extension.commands.config-linting-tools.title%",
+                "category": "%extension.commands.salesforce-mobile-offline.category%"
+            }
+        ],
+        "configuration": {
+            "title": "%salesforce.mobile.extensions%",
+            "properties": {
+                "mobileOfflineLinting.eslint-plugin-lwc-mobile": {
+                    "type": "string",
+                    "default": "^1.0.0",
+                    "description": "%extension.commands.salesforce-mobile-offline.lwc-mobile.version%"
+                },
+                "mobileOfflineLinting.eslint-plugin-lwc-graph-analyzer": {
+                    "type": "string",
+                    "default": "^0.9.0",
+                    "description": "%extension.commands.salesforce-mobile-offline.komaci.version%"
+                },
+                "mobileOfflineLinting.eslint": {
+                    "type": "string",
+                    "default": "^8.47.0",
+                    "description": "%extension.commands.salesforce-mobile-offline.eslint.version%"
+                }
+            }
         }
-      }
+    },
+    "volta": {
+        "node": "18.17.1"
+    },
+    "scripts": {
+        "clean": "rimraf out",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js",
+        "test-coverage": "node ./out/test/runTest.js --coverage",
+        "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
+        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
+        "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
+        "vscode:prepublish": "npm run clean && npm run bundle:extension"
+    },
+    "devDependencies": {
+        "@istanbuljs/nyc-config-typescript": "^1.0.2",
+        "@types/cli-progress": "^3.11.5",
+        "@types/glob": "^8.1.0",
+        "@types/inquirer": "^9.0.6",
+        "@types/mocha": "^10.0.3",
+        "@types/node": "18.x",
+        "@types/sinon": "^10.0.20",
+        "@types/vscode": "1.77.0",
+        "@typescript-eslint/eslint-plugin": "^6.9.0",
+        "@typescript-eslint/parser": "^6.9.0",
+        "@vscode/l10n-dev": "^0.0.29",
+        "@vscode/test-electron": "^2.3.6",
+        "@vscode/vsce": "^2.21.1",
+        "esbuild": "^0.19.5",
+        "eslint": "^8.52.0",
+        "glob": "^8.1.0",
+        "mocha": "^10.2.0",
+        "nyc": "^15.1.0",
+        "prettier": "^3.0.3",
+        "rimraf": "^5.0.5",
+        "sinon": "^17.0.0",
+        "typescript": "^5.2.2",
+        "ovsx": "^0.8.4"
+    },
+    "dependencies": {
+        "@salesforce/core": "^5.3.12",
+        "@salesforce/lwc-dev-mobile-core": "^3.3.0",
+        "@salesforce/sf-plugins-core": "^4.0.0",
+        "@vscode/l10n": "^0.0.16"
     }
-  },
-  "volta": {
-    "node": "18.17.1"
-  },
-  "scripts": {
-    "clean": "rimraf out",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js",
-    "test-coverage": "node ./out/test/runTest.js --coverage",
-    "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
-    "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
-    "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
-    "vscode:prepublish": "npm run clean && npm run bundle:extension"
-  },
-  "devDependencies": {
-    "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@types/cli-progress": "^3.11.5",
-    "@types/glob": "^8.1.0",
-    "@types/inquirer": "^9.0.6",
-    "@types/mocha": "^10.0.3",
-    "@types/node": "18.x",
-    "@types/sinon": "^10.0.20",
-    "@types/vscode": "1.77.0",
-    "@typescript-eslint/eslint-plugin": "^6.9.0",
-    "@typescript-eslint/parser": "^6.9.0",
-    "@vscode/l10n-dev": "^0.0.29",
-    "@vscode/test-electron": "^2.3.6",
-    "@vscode/vsce": "^2.21.1",
-    "esbuild": "^0.19.5",
-    "eslint": "^8.52.0",
-    "glob": "^8.1.0",
-    "mocha": "^10.2.0",
-    "nyc": "^15.1.0",
-    "prettier": "^3.0.3",
-    "rimraf": "^5.0.5",
-    "sinon": "^17.0.0",
-    "typescript": "^5.2.2",
-    "ovsx": "^0.8.4"
-  },
-  "dependencies": {
-    "@salesforce/core": "^5.3.12",
-    "@salesforce/lwc-dev-mobile-core": "^3.3.0",
-    "@salesforce/sf-plugins-core": "^4.0.0",
-    "@vscode/l10n": "^0.0.16"
-  }
 }
