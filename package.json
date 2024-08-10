@@ -118,7 +118,7 @@
         "ovsx": "^0.9.2"
     },
     "dependencies": {
-        "@salesforce/core": "^5.3.12",
+        "@salesforce/core": "^8.3.0",
         "@salesforce/lwc-dev-mobile-core": "^3.3.1",
         "@salesforce/sf-plugins-core": "^4.0.0",
         "@vscode/l10n": "^0.0.18"
