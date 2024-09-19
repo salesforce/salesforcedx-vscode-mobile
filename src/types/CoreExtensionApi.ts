@@ -6,10 +6,13 @@
  */
 
 import { WorkspaceContext } from './WorkspaceContext';
+import { SalesforceProjectConfig } from './SalesforceProjectConfig';
 
 export interface CoreExtensionApi {
     services: {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         WorkspaceContext: WorkspaceContext;
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        SalesforceProjectConfig: SalesforceProjectConfig;
     };
 }

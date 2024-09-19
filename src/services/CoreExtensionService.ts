@@ -7,7 +7,7 @@
 
 import { extensions } from 'vscode';
 import { satisfies, valid } from 'semver';
-import type { CoreExtensionApi, WorkspaceContext } from '../types';
+import type { CoreExtensionApi, WorkspaceContext, SalesforceProjectConfig } from '../types';
 import {
     CORE_EXTENSION_ID,
     MINIMUM_REQUIRED_VERSION_CORE_EXTENSION
@@ -22,6 +22,7 @@ const coreExtensionMinRequiredVersionError =
 export class CoreExtensionService {
     private static initialized = false;
     private static workspaceContext: WorkspaceContext;
+    private static salesforceProjectConfig: SalesforceProjectConfig;
 
     static loadDependencies() {
         if (!CoreExtensionService.initialized) {
@@ -45,6 +46,10 @@ export class CoreExtensionService {
                 coreExtensionApi?.services.WorkspaceContext
             );
 
+            CoreExtensionService.initializeSalesforceProjectConfig(
+                coreExtensionApi?.services.SalesforceProjectConfig
+            );
+
             CoreExtensionService.initialized = true;
         }
     }
@@ -57,6 +62,15 @@ export class CoreExtensionService {
         }
         CoreExtensionService.workspaceContext =
             workspaceContext.getInstance(false);
+    }
+
+    private static initializeSalesforceProjectConfig(
+        salesforceProjectConfig: SalesforceProjectConfig | undefined
+    ) {
+        if (!salesforceProjectConfig) {
+            throw new Error("UNDEFINED salesforceProjectConfig");
+        }
+        CoreExtensionService.salesforceProjectConfig = salesforceProjectConfig;
     }
 
     private static isAboveMinimumRequiredVersion(
@@ -77,6 +91,13 @@ export class CoreExtensionService {
     static getWorkspaceContext(): WorkspaceContext {
         if (CoreExtensionService.initialized) {
             return CoreExtensionService.workspaceContext;
+        }
+        throw new Error(NOT_INITIALIZED_ERROR);
+    }
+
+    static getSalesforceProjectConfig(): SalesforceProjectConfig {
+        if (CoreExtensionService.initialized) {
+            return CoreExtensionService.salesforceProjectConfig;
         }
         throw new Error(NOT_INITIALIZED_ERROR);
     }
