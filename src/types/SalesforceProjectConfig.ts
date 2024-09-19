@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: MIT
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
-export * from './AuthFields';
-export * from './CoreExtensionApi';
-export * from './SingleRecordQueryOptions';
-export * from './WorkspaceContext';
-export * from './SalesforceProjectConfig';
+import { SfProjectJson } from '@salesforce/core';
+
+export interface SalesforceProjectConfig {
+    getInstance(): Promise<SfProjectJson>;
+    getValue(key: string): Promise<any>;
+}

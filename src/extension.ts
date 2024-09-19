@@ -10,6 +10,8 @@
 import * as vscode from 'vscode';
 import * as onboardingWizard from './commands/wizard/onboardingWizard';
 import * as configureLintingToolsCommand from './commands/lint/configureLintingToolsCommand';
+import * as liveKomaciAnalyze from './commands/toolingHub/liveKomaciAnalyze';
+
 import { CoreExtensionService } from './services/CoreExtensionService';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 
@@ -38,6 +40,8 @@ export function activate(context: vscode.ExtensionContext) {
     onboardingWizard.onActivate(context);
 
     configureLintingToolsCommand.registerCommand(context);
+
+    liveKomaciAnalyze.registerCommand(context);
 }
 
 // This method is called when your extension is deactivated
