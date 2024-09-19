@@ -20,6 +20,9 @@ suite('Live Komaci Analyze Command Test Suite', () => {
     test('Extracts LWC name from URI, instanceUrl from workspace context, and namespace from project config', async() => {
         stubWorkspaceContext("instanceUrl");
         stubProjectConfig("mockLwcNamespace");
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         let vscodeEnvOpenExternalSpy = sinon.spy(env);
         const sourceUri = Uri.file('/Users/a.liu/Documents/sfdx/sfPlayground/force-app/main/default/lwc/childCmpA/childCmpA.html');
 
@@ -28,11 +31,17 @@ suite('Live Komaci Analyze Command Test Suite', () => {
         assert.equal(vscodeEnvOpenExternalSpy.openExternal.callCount, 1);
         // Assert shape of URL opened is good
         assert.equal(vscodeEnvOpenExternalSpy.openExternal.args[0][0], "instanceUrl/lwr/application/amd/0/e/native/ai/lightningmobileruntime%2Ftoolinghub?tab=audit&hideContainer=true&lwcName=childCmpA&lwcNamespace=mockLwcNamespace&hideForm=true&visualize=true");
+        // Assert telemetry
+        assert.equal(sendExceptionStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Defaults namespace to c if not given one', async() => {
         stubWorkspaceContext("instanceUrl");
         stubProjectConfig("");
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         let vscodeEnvOpenExternalSpy = sinon.spy(env);
         const sourceUri = Uri.file('/Users/a.liu/Documents/sfdx/sfPlayground/force-app/main/default/lwc/childCmpA/childCmpA.html');
 
@@ -40,11 +49,16 @@ suite('Live Komaci Analyze Command Test Suite', () => {
 
         assert.equal(vscodeEnvOpenExternalSpy.openExternal.callCount, 1);
         assert.equal(vscodeEnvOpenExternalSpy.openExternal.args[0][0].toString().indexOf("lwcNamespace=c") >= 0, true);
+        assert.equal(sendExceptionStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Aborts if given multiple sourceUris, which prevents it from analyzing 1 target', async() => {
         stubWorkspaceContext("instanceUrl");
         stubProjectConfig("mockLwcNamespace");
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         const showErrorMessageStub = sinon.stub(window, 'showErrorMessage');
         let vscodeEnvOpenExternalSpy = sinon.spy(env);
         const sourceUri = [Uri.file('/lwc/childCmpA/childCmpA.html'), Uri.file('/lwc/B/B.html')];
@@ -53,11 +67,16 @@ suite('Live Komaci Analyze Command Test Suite', () => {
         
         assert.equal(vscodeEnvOpenExternalSpy.openExternal.callCount, 0);
         assert.equal(showErrorMessageStub.callCount, 1);
+        assert.equal(sendExceptionStub.callCount, 1);
+        assert.equal(sendCommandEventStub.callCount, 0);
     });
 
     test('Aborts if given multiple uris, which prevents it from analyzing 1 target', async() => {
         stubWorkspaceContext("instanceUrl");
         stubProjectConfig("mockLwcNamespace");
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         const showErrorMessageStub = sinon.stub(window, 'showErrorMessage');
         let vscodeEnvOpenExternalSpy = sinon.spy(env);
         const sourceUri = Uri.file('/lwc/childCmpA/childCmpA.html');
@@ -67,6 +86,8 @@ suite('Live Komaci Analyze Command Test Suite', () => {
 
         assert.equal(vscodeEnvOpenExternalSpy.openExternal.callCount, 0);
         assert.equal(showErrorMessageStub.callCount, 1);
+        assert.equal(sendExceptionStub.callCount, 1);
+        assert.equal(sendCommandEventStub.callCount, 0);
     });
 
     // Helpers
@@ -99,5 +120,22 @@ suite('Live Komaci Analyze Command Test Suite', () => {
         sinon
             .stub(CoreExtensionService, 'getSalesforceProjectConfig')
             .returns(getSalesforceProjectConfigInstance);
+    }
+    function stubTelemetryService(sendExceptionStub : any, sendCommandEventStub : any) {
+        const getTelemetryServiceInstance = {
+            extensionName: "mockExtensionName",
+            isTelemetryEnabled: sinon.stub(),
+            getInstance: sinon.stub(),
+            getReporters: sinon.stub(),
+            initializeService: sinon.stub(),
+            sendExtensionActivationEvent: sinon.stub(),
+            sendExtensionDeactivationEvent: sinon.stub(),
+            sendCommandEvent: sendCommandEventStub,
+            sendException: sendExceptionStub,
+            dispose: sinon.stub()
+        };
+        sinon
+            .stub(CoreExtensionService, 'getTelemetryService')
+            .returns(getTelemetryServiceInstance);
     }
 });

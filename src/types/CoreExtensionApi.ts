@@ -7,6 +7,7 @@
 
 import { WorkspaceContext } from './WorkspaceContext';
 import { SalesforceProjectConfig } from './SalesforceProjectConfig';
+import { TelemetryService } from './TelemetryService';
 
 export interface CoreExtensionApi {
     services: {
@@ -14,5 +15,7 @@ export interface CoreExtensionApi {
         WorkspaceContext: WorkspaceContext;
         // eslint-disable-next-line @typescript-eslint/naming-convention
         SalesforceProjectConfig: SalesforceProjectConfig;
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        TelemetryService: TelemetryService;
     };
 }

@@ -9,3 +9,4 @@ export * from './CoreExtensionApi';
 export * from './SingleRecordQueryOptions';
 export * from './WorkspaceContext';
 export * from './SalesforceProjectConfig';
+export * from './TelemetryService';

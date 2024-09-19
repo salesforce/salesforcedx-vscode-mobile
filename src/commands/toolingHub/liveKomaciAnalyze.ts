@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2024, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
+ */
+
 import * as vscode from 'vscode';
 import { commands, window, ExtensionContext } from 'vscode';
 import { CoreExtensionService } from '../../services/CoreExtensionService';
@@ -7,8 +14,11 @@ const commandName = 'salesforcedx-vscode-offline-app.liveKomaciAnalysis';
 export class LiveKomaciAnalyzeCommand {
     static async execute(sourceUri: vscode.Uri | vscode.Uri[] | undefined,
                          uris: vscode.Uri[] | undefined) {
+        const telemetryService = await CoreExtensionService.getTelemetryService();
+
         // Extract LWC Name
         if ((uris && uris?.length > 1) || Array.isArray(sourceUri)) {
+            telemetryService.sendException(commandName + ".invalid_analysis_input", "(TODO) This command runs on a single component.");
             return await window.showErrorMessage("(TODO) This command runs on a single component.");
         }
         const sourceUriInput = sourceUri ? sourceUri : this.getUriFromActiveEditor();
@@ -20,6 +30,8 @@ export class LiveKomaciAnalyzeCommand {
         if (!lwcNamespace || lwcNamespace === '') {
             lwcNamespace = 'c'; // Default "c" custom namespace
         }
+
+        telemetryService.sendCommandEvent(commandName, process.hrtime(), { lwcName, lwcNamespace });
 
         const workspace = await CoreExtensionService.getWorkspaceContext();
     
