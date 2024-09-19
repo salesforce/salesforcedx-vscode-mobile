@@ -18,7 +18,7 @@ import { WorkspaceUtils } from './utils/workspaceUtils';
 export function activate(context: vscode.ExtensionContext) {
     // We need to do this first in case any other services need access to those provided by the core extension
     try {
-        CoreExtensionService.loadDependencies();
+        CoreExtensionService.loadDependencies(context);
     } catch (err) {
         console.error(err);
         vscode.window.showErrorMessage(
