@@ -7,7 +7,12 @@
 
 import { ExtensionContext, extensions } from 'vscode';
 import { satisfies, valid } from 'semver';
-import type { CoreExtensionApi, WorkspaceContext, SalesforceProjectConfig, TelemetryService } from '../types';
+import type {
+    CoreExtensionApi,
+    WorkspaceContext,
+    SalesforceProjectConfig,
+    TelemetryService
+} from '../types';
 import {
     CORE_EXTENSION_ID,
     MINIMUM_REQUIRED_VERSION_CORE_EXTENSION
@@ -27,7 +32,7 @@ export class CoreExtensionService {
     private static salesforceProjectConfig: SalesforceProjectConfig;
     private static telemetryService: TelemetryService;
 
-    static loadDependencies(context : ExtensionContext) {
+    static loadDependencies(context: ExtensionContext) {
         if (!CoreExtensionService.initialized) {
             const coreExtension = extensions.getExtension(CORE_EXTENSION_ID);
             if (!coreExtension) {
@@ -54,7 +59,8 @@ export class CoreExtensionService {
             );
 
             CoreExtensionService.initializeTelemetryService(
-                coreExtensionApi?.services.TelemetryService, context
+                coreExtensionApi?.services.TelemetryService,
+                context
             );
 
             CoreExtensionService.initialized = true;
@@ -81,15 +87,22 @@ export class CoreExtensionService {
     }
 
     private static initializeTelemetryService(
-        telemetryService: TelemetryService | undefined, context: ExtensionContext
+        telemetryService: TelemetryService | undefined,
+        context: ExtensionContext
     ) {
         if (!telemetryService) {
-          throw new Error(TELEMETRY_SERVICE_NOT_FOUND);
+            throw new Error(TELEMETRY_SERVICE_NOT_FOUND);
         }
         const { aiKey, name, version } = context.extension.packageJSON;
-        CoreExtensionService.telemetryService = telemetryService.getInstance(name);
-        CoreExtensionService.telemetryService.initializeService(context, name, aiKey, version);
-      }
+        CoreExtensionService.telemetryService =
+            telemetryService.getInstance(name);
+        CoreExtensionService.telemetryService.initializeService(
+            context,
+            name,
+            aiKey,
+            version
+        );
+    }
 
     private static isAboveMinimumRequiredVersion(
         minRequiredVersion: string,
@@ -122,7 +135,7 @@ export class CoreExtensionService {
 
     static getTelemetryService(): TelemetryService {
         if (CoreExtensionService.initialized) {
-          return CoreExtensionService.telemetryService;
+            return CoreExtensionService.telemetryService;
         }
         throw new Error(NOT_INITIALIZED_ERROR);
     }

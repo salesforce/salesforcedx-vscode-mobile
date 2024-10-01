@@ -12,17 +12,29 @@ import { CoreExtensionService } from '../../services/CoreExtensionService';
 const commandName = 'salesforcedx-vscode-offline-app.liveKomaciAnalysis';
 
 export class LiveKomaciAnalyzeCommand {
-    static async execute(sourceUri: vscode.Uri | vscode.Uri[] | undefined,
-                         uris: vscode.Uri[] | undefined) {
-        const telemetryService = await CoreExtensionService.getTelemetryService();
+    static async execute(
+        sourceUri: vscode.Uri | vscode.Uri[] | undefined,
+        uris: vscode.Uri[] | undefined
+    ) {
+        const telemetryService =
+            await CoreExtensionService.getTelemetryService();
 
         // Extract LWC Name
         if ((uris && uris?.length > 1) || Array.isArray(sourceUri)) {
-            telemetryService.sendException(commandName + ".invalid_analysis_input", "(TODO) This command runs on a single component.");
-            return await window.showErrorMessage("(TODO) This command runs on a single component.");
+            telemetryService.sendException(
+                commandName + '.invalid_analysis_input',
+                '(TODO) This command runs on a single component.'
+            );
+            return await window.showErrorMessage(
+                '(TODO) This command runs on a single component.'
+            );
         }
-        const sourceUriInput = sourceUri ? sourceUri : this.getUriFromActiveEditor();
-        const lwcName = this.extractLwcNameFromSourceUri(sourceUriInput as vscode.Uri);
+        const sourceUriInput = sourceUri
+            ? sourceUri
+            : this.getUriFromActiveEditor();
+        const lwcName = this.extractLwcNameFromSourceUri(
+            sourceUriInput as vscode.Uri
+        );
 
         // Extract LWC namespace - it's declared in sfdx-project.json
         const config = await CoreExtensionService.getSalesforceProjectConfig();
@@ -31,17 +43,22 @@ export class LiveKomaciAnalyzeCommand {
             lwcNamespace = 'c'; // Default "c" custom namespace
         }
 
-        telemetryService.sendCommandEvent(commandName, process.hrtime(), { lwcName, lwcNamespace });
+        telemetryService.sendCommandEvent(commandName, process.hrtime(), {
+            lwcName,
+            lwcNamespace
+        });
 
         const workspace = await CoreExtensionService.getWorkspaceContext();
-    
+
         // Deploy LWC so analysis runs against current code
         // TODO: Commented out until TD-0215753 is delivered
         // const result = await vscode.commands.executeCommand('sf.deploy.current.source.file');
 
         // Open tooling hub in browser
         workspace.getConnection().then((conn) => {
-            let toolingHubUrl = conn.instanceUrl + "/lwr/application/amd/0/e/native/ai/lightningmobileruntime%2Ftoolinghub";
+            let toolingHubUrl =
+                conn.instanceUrl +
+                '/lwr/application/amd/0/e/native/ai/lightningmobileruntime%2Ftoolinghub';
             toolingHubUrl += `?tab=audit&hideContainer=true&lwcName=${lwcName}&lwcNamespace=${lwcNamespace}&hideForm=true&visualize=true`;
             vscode.env.openExternal(toolingHubUrl as any);
         });
@@ -55,20 +72,25 @@ export class LiveKomaciAnalyzeCommand {
         return undefined;
     };
 
-    static extractLwcNameFromSourceUri(sourceUriInput : vscode.Uri | undefined) : string {
+    static extractLwcNameFromSourceUri(
+        sourceUriInput: vscode.Uri | undefined
+    ): string {
         const path = sourceUriInput?.path ? sourceUriInput?.path : null;
         if (path && path.indexOf('lwc/') >= 0) {
-            return path.split("lwc/")[1].split("/")[0];
+            return path.split('lwc/')[1].split('/')[0];
         }
         return '';
     }
 }
 
 export function registerCommand(context: ExtensionContext) {
-    commands.registerCommand(commandName, async (
-        sourceUri: vscode.Uri | vscode.Uri[] | undefined,
-        uris: vscode.Uri[] | undefined
-    ) => {
-        await LiveKomaciAnalyzeCommand.execute(sourceUri, uris);
-    });
+    commands.registerCommand(
+        commandName,
+        async (
+            sourceUri: vscode.Uri | vscode.Uri[] | undefined,
+            uris: vscode.Uri[] | undefined
+        ) => {
+            await LiveKomaciAnalyzeCommand.execute(sourceUri, uris);
+        }
+    );
 }
