@@ -38,13 +38,13 @@
         "menus": {
             "editor/context": [
                 {
-                  "command": "salesforcedx-vscode-offline-app.liveKomaciAnalysis",
+                  "command": "salesforcedx-vscode-offline-app.live-komaci-analysis",
                   "when": "sf:project_opened && resourceLangId != 'forcesourcemanifest' && sf:has_target_org && resourcePath =~ /lwc/ && resource =~ /.\\.(js|ts||css|html)?$/"
                 }
               ],
               "explorer/context": [
                 {
-                  "command": "salesforcedx-vscode-offline-app.liveKomaciAnalysis",
+                  "command": "salesforcedx-vscode-offline-app.live-komaci-analysis",
                   "when": "sf:project_opened && resourceLangId != 'forcesourcemanifest' && sf:has_target_org && resourcePath =~ /lwc/ && resource =~ /.\\.(js|ts||css|html)?$/"
                 }
               ],
@@ -54,7 +54,7 @@
                     "when": "sfdx_project_opened"
                 },
                 {
-                    "command": "salesforcedx-vscode-offline-app.liveKomaciAnalysis",
+                    "command": "salesforcedx-vscode-offline-app.live-komaci-analysis",
                     "when": "sf:project_opened && resourceLangId != 'forcesourcemanifest' && sf:has_target_org && resourcePath =~ /lwc/ && resource =~ /.\\.(js|ts||css|html)?$/"
                 }
             ]
@@ -71,8 +71,8 @@
                 "category": "%extension.commands.salesforce-mobile-offline.category%"
             },
             {
-                "command": "salesforcedx-vscode-offline-app.liveKomaciAnalysis",
-                "title": "%extension.commands.salesforce-mobile-offline.toolinghub.liveKomaciAnalysis%"
+                "command": "salesforcedx-vscode-offline-app.live-komaci-analysis",
+                "title": "%extension.commands.salesforce-mobile-offline.tooling-hub.live-komaci-analysis%"
             }
         ],
         "configuration": {
