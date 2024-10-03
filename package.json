@@ -90,7 +90,8 @@
         "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
         "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
         "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
-        "vscode:prepublish": "npm run clean && npm run bundle:extension"
+        "vscode:prepublish": "npm run clean && npm run bundle:extension",
+        "postinstall": "cd lsp/client && npm install && cd ../server && npm install && cd ../.."
     },
     "devDependencies": {
         "@istanbuljs/nyc-config-typescript": "^1.0.2",
