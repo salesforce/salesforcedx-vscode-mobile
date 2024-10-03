@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2024, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
+ */
+
 import {
     createConnection,
     TextDocuments,
@@ -13,7 +20,6 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 // Create a connection for the server, using Node's IPC as a transport.
-// Also include all preview / proposed LSP features.
 const connection = createConnection(ProposedFeatures.all);
 
 // Create a simple text document manager.
@@ -49,6 +55,7 @@ connection.onInitialize((params: InitializeParams) => {
             }
         }
     };
+
     if (hasWorkspaceFolderCapability) {
         result.capabilities.workspace = {
             workspaceFolders: {
@@ -74,19 +81,20 @@ connection.onInitialized(() => {
     }
 });
 
-// The example settings
-interface ExampleSettings {
-    maxNumberOfProblems: number;
+
+// Settings for Mobile LSP
+interface MobileSettings {
+    maxNumberOfProblems: number;  //max number of diagnostics to detect per document. 
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
-// Please note that this is not the case when using this server with the client provided in this example
+// Please note that this is not the case when using this server with the client provided
 // but could happen with other clients.
-const defaultSettings: ExampleSettings = { maxNumberOfProblems: 1000 };
-let globalSettings: ExampleSettings = defaultSettings;
+const defaultSettings: MobileSettings = { maxNumberOfProblems: 1000 };
+let globalSettings: MobileSettings = defaultSettings;
 
 // Cache the settings of all open documents
-const documentSettings: Map<string, Thenable<ExampleSettings>> = new Map();
+const documentSettings: Map<string, Thenable<MobileSettings>> = new Map();
 export const documentCache: Map<string, TextDocument> = new Map();
 
 connection.onDidChangeConfiguration((change) => {
@@ -94,7 +102,7 @@ connection.onDidChangeConfiguration((change) => {
         // Reset all cached document settings
         documentSettings.clear();
     } else {
-        globalSettings = <ExampleSettings>(
+        globalSettings = <MobileSettings>(
             (change.settings.languageServerExample || defaultSettings)
         );
     }
@@ -106,7 +114,7 @@ connection.onDidChangeConfiguration((change) => {
 
 export function getDocumentSettings(
     resource: string
-): Thenable<ExampleSettings> {
+): Thenable<MobileSettings> {
     if (!hasConfigurationCapability) {
         return Promise.resolve(globalSettings);
     }
@@ -150,7 +158,7 @@ connection.languages.diagnostics.on(async (params) => {
 documents.onDidChangeContent((change) => {
     const document = change.document;
     documentCache.set(document.uri, document);
-    //validateTextDocument(document);
+    //TODO :  valid and report back diagnostics. 
 });
 
 connection.onDidChangeWatchedFiles((_change) => {

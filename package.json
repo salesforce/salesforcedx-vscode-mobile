@@ -32,7 +32,7 @@
     "extensionDependencies": [
         "salesforce.salesforcedx-vscode-core"
     ],
-    "main": "lsp/client/out/extension.js",
+    "main": "out/extension.js",
     "l10n": "./l10n",
     "contributes": {
         "menus": {

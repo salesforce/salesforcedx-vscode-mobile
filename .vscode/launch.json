@@ -15,7 +15,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js",
 				"${workspaceFolder}/lsp/client/out/**/*.js",
-				"${workspaceFolder}/lsp/server/**/*.js"
+				"${workspaceFolder}/lsp/server/out/**/*.js"
 			],
 			"preLaunchTask": "${defaultBuildTask}",
 			"autoAttachChildProcesses": true
