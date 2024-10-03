@@ -129,9 +129,8 @@ export class CodeBuilder {
         quickActionVariables[CodeBuilder.TEMPLATE_QUICK_ACTION_LABEL] = label;
         quickActionVariables[CodeBuilder.TEMPLATE_LWC_NAME] = name;
         if (iconName !== undefined && iconName !== '') {
-            quickActionVariables[
-                CodeBuilder.TEMPLATE_QUICK_ACTION_ICON
-            ] = `<icon>${iconName}</icon>`;
+            quickActionVariables[CodeBuilder.TEMPLATE_QUICK_ACTION_ICON] =
+                `<icon>${iconName}</icon>`;
         } else {
             quickActionVariables[CodeBuilder.TEMPLATE_QUICK_ACTION_ICON] = '';
         }
@@ -248,15 +247,12 @@ export class CodeBuilder {
             this.objectApiName;
 
         // Labels
-        templateVariables[
-            CodeBuilder.TEMPLATE_CREATE_LWC_LABEL
-        ] = `LWC for creating a/an ${this.objectApiName} instance.`;
-        templateVariables[
-            CodeBuilder.TEMPLATE_EDIT_LWC_LABEL
-        ] = `LWC for editing a/an ${this.objectApiName} instance.`;
-        templateVariables[
-            CodeBuilder.TEMPLATE_VIEW_LWC_LABEL
-        ] = `LWC for viewing a/an ${this.objectApiName} instance.`;
+        templateVariables[CodeBuilder.TEMPLATE_CREATE_LWC_LABEL] =
+            `LWC for creating a/an ${this.objectApiName} instance.`;
+        templateVariables[CodeBuilder.TEMPLATE_EDIT_LWC_LABEL] =
+            `LWC for editing a/an ${this.objectApiName} instance.`;
+        templateVariables[CodeBuilder.TEMPLATE_VIEW_LWC_LABEL] =
+            `LWC for viewing a/an ${this.objectApiName} instance.`;
 
         // We need to populate the following template variables:
         // TEMPLATE_FIELDS - a comma separated list of field names from the import statements, used in viewRecord template.
