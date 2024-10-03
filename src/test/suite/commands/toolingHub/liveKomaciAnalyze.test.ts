@@ -9,6 +9,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { afterEach } from 'mocha';
 import { Uri, env, window } from 'vscode';
+import { Connection } from '@salesforce/core';
 import { LiveKomaciAnalyzeCommand } from '../../../../commands/toolingHub/liveKomaciAnalyze';
 import { CoreExtensionService } from '../../../../services';
 
@@ -119,11 +120,11 @@ suite('Live Komaci Analyze Command Test Suite', () => {
 
     // Helpers
     function stubWorkspaceContext(instanceUrl: string) {
+        const stubConnection = sinon.createStubInstance(Connection);
+        stubConnection.instanceUrl = instanceUrl;
         const getWorkspaceContextInstance = {
             getConnection: () => {
-                return Promise.resolve({
-                    instanceUrl: instanceUrl
-                });
+                return Promise.resolve(stubConnection);
             },
             onOrgChange: sinon.stub(),
             getInstance: sinon.stub(),
