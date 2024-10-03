@@ -4,21 +4,10 @@ import {
     ProposedFeatures,
     InitializeParams,
     DidChangeConfigurationNotification,
-    CompletionItem,
-    TextDocumentPositionParams,
     TextDocumentSyncKind,
     InitializeResult,
     DocumentDiagnosticReportKind,
-    CodeActionKind,
-    type DocumentDiagnosticReport,
-    CodeAction,
-    WorkspaceChange,
-    ChangeAnnotation,
-    TextEdit,
-    Position,
-    SymbolInformation,
-    SymbolKind,
-    CodeLens
+    type DocumentDiagnosticReport
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -54,34 +43,9 @@ connection.onInitialize((params: InitializeParams) => {
     const result: InitializeResult = {
         capabilities: {
             textDocumentSync: TextDocumentSyncKind.Incremental,
-            // Tell the client that this server supports code completion.
-            completionProvider: {
-                resolveProvider: true,
-                triggerCharacters: ['@']
-            },
             diagnosticProvider: {
                 interFileDependencies: false,
                 workspaceDiagnostics: false
-            },
-            codeActionProvider: {
-                codeActionKinds: [CodeActionKind.QuickFix],
-                resolveProvider: true
-            },
-            hoverProvider: true,
-            documentRangeFormattingProvider: {
-                rangesSupport: true
-            },
-            documentFormattingProvider: true,
-            documentHighlightProvider: true,
-            documentOnTypeFormattingProvider: {
-                firstTriggerCharacter: '}'
-            },
-            renameProvider: true,
-            documentSymbolProvider: true,
-            // colorProvider:true,
-            foldingRangeProvider: true,
-            codeLensProvider: {
-                resolveProvider: true
             }
         }
     };
@@ -192,117 +156,6 @@ documents.onDidChangeContent((change) => {
 connection.onDidChangeWatchedFiles((_change) => {
     // Monitored files have change in VSCode
     connection.console.log('We received a file change event');
-});
-
-// This handler provides the initial list of the completion items.
-
-// This handler resolves additional information for the item selected in
-// the completion list.
-connection.onCompletionResolve((item: CompletionItem): CompletionItem => {
-    if (item.data === 1) {
-        item.detail = 'foo details';
-        item.documentation = 'foo documentation';
-    } else if (item.data === 2) {
-        item.detail = 'bar details';
-        item.documentation = 'bar documentation';
-    }
-    return item;
-});
-
-connection.onCodeActionResolve((codeAction) => {
-    return codeAction;
-});
-
-// connection.onHover((params): Hover | undefined => {
-//     return doOnHover(params);
-// });
-
-connection.onDocumentHighlight((textPosition) => {
-    const position = textPosition.position;
-    return [
-        // DocumentHighlight.create({
-        // 	start: { line: position.line + 1, character: position.character },
-        // 	end: { line: position.line + 1, character: position.character + 5 }
-        // }, DocumentHighlightKind.Text)
-    ];
-});
-
-connection.onDocumentFormatting((params): TextEdit[] => {
-    const result: TextEdit[] = [];
-
-    const textDocument = documentCache.get(params.textDocument.uri)!;
-    const text = textDocument.getText();
-
-    const pattern = /gql`([^`]*)`/g;
-    let match: RegExpExecArray | null;
-
-    const change: WorkspaceChange = new WorkspaceChange();
-
-    while ((match = pattern.exec(text)) && true) {
-        const gqlText = match[1];
-        const gqlBodyStartIndex = match.index + 4;
-        const gqlBodyEndIndex = pattern.lastIndex - 1;
-
-        // const rootQuery = RootQuery.parse(gqlText);
-        // if (rootQuery.result != null) {
-        //     const textEdit = TextEdit.replace(
-        //         {
-        //             start: textDocument.positionAt(gqlBodyStartIndex),
-        //             end: textDocument.positionAt(gqlBodyEndIndex)
-        //         },
-        //         preTabLines(
-        //             preTabLines(
-        //                 preTabLines(`\n${rootQuery.result.toString()}\n`)
-        //             )
-        //         )
-        //     );
-        //     result.push(textEdit);
-        // }
-    }
-    return result;
-});
-
-connection.onDocumentOnTypeFormatting((params) => {
-    //	connection.console.log(`Document On Type Formatting: ${JSON.stringify(params.position)} ${params.ch} ${JSON.stringify(params.options)}`);
-    return [];
-});
-
-connection.onRenameRequest((params) => {
-    const td = documentCache.get(params.textDocument.uri);
-    //	connection.console.log(`Rename: ${JSON.stringify(params.position)} ${params.newName}`);
-    // return new ResponseError(20, 'Element can\'t be renamed');
-    const change = new WorkspaceChange();
-    change
-        .getTextEditChange(params.textDocument.uri)
-        .insert(
-            Position.create(0, 0),
-            'Rename inserted\n',
-            ChangeAnnotation.create('Rename symbol', true)
-        );
-    return change.edit;
-});
-
-connection.onDocumentSymbol((identifier) => {
-    return [
-        SymbolInformation.create(
-            'query',
-            SymbolKind.Enum,
-            {
-                start: { line: 0, character: 15 },
-                end: { line: 0, character: 22 }
-            },
-            identifier.textDocument.uri
-        )
-    ];
-});
-
-connection.onCodeLens((param) => {
-    const result: CodeLens[] = [];
-    return result;
-});
-
-connection.onCodeActionResolve((param) => {
-    return CodeAction.create('abc', CodeActionKind.Empty);
 });
 
 // Make the text document manager listen on the connection

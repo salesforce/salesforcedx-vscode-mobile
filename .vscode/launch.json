@@ -13,9 +13,12 @@
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/out/**/*.js",
+				"${workspaceFolder}/lsp/client/out/**/*.js",
+				"${workspaceFolder}/lsp/server/**/*.js"
 			],
-			"preLaunchTask": "${defaultBuildTask}"
+			"preLaunchTask": "${defaultBuildTask}",
+			"autoAttachChildProcesses": true
 		},
 		{
 			"name": "Extension Tests",
@@ -26,7 +29,9 @@
 				"--extensionTestsPath=${workspaceFolder}/out/test/suite/index"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/out/**/*.js",
+				"${workspaceFolder}/lsp/client/out/**/*.js",
+				"${workspaceFolder}/lsp/server/out/**/*.js"
 			],
 			"preLaunchTask": "${defaultBuildTask}"
 		}

@@ -32,7 +32,7 @@
     "extensionDependencies": [
         "salesforce.salesforcedx-vscode-core"
     ],
-    "main": "./out/extension.js",
+    "main": "lsp/client/out/extension.js",
     "l10n": "./l10n",
     "contributes": {
         "menus": {
@@ -81,8 +81,8 @@
     },
     "scripts": {
         "clean": "rimraf out",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
+        "compile": "tsc -b ./",
+        "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
