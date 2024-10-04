@@ -63,18 +63,15 @@ export class LiveKomaciAnalyzeCommand {
         });
     }
 
-    static getUriFromActiveEditor = (): vscode.Uri | undefined => {
+    static getUriFromActiveEditor(): vscode.Uri | undefined {
         const editor = vscode.window.activeTextEditor;
-        if (editor && editor.document.languageId !== 'forcesourcemanifest') {
-            return editor.document.uri;
-        }
-        return undefined;
-    };
+        return editor?.document.uri;
+    }
 
     static extractLwcNameFromSourceUri(
         sourceUriInput: vscode.Uri | undefined
     ): string {
-        const path = sourceUriInput?.path ? sourceUriInput?.path : null;
+        const path = sourceUriInput?.path ?? null;
         if (path && path.indexOf('lwc/') >= 0) {
             return path.split('lwc/')[1].split('/')[0];
         }
