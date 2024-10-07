@@ -18,6 +18,7 @@ import {
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import { validateDocument } from './validateDocument';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -95,7 +96,6 @@ let globalSettings: MobileSettings = defaultSettings;
 
 // Cache the settings of all open documents
 const documentSettings: Map<string, Thenable<MobileSettings>> = new Map();
-export const documentCache: Map<string, TextDocument> = new Map();
 
 connection.onDidChangeConfiguration((change) => {
     if (hasConfigurationCapability) {
@@ -133,7 +133,6 @@ export function getDocumentSettings(
 documents.onDidClose((e) => {
     const uri = e.document.uri;
     documentSettings.delete(uri);
-    documentCache.delete(uri);
 });
 
 connection.languages.diagnostics.on(async (params) => {
@@ -157,8 +156,7 @@ connection.languages.diagnostics.on(async (params) => {
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
     const document = change.document;
-    documentCache.set(document.uri, document);
-    //TODO :  valid and report back diagnostics. 
+    validateDocument(document)
 });
 
 connection.onDidChangeWatchedFiles((_change) => {
@@ -172,3 +170,6 @@ documents.listen(connection);
 
 // Listen on the connection
 connection.listen();
+
+
+

@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { suite, afterEach, test } from 'mocha';
-import { findNonEditableAdapter } from '../diagnostic/adapters_localChangeNotAware';
+import { findNonEditableAdapter } from '../diagnostic/js/adapters_localChangeNotAware';
 import * as parser from '@babel/parser';
 
 const relatedRecordsJS = `
