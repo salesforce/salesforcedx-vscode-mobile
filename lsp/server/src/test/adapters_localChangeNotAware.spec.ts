@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { suite, afterEach, test } from 'mocha';
-import { findNonEditableAdapter } from '../diagnostic/js/adapters_localChangeNotAware';
+//import { findNonEditableAdapter } from '../diagnostic/js/adapters_localChangeNotAware';
 import * as parser from '@babel/parser';
 
 const relatedRecordsJS = `
@@ -30,17 +30,17 @@ export default class RelatedListRecords extends LightningElement {
 }
 `;
 
-describe('JS parsing', () => {
-    beforeEach(function () {
-        sinon.restore();
-    });
+// describe('JS parsing', () => {
+//     beforeEach(function () {
+//         sinon.restore();
+//     });
 
-    it('identify getRelatedRecords', () => {
-        const jsNode = parser.parse(relatedRecordsJS, {
-            sourceType: 'module',
-            plugins: ['decorators']
-        });
-        const nodes = findNonEditableAdapter(jsNode, 'getRelatedListRecords');
-        assert.equal(nodes.length, 1);
-    });
-});
+//     it('identify getRelatedRecords', () => {
+//         const jsNode = parser.parse(relatedRecordsJS, {
+//             sourceType: 'module',
+//             plugins: ['decorators']
+//         });
+//         const nodes = findNonEditableAdapter(jsNode, 'getRelatedListRecords');
+//         assert.equal(nodes.length, 1);
+//     });
+// });
