@@ -5,39 +5,54 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import * as parser from '@babel/parser';
 import { Node, isCallExpression } from '@babel/types';
 import traverse from '@babel/traverse';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 
-/** */
+
+const LOCAL_CHANGE_NOT_AWARE_MESSAGE =
+    'You are using a wire adapter that works while offline, but doesn’t update to add or remove records that are created or deleted while offline';
+const SEVERITY = DiagnosticSeverity.Information;
+
+const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = ['getRelatedListRecords', 'getRelatedListCount'];
+
+/** 
+ * Produce diagnostic for adapter which works offline but doesn't handle local change. 
+*/
 export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
-    adapterNames: string[] = ['getRelatedListRecords', 'getRelatedListCount'];
-
-    msgLocalChangeNotAware =
-        'You are using a wire adapter that works while offline, but doesn’t update to add or remove records that are created or deleted while offline';
-
+   
     validateDocument(
         textDocument: TextDocument,
         node: Node
     ): Promise<Diagnostic[]> {
         return Promise.resolve(
-            this.findNonEditableAdapter(node, this.adapterNames).map((item) => {
+            this.findNonEditableAdapter(node, LOCAL_CHANGE_NOT_AWARE_ADAPTERS).map((item) => {
                 return {
-                    severity: DiagnosticSeverity.Information,
+                    severity: SEVERITY,
                     range: {
                         start: textDocument.positionAt(item.start as number),
                         end: textDocument.positionAt(item.end as number)
                     },
-                    message: this.msgLocalChangeNotAware
+                    message: LOCAL_CHANGE_NOT_AWARE_MESSAGE
                 } as Diagnostic;
             })
         );
     }
 
-    findNonEditableAdapter(ast: Node, adapterNames: string[]): Node[] {
+    /**
+     * Find @wire adapter call which called in the local change not aware adapters. For example: 
+        export default class RelatedListRecords extends LightningElement {
+            ...
+            @wire(getRelatedListRecords, 
+            ...
+        }
+     * @param ast 
+     * @param adapterNames 
+     * @returns 
+     */
+    private findNonEditableAdapter(ast: Node, adapterNames: string[]): Node[] {
         const targetNodes: Node[] = [];
         traverse(ast, {
             Decorator(path) {

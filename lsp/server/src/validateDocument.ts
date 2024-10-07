@@ -8,8 +8,13 @@
 import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
-import { jsDiagonosticProducers } from './server';
-import * as parser from '@babel/parser';
+import { Node } from '@babel/types';
+import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
+import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters_localChangeNotAware';
+import { parseJs } from './utils/babelUtil'
+
+const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
+jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
 
 /**
  * process the document based extension type.
@@ -25,12 +30,9 @@ export async function validateDocument(
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        if (jsDiagonosticProducers.length > 0) {
-            const jsNode = parser.parse(document.getText(), {
-                sourceType: 'module',
-                plugins: ['decorators']
-            });
-            for (const producer of jsDiagonosticProducers) {
+        if (jsDiagnosticProducers.length > 0) {
+            const jsNode = parseJs(document.getText());
+            for (const producer of jsDiagnosticProducers) {
                 const diagnostics = await producer.validateDocument(
                     document,
                     jsNode

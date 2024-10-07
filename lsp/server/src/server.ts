@@ -19,11 +19,6 @@ import {
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
-import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
-import { Node } from '@babel/types';
-
-import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters_localChangeNotAware';
-import { doc } from 'prettier';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -34,7 +29,7 @@ const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
-export const jsDiagonosticProducers: DiagnosticProducer<Node>[] = [];
+
 
 connection.onInitialize((params: InitializeParams) => {
     const capabilities = params.capabilities;
@@ -161,6 +156,7 @@ connection.languages.diagnostics.on(async (params) => {
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
     const document = change.document;
+    // generate diagnostics for the document.
     validateDocument(document);
 });
 
@@ -168,9 +164,6 @@ connection.onDidChangeWatchedFiles((_change) => {
     // Monitored files have change in VSCode
     connection.console.log('We received a file change event');
 });
-
-// Configure JS rules
-jsDiagonosticProducers.push(new AdaptersLocalChangeNotAware());
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
