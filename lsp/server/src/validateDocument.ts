@@ -11,10 +11,11 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Node } from '@babel/types';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters_localChangeNotAware';
-import { parseJs } from './utils/babelUtil'
+import { parseJs } from './utils/babelUtil';
 
 const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
 jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
+import { getDocumentSettings } from './server';
 
 /**
  * process the document based extension type.
@@ -26,19 +27,27 @@ jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
 export async function validateDocument(
     document: TextDocument
 ): Promise<Diagnostic[]> {
+    const setting = await getDocumentSettings(document.uri);
+
     const results: Diagnostic[] = [];
 
     if (document.languageId === 'javascript') {
         // handles JS rules
         if (jsDiagnosticProducers.length > 0) {
-            const jsNode = parseJs(document.getText());
-            for (const producer of jsDiagnosticProducers) {
-                const diagnostics = await producer.validateDocument(
-                    document,
-                    jsNode
-                );
-                results.push(...diagnostics);
-            }
+            try {
+                const jsNode = parseJs(document.getText());
+                for (const producer of jsDiagnosticProducers) {
+                    if (results.length > setting.maxNumberOfProblems) {
+                        break;
+                    }
+
+                    const diagnostics = await producer.validateDocument(
+                        document,
+                        jsNode
+                    );
+                    results.push(...diagnostics);
+                }
+            } catch (e) {}
         }
     }
 

@@ -30,7 +30,6 @@ let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
 
-
 connection.onInitialize((params: InitializeParams) => {
     const capabilities = params.capabilities;
 
@@ -95,7 +94,7 @@ const defaultSettings: MobileSettings = { maxNumberOfProblems: 1000 };
 let globalSettings: MobileSettings = defaultSettings;
 
 // Cache the settings of all open documents
-const documentSettings: Map<string, Thenable<MobileSettings>> = new Map();
+const documentSettings: Map<string, MobileSettings> = new Map();
 
 connection.onDidChangeConfiguration((change) => {
     if (hasConfigurationCapability) {
@@ -103,7 +102,7 @@ connection.onDidChangeConfiguration((change) => {
         documentSettings.clear();
     } else {
         globalSettings = <MobileSettings>(
-            (change.settings.languageServerExample || defaultSettings)
+            (change.settings.mobileLSP || defaultSettings)
         );
     }
     // Refresh the diagnostics since the `maxNumberOfProblems` could have changed.
@@ -112,18 +111,19 @@ connection.onDidChangeConfiguration((change) => {
     connection.languages.diagnostics.refresh();
 });
 
-export function getDocumentSettings(
+export async function getDocumentSettings(
     resource: string
-): Thenable<MobileSettings> {
+): Promise<MobileSettings> {
     if (!hasConfigurationCapability) {
         return Promise.resolve(globalSettings);
     }
     let result = documentSettings.get(resource);
     if (!result) {
-        result = connection.workspace.getConfiguration({
+        result = await connection.workspace.getConfiguration({
             scopeUri: resource,
-            section: 'languageServerExample'
+            section: 'mobileLSP'
         });
+        result = result || defaultSettings;
         documentSettings.set(resource, result);
     }
     return result;
@@ -150,19 +150,6 @@ connection.languages.diagnostics.on(async (params) => {
             items: []
         } satisfies DocumentDiagnosticReport;
     }
-});
-
-// The content of a text document has changed. This event is emitted
-// when the text document first opened or when its content has changed.
-documents.onDidChangeContent((change) => {
-    const document = change.document;
-    // generate diagnostics for the document.
-    validateDocument(document);
-});
-
-connection.onDidChangeWatchedFiles((_change) => {
-    // Monitored files have change in VSCode
-    connection.console.log('We received a file change event');
 });
 
 // Make the text document manager listen on the connection

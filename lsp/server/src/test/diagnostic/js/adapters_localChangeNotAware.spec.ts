@@ -40,16 +40,24 @@ export default class RelatedListRecords extends LightningElement {
 `;
 
 describe('AdaptersLocalChangeNotAware', () => {
-    const rule = new AdaptersLocalChangeNotAware()
+    const rule = new AdaptersLocalChangeNotAware();
 
     beforeEach(function () {
         sinon.restore();
     });
 
     it('produce diagnostic for getRelatedRecords', async () => {
-        const textDocument = TextDocument.create('file://test.js', 'javascript', 1, relatedRecordsJS)
+        const textDocument = TextDocument.create(
+            'file://test.js',
+            'javascript',
+            1,
+            relatedRecordsJS
+        );
         const jsAstNode = parseJs(textDocument.getText());
-        const diagnostics = await rule.validateDocument(textDocument, jsAstNode)
+        const diagnostics = await rule.validateDocument(
+            textDocument,
+            jsAstNode
+        );
 
         assert.equal(diagnostics.length, 1);
         const { range } = diagnostics[0];
@@ -60,5 +68,5 @@ describe('AdaptersLocalChangeNotAware', () => {
         const targetString = relatedRecordsJS.substring(startOffset, endOffset);
 
         assert.equal(targetString, 'getRelatedListRecords');
-   });
+    });
 });
