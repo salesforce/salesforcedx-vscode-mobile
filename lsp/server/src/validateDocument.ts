@@ -8,14 +8,9 @@
 import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
-import { Node } from '@babel/types';
-import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
-import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters_localChangeNotAware';
-import { parseJs } from './utils/babelUtil';
-
-const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
-jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
 import { getDocumentSettings } from './server';
+import { validateJs } from './validateJs';
+import { validateGraphql } from './validateGraphql';
 
 /**
  * process the document based extension type.
@@ -27,29 +22,22 @@ import { getDocumentSettings } from './server';
 export async function validateDocument(
     document: TextDocument
 ): Promise<Diagnostic[]> {
-    const setting = await getDocumentSettings(document.uri);
+    const { uri } = document;
+    const fileContent = document.getText();
+
+    const setting = await getDocumentSettings(uri);
 
     const results: Diagnostic[] = [];
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        if (jsDiagnosticProducers.length > 0) {
-            try {
-                const jsNode = parseJs(document.getText());
-                for (const producer of jsDiagnosticProducers) {
-                    if (results.length > setting.maxNumberOfProblems) {
-                        break;
-                    }
+        await validateJs(fileContent, results, setting, document);
 
-                    const diagnostics = await producer.validateDocument(
-                        document,
-                        jsNode
-                    );
-                    results.push(...diagnostics);
-                }
-            } catch (e) {}
-        }
-    }
+        // handle graphql rules
+        await validateGraphql(results, setting, uri, fileContent);
 
+    } 
     return results;
 }
+
+
