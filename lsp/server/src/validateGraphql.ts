@@ -6,13 +6,11 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { ASTNode, Source } from 'graphql';
+import { ASTNode} from 'graphql';
 import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
-import { Node } from '@babel/types';
 import { Diagnostic } from 'vscode-languageserver/node';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { MissingUiapi } from './diagnostic/gql/missing_uiapi';
-import { MobileSettings } from './server';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { parse } from 'graphql'
 
@@ -20,43 +18,61 @@ import { parse } from 'graphql'
 const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [];
 diagnosticProducers.push(new MissingUiapi());
 
-export async function validateGraphql(results: Diagnostic[], setting: MobileSettings, textDocument: TextDocument, fileContent: string) {
-    if (diagnosticProducers.length > 0 && results.length < setting.maxNumberOfProblems) {
-        const graphqlChunks = gqlPluckFromCodeStringSync(
-            textDocument.uri,
-            fileContent,
-            {
-                skipIndent: true
-            }
-        );
+/**
+ * validate the graphql queries in the document.
+ * @param maxCount  the max count of diagnostics to return 
+ * @param textDocument 
+ * @param fileContent 
+ */
+export async function validateGraphql(
+    maxCount: number,
+    textDocument: TextDocument, 
+    fileContent: string
+): Promise<Diagnostic[]> {
+    const results: Diagnostic[] = [];
 
-        for (const graphql of graphqlChunks) {
-            if (results.length > setting.maxNumberOfProblems) {
+    if (maxCount <= 0 || diagnosticProducers.length === 0) {
+        return results;
+    }
+
+    // Find the gql``s in the file content
+    const graphQueries = gqlPluckFromCodeStringSync(
+        textDocument.uri,
+        fileContent,
+        {
+            skipIndent: true
+        }
+    );
+
+    // Validate each query
+    for (const query of graphQueries) {
+        if (results.length >= maxCount) {
+            break;
+        }
+        const lineOffset = query.locationOffset.line - 1;
+        const columnOffset = query.locationOffset.column + 1;
+        const diagnostics = await validateOneGraphQuery(textDocument, query.body);
+        // Update the range offset correctly
+        for (const item of diagnostics) {
+            if (results.length >= maxCount) {
                 break;
             }
-            const lineOffset = graphql.locationOffset.line - 1;
-            const columnOffset = graphql.locationOffset.column + 1;
-            const diagnostics = await validateGraphQlChunk(textDocument, graphql);
-            // Update the range offset correctly
-            for (const item of diagnostics) {
-                if (results.length > setting.maxNumberOfProblems) {
-                    break;
-                }
-                updateDiagnosticOffset(item, lineOffset, columnOffset);
-                results.push(item);
-            }
+            updateDiagnosticOffset(item, lineOffset, columnOffset);
+            results.push(item);
         }
     }
+
+    return results;
 }
 
 /**
- * Validate graphql diagnostic rules to the chunk of graphql. 
+ * Validate graphql diagnostic rules to a graph query. 
  * @param graphql the graph code
  * @param graphqlDiagnosticProducers  the collection of graphql rules. 
  */
-async function validateGraphQlChunk(textDocument: TextDocument, graphql: Source): Promise<Diagnostic[]> {
+async function validateOneGraphQuery(textDocument: TextDocument, graphql: string): Promise<Diagnostic[]> {
     const results: Diagnostic[] = []; 
-    const graphqlAstNode = parse(graphql.body);
+    const graphqlAstNode = parse(graphql);
 
     for (const producer of diagnosticProducers) {
         (await producer.validateDocument(textDocument, graphqlAstNode)).forEach((it) => {

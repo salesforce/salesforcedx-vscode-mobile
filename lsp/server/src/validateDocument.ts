@@ -31,15 +31,25 @@ export async function validateDocument(
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        await validateJs(results, setting, document, fileContent);
+        const jsDiagnostics=  await validateJs(
+            setting.maxNumberOfProblems - results.length, 
+            document, 
+            fileContent
+        );
+        results.push(...jsDiagnostics);
 
         // handle graphql rules
-        await validateGraphql(results, setting, document, fileContent);
+        const graphqlDiagnostics = await validateGraphql(
+            setting.maxNumberOfProblems - results.length, 
+            document, 
+            fileContent
+        );
+        results.push(...graphqlDiagnostics);
 
     } 
 
     if (document.languageId === 'html') {
-
+        
     }
 
     return results;

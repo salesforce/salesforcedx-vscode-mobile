@@ -11,7 +11,6 @@ import * as sinon from 'sinon';
 import { AdaptersLocalChangeNotAware } from '../../../diagnostic/js/adapters_localChangeNotAware';
 import { parseJs } from '../../../utils/babelUtil';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { text } from 'stream/consumers';
 
 const relatedRecordsJS = `
 import { LightningElement, wire } from "lwc";
