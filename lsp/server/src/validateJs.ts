@@ -26,10 +26,10 @@ jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
  * @returns 
  */
 export async function validateJs(
-    fileContent: string, 
     results: Diagnostic[], 
     setting: MobileSettings, 
-    textDocument: TextDocument
+    textDocument: TextDocument,
+    fileContent: string
 ) {
     if (results.length >setting.maxNumberOfProblems) {
         return

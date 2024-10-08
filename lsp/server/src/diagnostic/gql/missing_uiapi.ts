@@ -10,6 +10,7 @@ import traverse from '@babel/traverse';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
+import { ASTNode } from 'graphql';
 
 
 const LOCAL_CHANGE_NOT_AWARE_MESSAGE =
@@ -21,23 +22,24 @@ const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = ['getRelatedListRecords', 'get
 /** 
  * Produce diagnostic for adapter which works offline but doesn't handle local change. 
 */
-export class MissingUiapi implements DiagnosticProducer<Node> {
+export class MissingUiapi implements DiagnosticProducer<ASTNode> {
    
     validateDocument(
         textDocument: TextDocument,
-        node: Node
+        node: ASTNode
     ): Promise<Diagnostic[]> {
         return Promise.resolve(
-            this.findNonEditableAdapter(node, LOCAL_CHANGE_NOT_AWARE_ADAPTERS).map((item) => {
-                return {
-                    severity: SEVERITY,
-                    range: {
-                        start: textDocument.positionAt(item.start as number),
-                        end: textDocument.positionAt(item.end as number)
-                    },
-                    message: LOCAL_CHANGE_NOT_AWARE_MESSAGE
-                } as Diagnostic;
-            })
+            []
+            // this.findNonEditableAdapter(node, LOCAL_CHANGE_NOT_AWARE_ADAPTERS).map((item) => {
+            //     return {
+            //         severity: SEVERITY,
+            //         range: {
+            //             start: textDocument.positionAt(item.start as number),
+            //             end: textDocument.positionAt(item.end as number)
+            //         },
+            //         message: LOCAL_CHANGE_NOT_AWARE_MESSAGE
+            //     } as Diagnostic;
+            // })
         );
     }
 

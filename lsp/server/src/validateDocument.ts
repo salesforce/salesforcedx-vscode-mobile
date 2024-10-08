@@ -31,12 +31,17 @@ export async function validateDocument(
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        await validateJs(fileContent, results, setting, document);
+        await validateJs(results, setting, document, fileContent);
 
         // handle graphql rules
-        await validateGraphql(results, setting, uri, fileContent);
+        await validateGraphql(results, setting, document, fileContent);
 
     } 
+
+    if (document.languageId === 'html') {
+
+    }
+
     return results;
 }
 
