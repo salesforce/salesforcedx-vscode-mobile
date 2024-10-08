@@ -11,11 +11,11 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Node } from '@babel/types';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters_localChangeNotAware';
-import { parseJs } from './utils/babelUtil';
+import { getDocumentSettings } from './server';
+import { validateJs } from './validateJs';
 
 const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
 jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
-import { getDocumentSettings } from './server';
 
 /**
  * process the document based extension type.
@@ -23,32 +23,25 @@ import { getDocumentSettings } from './server';
  * if js then parse it using babel, call js related rules
  * find the gql taggedTemplates, parse the graphql string and call graphql related rules.
  * @param document the input document to validate.
+ * @returns diagnostic results for target document.
  */
 export async function validateDocument(
     document: TextDocument
 ): Promise<Diagnostic[]> {
     const setting = await getDocumentSettings(document.uri);
 
+    const fileContent = document.getText();
+
     const results: Diagnostic[] = [];
+
+    const maxCount = setting.maxNumberOfProblems;
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        if (jsDiagnosticProducers.length > 0) {
-            try {
-                const jsNode = parseJs(document.getText());
-                for (const producer of jsDiagnosticProducers) {
-                    if (results.length > setting.maxNumberOfProblems) {
-                        break;
-                    }
+        const diagnostics = await validateJs(fileContent, document, maxCount);
+        results.push(...diagnostics);
 
-                    const diagnostics = await producer.validateDocument(
-                        document,
-                        jsNode
-                    );
-                    results.push(...diagnostics);
-                }
-            } catch (e) {}
-        }
+        // TODO: Handle GraphQL
     }
 
     return results;

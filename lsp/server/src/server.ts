@@ -83,7 +83,7 @@ connection.onInitialized(() => {
 });
 
 // Settings for Mobile LSP
-interface MobileSettings {
+export interface MobileSettings {
     maxNumberOfProblems: number; //max number of diagnostics to detect per document.
 }
 

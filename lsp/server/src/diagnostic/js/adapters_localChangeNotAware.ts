@@ -11,24 +11,28 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 
-
 const LOCAL_CHANGE_NOT_AWARE_MESSAGE =
     'You are using a wire adapter that works while offline, but doesn’t update to add or remove records that are created or deleted while offline';
 const SEVERITY = DiagnosticSeverity.Information;
 
-const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = ['getRelatedListRecords', 'getRelatedListCount'];
+const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = [
+    'getRelatedListRecords',
+    'getRelatedListCount'
+];
 
-/** 
- * Produce diagnostic for adapter which works offline but doesn't handle local change. 
-*/
+/**
+ * Produce diagnostic for adapter which works offline but doesn't handle local change.
+ */
 export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
-   
     validateDocument(
         textDocument: TextDocument,
         node: Node
     ): Promise<Diagnostic[]> {
         return Promise.resolve(
-            this.findNonEditableAdapter(node, LOCAL_CHANGE_NOT_AWARE_ADAPTERS).map((item) => {
+            this.findLocalChangeNotAwareAdapterNode(
+                node,
+                LOCAL_CHANGE_NOT_AWARE_ADAPTERS
+            ).map((item) => {
                 return {
                     severity: SEVERITY,
                     range: {
@@ -48,27 +52,27 @@ export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
             @wire(getRelatedListRecords, 
             ...
         }
-     * @param ast 
-     * @param adapterNames 
-     * @returns 
+     * @param astNode root node to search
+     * @param adapterNames adapter which are not able to reflect the local change.
+     * @returns node with adapter name
      */
-    private findNonEditableAdapter(ast: Node, adapterNames: string[]): Node[] {
+    private findLocalChangeNotAwareAdapterNode(
+        astNode: Node,
+        adapterNames: string[]
+    ): Node[] {
         const targetNodes: Node[] = [];
-        traverse(ast, {
+        traverse(astNode, {
             Decorator(path) {
                 const expression = path.node.expression;
                 if (isCallExpression(expression)) {
                     const callee = expression.callee;
                     if (
                         callee.type === 'Identifier' &&
-                        callee.name === 'wire'
+                        callee.name === 'wire' &&
+                        expression.arguments[0].type === 'Identifier' &&
+                        adapterNames.includes(expression.arguments[0].name)
                     ) {
-                        if (
-                            expression.arguments[0].type === 'Identifier' &&
-                            adapterNames.includes(expression.arguments[0].name)
-                        ) {
-                            targetNodes.push(expression.arguments[0]);
-                        }
+                        targetNodes.push(expression.arguments[0]);
                     }
                 }
             }
