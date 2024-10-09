@@ -7,6 +7,7 @@
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateGraphql } from '../validateGraphql';
+import * as assert from 'assert';
 
 describe('validateGraphql', () => {
     
@@ -22,7 +23,7 @@ describe('validateGraphql', () => {
 
                 gqlQuery = gql\`
                     query {
-                        uiapi {
+                        uiapia {
                             query {
                                 Account {
                                     edges {
@@ -41,7 +42,8 @@ describe('validateGraphql', () => {
         );
         const diagnostics = await validateGraphql(100, textDocument, textDocument.getText());
     
-
+        assert.equal(diagnostics.length, 1);
+        assert.equal(diagnostics[0].message, 'uiapi is misspelled.')
     });
 
 });

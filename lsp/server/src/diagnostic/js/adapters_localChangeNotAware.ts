@@ -27,7 +27,7 @@ export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
         textDocument: TextDocument,
         node: Node
     ): Promise<Diagnostic[]> {
-        return Promise.resolve(
+         return Promise.resolve(
             this.findNonEditableAdapter(node, LOCAL_CHANGE_NOT_AWARE_ADAPTERS).map((item) => {
                 return {
                     severity: SEVERITY,

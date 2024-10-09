@@ -46,12 +46,12 @@
                 "--inspect-brk",
                  "--require",
                 "ts-node/register",
-                "${workspaceFolder}/**/*.spec.js"
+                "${workspaceFolder}/**/*.spec.ts"
               ],
             "internalConsoleOptions": "openOnSessionStart",
             "sourceMaps": true,
             "outFiles": [
-                "${workspaceFolder}/**/*.spec.js"
+                "${workspaceFolder}/**/*.spec.ts"
             ]
           }	
 	]

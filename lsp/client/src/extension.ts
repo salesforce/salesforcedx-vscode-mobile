@@ -33,6 +33,9 @@ export function activate(context: ExtensionContext) {
         }
     };
 
+    // Get extension name
+    const extensionName = context.extension.packageJSON.contributes.configuration.title;
+
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {
         // Register the server for plain text documents
@@ -43,6 +46,9 @@ export function activate(context: ExtensionContext) {
         synchronize: {
             // Notify the server about file changes to '.clientrc files contained in the workspace
             fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+        },
+        initializationOptions: {
+            extensionName
         }
     };
 

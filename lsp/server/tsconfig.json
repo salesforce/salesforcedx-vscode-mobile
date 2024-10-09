@@ -11,6 +11,6 @@
         "composite": true
     },
 
-    "include": ["src"],
+    "include": ["src", "src/diagnostic/gql/misspelled-uiapi.ts"],
     "exclude": ["node_modules", ".vscode-test"]
 }
