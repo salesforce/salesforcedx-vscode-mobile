@@ -1,0 +1,17 @@
+{
+    "name": "mobile-lsp-client",
+    "description": "Client for the Salesforce Mobile Language Server, enabling language support for mobile development in VSCode.",
+    "license": "MIT",
+    "version": "0.0.1",
+    "publisher": "salesforce",
+    "engines": {
+        "vscode": "1.77.0"
+    },
+    "dependencies": {
+        "vscode-languageclient": "^9.0.1"
+    },
+    "devDependencies": {
+        "@types/vscode": "1.77.0",
+        "@vscode/test-electron": "^2.3.9"
+    }
+}

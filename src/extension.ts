@@ -12,6 +12,7 @@ import * as onboardingWizard from './commands/wizard/onboardingWizard';
 import * as configureLintingToolsCommand from './commands/lint/configureLintingToolsCommand';
 import { CoreExtensionService } from './services/CoreExtensionService';
 import { WorkspaceUtils } from './utils/workspaceUtils';
+import * as lspClient from '../lsp/client/out/extension';
 
 export function activate(context: vscode.ExtensionContext) {
     // We need to do this first in case any other services need access to those provided by the core extension
@@ -38,7 +39,10 @@ export function activate(context: vscode.ExtensionContext) {
     onboardingWizard.onActivate(context);
 
     configureLintingToolsCommand.registerCommand(context);
+    lspClient.activate(context);
 }
 
 // This method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+    lspClient.deactivate();
+}
