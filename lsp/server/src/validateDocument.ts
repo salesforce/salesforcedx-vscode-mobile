@@ -20,7 +20,7 @@ import { validateJs } from './validateJs';
  * For JavaScript, parse with Babel and apply JavaScript rules.
  * For GraphQL tagged templates, parse the GraphQL string and apply GraphQL rules.
  *
- * @param document The document to validate.
+ * @param document Text document to validate.
  * @returns Diagnostic results for the document.
  */
 export async function validateDocument(

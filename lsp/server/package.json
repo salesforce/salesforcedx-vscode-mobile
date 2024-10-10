@@ -1,16 +1,12 @@
 {
-    "name": "lsp-sample-server",
-    "description": "Example implementation of a language server in node.",
+    "name": "mobile-lsp-server",
+    "description": "sf mobile language server",
     "version": "1.0.0",
-    "author": "Microsoft Corporation",
     "license": "MIT",
     "engines": {
         "node": "*"
     },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Microsoft/vscode-extension-samples"
-    },
+    "publisher": "salesforce",
     "dependencies": {
         "@babel/traverse": "^7.25.7",
         "vscode-languageserver": "^9.0.1",
