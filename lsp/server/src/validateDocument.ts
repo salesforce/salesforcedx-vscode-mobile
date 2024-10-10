@@ -13,11 +13,13 @@ import { validateJs } from './validateJs';
 import { validateGraphql } from './validateGraphql';
 
 /**
- * process the document based extension type.
- * if html, call html related rules;
- * if js then parse it using babel, call js related rules
- * find the gql taggedTemplates, parse the graphql string and call graphql related rules.
- * @param document the input document to validate.
+ * Validate the document based on its extension type.
+ * For HTML, apply HTML rules.
+ * For JavaScript, parse with Babel and apply JavaScript rules.
+ * For GraphQL tagged templates, parse the GraphQL string and apply GraphQL rules.
+ *
+ * @param document Text document to validate.
+ * @returns Diagnostic results for the document.
  */
 export async function validateDocument(
     document: TextDocument, 
@@ -27,7 +29,6 @@ export async function validateDocument(
     const fileContent = document.getText();
 
     const setting = await getDocumentSettings(uri);
-
     const results: Diagnostic[] = [];
 
     if (document.languageId === 'javascript') {
