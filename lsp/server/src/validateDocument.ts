@@ -11,7 +11,6 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { getDocumentSettings } from './server';
 import { validateJs } from './validateJs';
 import { validateGraphql } from './validateGraphql';
-import * as vscode from "vscode";
 
 /**
  * process the document based extension type.
@@ -50,7 +49,7 @@ export async function validateDocument(
     } 
 
     if (document.languageId === 'html') {
-
+        
     }
 
     // Set the source for diagnostic source.

@@ -17,8 +17,6 @@ describe('validateGraphql', () => {
             'javascript',
             1,
             `
-            import { LightningElement, wire, track, api } from 'lwc';
-            import {gql, graphql} from "lightning/uiGraphQLApi";
             export default class graphqlBatchTest extends LightningElement {
 
                 gqlQuery = gql\`

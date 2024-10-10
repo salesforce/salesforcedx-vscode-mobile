@@ -5,18 +5,16 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { Node, isCallExpression } from '@babel/types';
-import traverse from '@babel/traverse';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 import { ASTNode, visit } from 'graphql';
 
-
 const LOCAL_CHANGE_NOT_AWARE_MESSAGE = 'uiapi is misspelled.';
 const SEVERITY = DiagnosticSeverity.Error;
 
 /** 
+ * DUMMY demo implementation showcasing graphql parsing and diagnostic geneation for scaffolding. 
  * Produce diagnostic when graphql uiapi node is misspelled.
 */
 export class MisspelledUiapi implements DiagnosticProducer<ASTNode> {
