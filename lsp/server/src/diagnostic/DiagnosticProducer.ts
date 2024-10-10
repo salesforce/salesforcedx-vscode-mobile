@@ -9,11 +9,11 @@ import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 export interface DiagnosticProducer<T> {
-
     /**
-     * validate the parsed text document as astNode and return a list of diagnostics. 
+     * Validate the parsed text document as astNode and return a list of diagnostics.
      * @param textDocument the language server text document
-     * @param astNode parsed astNode for document body. 
+     * @param astNode parsed astNode for document body
+     * @returns An array of diagnostics found within ast node
      */
     validateDocument(
         textDocument: TextDocument,

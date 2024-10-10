@@ -7,7 +7,6 @@
 
 import { Diagnostic } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { MobileSettings } from './server';
 import { parseJs } from './utils/babelUtil';
 import { Node } from '@babel/types';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
@@ -17,11 +16,11 @@ const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
 jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
 
 /**
- * validate the js file content
- * @param fileContent js file content
- * @param textDocument text document
- * @param maxCount max problem to process
- * @returns
+ * Validate JavaScript file content.
+ * @param fileContent The JavaScript file content
+ * @param textDocument The corresponding text document
+ * @param maxCount The maximum number of diagnostics to report
+ * @returns An array of diagnostics found within the JavaScript file
  */
 export async function validateJs(
     fileContent: string,
@@ -34,7 +33,6 @@ export async function validateJs(
     }
 
     if (jsDiagnosticProducers.length > 0) {
-        // TODO: the try catch should only be on parsing.
         try {
             const jsNode = parseJs(fileContent);
             for (const producer of jsDiagnosticProducers) {

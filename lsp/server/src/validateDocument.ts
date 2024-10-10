@@ -14,16 +14,14 @@ import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters_localChang
 import { getDocumentSettings } from './server';
 import { validateJs } from './validateJs';
 
-const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
-jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
-
 /**
- * process the document based extension type.
- * if html, call html related rules;
- * if js then parse it using babel, call js related rules
- * find the gql taggedTemplates, parse the graphql string and call graphql related rules.
- * @param document the input document to validate.
- * @returns diagnostic results for target document.
+ * Validate the document based on its extension type.
+ * For HTML, apply HTML rules.
+ * For JavaScript, parse with Babel and apply JavaScript rules.
+ * For GraphQL tagged templates, parse the GraphQL string and apply GraphQL rules.
+ *
+ * @param document The document to validate.
+ * @returns Diagnostic results for the document.
  */
 export async function validateDocument(
     document: TextDocument
@@ -37,7 +35,7 @@ export async function validateDocument(
     const maxCount = setting.maxNumberOfProblems;
 
     if (document.languageId === 'javascript') {
-        // handles JS rules
+        // Handles JS rules
         const diagnostics = await validateJs(fileContent, document, maxCount);
         results.push(...diagnostics);
 

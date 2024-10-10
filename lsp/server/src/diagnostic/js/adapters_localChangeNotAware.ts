@@ -12,7 +12,7 @@ import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 
 const LOCAL_CHANGE_NOT_AWARE_MESSAGE =
-    'You are using a wire adapter that works while offline, but doesn’t update to add or remove records that are created or deleted while offline';
+    'The wire adapter you are using allows you to work offline, but it does not automatically update its records when data is added or removed while you are disconnected.';
 const SEVERITY = DiagnosticSeverity.Information;
 
 const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = [
@@ -21,7 +21,7 @@ const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = [
 ];
 
 /**
- * Produce diagnostic for adapter which works offline but doesn't handle local change.
+ * Produce diagnostics for adapter which works offline but doesn't handle local change.
  */
 export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
     validateDocument(
