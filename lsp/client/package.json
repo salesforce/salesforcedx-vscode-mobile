@@ -1,14 +1,9 @@
 {
-    "name": "lsp-sample-client",
-    "description": "VSCode part of a language server",
-    "author": "Microsoft Corporation",
+    "name": "mobile-lsp-client",
+    "description": "Client for the Salesforce Mobile Language Server, enabling language support for mobile development in VSCode.",
     "license": "MIT",
     "version": "0.0.1",
-    "publisher": "vscode",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Microsoft/vscode-extension-samples"
-    },
+    "publisher": "salesforce",
     "engines": {
         "vscode": "1.77.0"
     },

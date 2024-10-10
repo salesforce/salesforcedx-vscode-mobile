@@ -37,8 +37,8 @@ export function activate(context: ExtensionContext) {
     const clientOptions: LanguageClientOptions = {
         // Register the server for plain text documents
         documentSelector: [
-            // watch all js file, to be fine tuned to watch lwc js. 
-            { scheme: 'file', language: 'javascript' }  
+            // watch all js file, to be fine tuned to watch lwc js.
+            { scheme: 'file', language: 'javascript' }
         ],
         synchronize: {
             // Notify the server about file changes to '.clientrc files contained in the workspace
@@ -48,7 +48,7 @@ export function activate(context: ExtensionContext) {
 
     // Create the language client and start the client.
     client = new LanguageClient(
-        'lsp Mobile',
+        'LSP Mobile',
         'LSP Mobile Client',
         serverOptions,
         clientOptions

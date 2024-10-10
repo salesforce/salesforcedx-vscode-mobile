@@ -54,7 +54,7 @@ export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
         }
      * @param astNode root node to search
      * @param adapterNames adapter which are not able to reflect the local change.
-     * @returns node with adapter name
+     * @returns nodes with adapter name
      */
     private findLocalChangeNotAwareAdapterNode(
         astNode: Node,
