@@ -44,4 +44,24 @@ describe('validateGraphql', () => {
         assert.equal(diagnostics[0].message, 'uiapi is misspelled.');
     });
 
+    it('graphql with incorrect syntax produces no diagnostic', async () => {
+        const textDocument = TextDocument.create(
+            'file://test.js',
+            'javascript',
+            1,
+            `
+            export default class graphqlBatchTest extends LightningElement {
+
+                gqlQuery = gql\`
+                    query { 
+                \`;
+
+            };
+            `
+        );
+        const diagnostics = await validateGraphql(textDocument, 100);
+    
+        assert.equal(diagnostics.length, 0);
+    });
+
 });

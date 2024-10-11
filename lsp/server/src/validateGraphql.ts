@@ -69,13 +69,20 @@ export async function validateGraphql(
  */
 export async function validateOneGraphQuery(textDocument: TextDocument, graphql: string): Promise<Diagnostic[]> {
     const results: Diagnostic[] = []; 
-    const graphqlAstNode = parse(graphql);
+  
+    // graphql string fails to parse will not produce diagnostic
+    try {
+        const graphqlAstNode = parse(graphql);
 
-    for (const producer of diagnosticProducers) {
-        (await producer.validateDocument(textDocument, graphqlAstNode)).forEach((it) => {
-            results.push(it);
-        });
+        for (const producer of diagnosticProducers) {
+            (await producer.validateDocument(textDocument, graphqlAstNode)).forEach((it) => {
+                results.push(it);
+            });
+        }
+    } catch (e) {
+        // Do nothing here? 
     }
+
     return results;
 }
 
