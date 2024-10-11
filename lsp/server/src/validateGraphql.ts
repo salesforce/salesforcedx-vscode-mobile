@@ -18,14 +18,12 @@ diagnosticProducers.push(new MisspelledUiapi());
 
 /**
  * validate the graphql queries in the document.
- * @param maxCount  the max count of diagnostics to return 
  * @param textDocument 
- * @param fileContent 
+ * @param maxCount  the max count of diagnostics to return 
  */
 export async function validateGraphql(
-    maxCount: number,
     textDocument: TextDocument, 
-    fileContent: string
+    maxCount: number
 ): Promise<Diagnostic[]> {
     const results: Diagnostic[] = [];
 
@@ -36,7 +34,7 @@ export async function validateGraphql(
     // Find the gql``s in the file content
     const graphQueries = gqlPluckFromCodeStringSync(
         textDocument.uri,
-        fileContent,
+        textDocument.getText(),
         {
             skipIndent: true
         }
@@ -69,7 +67,7 @@ export async function validateGraphql(
  * @param graphql the graph code
  * @param graphqlDiagnosticProducers  the collection of graphql rules. 
  */
-async function validateOneGraphQuery(textDocument: TextDocument, graphql: string): Promise<Diagnostic[]> {
+export async function validateOneGraphQuery(textDocument: TextDocument, graphql: string): Promise<Diagnostic[]> {
     const results: Diagnostic[] = []; 
     const graphqlAstNode = parse(graphql);
 

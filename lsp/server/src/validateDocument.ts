@@ -26,7 +26,6 @@ export async function validateDocument(
     extensionName: string
 ): Promise<Diagnostic[]> {
     const { uri } = document;
-    const fileContent = document.getText();
 
     const setting = await getDocumentSettings(uri);
     const results: Diagnostic[] = [];
@@ -34,17 +33,15 @@ export async function validateDocument(
     if (document.languageId === 'javascript') {
         // handles JS rules
         const jsDiagnostics=  await validateJs(
-            setting.maxNumberOfProblems - results.length, 
             document, 
-            fileContent
+            setting.maxNumberOfProblems - results.length
         );
         results.push(...jsDiagnostics);
 
         // handle graphql rules
         const graphqlDiagnostics = await validateGraphql(
-            setting.maxNumberOfProblems - results.length, 
             document, 
-            fileContent
+            setting.maxNumberOfProblems - results.length, 
         );
         results.push(...graphqlDiagnostics);
     } 

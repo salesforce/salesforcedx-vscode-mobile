@@ -38,10 +38,10 @@ describe('validateGraphql', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql(100, textDocument, textDocument.getText());
+        const diagnostics = await validateGraphql(textDocument, 100);
     
         assert.equal(diagnostics.length, 1);
-        assert.equal(diagnostics[0].message, 'uiapi is misspelled.')
+        assert.equal(diagnostics[0].message, 'uiapi is misspelled.');
     });
 
 });
