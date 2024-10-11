@@ -18,6 +18,11 @@ const NYC = require('nyc');
 
 let nyc: any = undefined;
 
+interface FilePath {
+    directory: string;
+    fileName: string;
+}
+
 export async function run(): Promise<void> {
     if (process.env['CODE_COVERAGE'] === '1') {
         nyc = new NYC({
@@ -28,8 +33,16 @@ export async function run(): Promise<void> {
             silent: false,
             instrument: true,
             hookRequire: true,
-            include: ['out/**/*.js'],
-            exclude: ['out/test/**']
+            include: [
+                'out/**/*.js',
+                'lsp/client/out/**/*.js',
+                'lsp/server/out/**/*.js'
+            ],
+            exclude: [
+                'out/test/**',
+                'lsp/client/out/test/**',
+                'lsp/server/out/test/**'
+            ]
         });
         await nyc.wrap();
         await nyc.createTempDirectory();
@@ -43,43 +56,74 @@ export async function run(): Promise<void> {
     });
 
     const testsRoot = path.resolve(__dirname, '..');
+    const testsLSPClient = path.resolve(
+        __dirname,
+        '../../../lsp/client/out/test'
+    );
+    const testsLSPServer = path.resolve(
+        __dirname,
+        '../../../lsp/server/out/test'
+    );
 
     return new Promise((c, e) => {
-        glob('**/**.test.js', { cwd: testsRoot }, async (err, files) => {
-            if (err) {
-                return e(err);
-            }
-
-            // Add files to the test suite
-            files.forEach((f) => {
-                mocha.addFile(path.resolve(testsRoot, f));
-            });
-
-            try {
-                // Run the mocha test
-                mocha.run(async (failures) => {
-                    if (failures > 0) {
-                        e(new Error(`${failures} tests failed.`));
-                    } else {
-                        if (process.env['CODE_COVERAGE'] === '1') {
-                            await nyc.writeCoverageFile();
-
-                            // nyc text report is output to process.stdout and using plain console.log
-                            // will not output to terminal. Overriding process.stdout to pipe the output
-                            // to console.log.
-                            console.log(
-                                await pipeNycReport(nyc.report.bind(nyc))
-                            );
-                        }
-
-                        c();
-                    }
+        const testDirs = [testsRoot, testsLSPClient, testsLSPServer];
+        Promise.all(
+            testDirs.map(
+                (dir) =>
+                    new Promise<FilePath[]>((resolveGlob, rejectGlob) => {
+                        glob(
+                            '**/**.test.js',
+                            { cwd: dir },
+                            async (err, files) => {
+                                if (err) {
+                                    return rejectGlob(err);
+                                }
+                                resolveGlob(
+                                    //Converts file name into FilePath
+                                    files.map((fileName) => {
+                                        return { directory: dir, fileName };
+                                    })
+                                );
+                            }
+                        );
+                    })
+            )
+        )
+            .then((testPathsArray) => {
+                const allTests = testPathsArray.flat();
+                allTests.forEach((testPath) => {
+                    mocha.addFile(
+                        path.resolve(testPath.directory, testPath.fileName)
+                    );
                 });
-            } catch (err) {
+                try {
+                    // Run the mocha test
+                    mocha.run(async (failures) => {
+                        if (failures > 0) {
+                            e(new Error(`${failures} tests failed.`));
+                        } else {
+                            if (process.env['CODE_COVERAGE'] === '1') {
+                                await nyc.writeCoverageFile();
+
+                                // nyc text report is output to process.stdout and using plain console.log
+                                // will not output to terminal. Overriding process.stdout to pipe the output
+                                // to console.log.
+                                console.log(
+                                    await pipeNycReport(nyc.report.bind(nyc))
+                                );
+                            }
+                            c();
+                        }
+                    });
+                } catch (err) {
+                    console.error(err);
+                    e(err);
+                }
+            })
+            .catch((err) => {
                 console.error(err);
                 e(err);
-            }
-        });
+            });
     });
 }
 

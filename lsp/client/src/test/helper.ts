@@ -13,20 +13,20 @@ export let editor: vscode.TextEditor;
 
 export async function activate(docUri: vscode.Uri) {
     const extension = vscode.extensions.getExtension(
-        'salesforcedx-vscode-mobile'
+        'salesforce.salesforcedx-vscode-mobile'
     );
+    //extension can be active at this point
     await extension.activate();
     try {
         doc = await vscode.workspace.openTextDocument(docUri);
         editor = await vscode.window.showTextDocument(doc);
-        await sleep(2000);
     } catch (e) {
         console.error(e);
     }
 }
 
 export function getDocPath(docName: string) {
-    return path.resolve(__dirname, '../../testFixure', docName);
+    return path.resolve(__dirname, '../../testFixture', docName);
 }
 
 export function getDocUri(docName: string) {

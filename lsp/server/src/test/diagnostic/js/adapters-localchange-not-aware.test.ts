@@ -8,10 +8,11 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 
+import { afterEach } from 'mocha';
+
 import { AdaptersLocalChangeNotAware } from '../../../diagnostic/js/adapters_localChangeNotAware';
 import { parseJs } from '../../../utils/babelUtil';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { text } from 'stream/consumers';
 
 const relatedRecordsJS = `
 import { LightningElement, wire } from "lwc";
@@ -39,14 +40,14 @@ export default class RelatedListRecords extends LightningElement {
 }
 `;
 
-describe('AdaptersLocalChangeNotAware', () => {
+suite('Diagnostics Test Suite [Server]: Adapter Local Change Not Aware', () => {
     const rule = new AdaptersLocalChangeNotAware();
 
-    beforeEach(function () {
+    afterEach(function () {
         sinon.restore();
     });
 
-    it('produce diagnostic for getRelatedRecords', async () => {
+    test('Wire "getRelatedRecords" produces local-change-not-aware diagnostic', async () => {
         const textDocument = TextDocument.create(
             'file://test.js',
             'javascript',
