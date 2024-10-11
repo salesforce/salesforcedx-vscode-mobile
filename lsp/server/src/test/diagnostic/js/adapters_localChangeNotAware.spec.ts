@@ -11,30 +11,23 @@ import * as sinon from 'sinon';
 import { AdaptersLocalChangeNotAware } from '../../../diagnostic/js/adapters_localChangeNotAware';
 import { parseJs } from '../../../utils/babelUtil';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { text } from 'stream/consumers';
 
 const relatedRecordsJS = `
 import { LightningElement, wire } from "lwc";
 import { getRelatedListRecords } from "lightning/uiRelatedListApi";
 
 export default class RelatedListRecords extends LightningElement {
-  // Specify the parent record ID, the related list you want, and the fields
-  recordId = "0015g00000XYZABC"; // Replace with the actual record ID (Account in this example)
+
+  recordId = "0015g00000XYZABC";
 
   relatedRecords;
 
   @wire(getRelatedListRecords, {
-    parentRecordId: "$recordId", // Parent record (e.g., Account Id)
-    relatedListId: "Opportunities", // API name of the related list (Opportunities related to Account)
-    fields: ["Opportunity.Name", "Opportunity.Amount", "Opportunity.StageName"], // Fields to fetch
+    parentRecordId: "$recordId", 
+    relatedListId: "Opportunities",
+    fields: ["Opportunity.Name"],
   })
   relatedListHandler({ error, data }) {
-    if (data) {
-      this.relatedRecords = data.records;
-      console.log("Related records fetched successfully:", this.relatedRecords);
-    } else if (error) {
-      console.error("Error fetching related records:", error);
-    }
   }
 }
 `;
