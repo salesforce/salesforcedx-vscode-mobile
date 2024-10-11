@@ -8,11 +8,9 @@
 import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
-import { Node } from '@babel/types';
-import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
-import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters_localChangeNotAware';
 import { getDocumentSettings } from './server';
 import { validateJs } from './validateJs';
+import { validateGraphql } from './validateGraphql';
 
 /**
  * Validate the document based on its extension type.
@@ -20,27 +18,42 @@ import { validateJs } from './validateJs';
  * For JavaScript, parse with Babel and apply JavaScript rules.
  * For GraphQL tagged templates, parse the GraphQL string and apply GraphQL rules.
  *
- * @param document The document to validate.
+ * @param document Text document to validate.
  * @returns Diagnostic results for the document.
  */
 export async function validateDocument(
-    document: TextDocument
+    document: TextDocument, 
+    extensionName: string
 ): Promise<Diagnostic[]> {
-    const setting = await getDocumentSettings(document.uri);
+    const { uri } = document;
 
-    const fileContent = document.getText();
-
+    const setting = await getDocumentSettings(uri);
     const results: Diagnostic[] = [];
 
-    const maxCount = setting.maxNumberOfProblems;
-
     if (document.languageId === 'javascript') {
-        // Handles JS rules
-        const diagnostics = await validateJs(fileContent, document, maxCount);
-        results.push(...diagnostics);
+        // handles JS rules
+        const jsDiagnostics=  await validateJs(
+            document, 
+            setting.maxNumberOfProblems - results.length
+        );
+        results.push(...jsDiagnostics);
 
-        // TODO: Handle GraphQL
+        // handle graphql rules
+        const graphqlDiagnostics = await validateGraphql(
+            document, 
+            setting.maxNumberOfProblems - results.length, 
+        );
+        results.push(...graphqlDiagnostics);
+    } 
+
+    if (document.languageId === 'html') {
+        
     }
+
+    // Set the source for diagnostic source.
+    results.forEach((diagnostic) => {
+        diagnostic.source = extensionName;
+    });
 
     return results;
 }

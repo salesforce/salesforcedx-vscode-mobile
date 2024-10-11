@@ -30,7 +30,10 @@ let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
 
+let extensionName: string = '';
+
 connection.onInitialize((params: InitializeParams) => {
+    extensionName = params.initializationOptions?.extensionName;
     const capabilities = params.capabilities;
 
     // Does the client support the `workspace/configuration` request?
@@ -140,7 +143,7 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validateDocument(document)
+            items: await validateDocument(document, extensionName)
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk

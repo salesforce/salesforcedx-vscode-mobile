@@ -42,6 +42,7 @@
             "args": [
                 "--no-timeouts",
                 "--colors",
+                "--stdio",
                 "--inspect-brk",
                 "--require",
                 "ts-node/register",

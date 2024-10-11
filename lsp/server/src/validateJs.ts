@@ -10,7 +10,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { parseJs } from './utils/babelUtil';
 import { Node } from '@babel/types';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
-import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters_localChangeNotAware';
+import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-change-not-aware';
 
 const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
 jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
@@ -18,12 +18,10 @@ jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
 /**
  * Validate JavaScript file content.
  * @param fileContent The JavaScript file content
- * @param textDocument The corresponding text document
  * @param maxCount The maximum number of diagnostics to report
  * @returns An array of diagnostics found within the JavaScript file
  */
 export async function validateJs(
-    fileContent: string,
     textDocument: TextDocument,
     maxCount: number
 ): Promise<Diagnostic[]> {
@@ -34,7 +32,7 @@ export async function validateJs(
 
     if (jsDiagnosticProducers.length > 0) {
         try {
-            const jsNode = parseJs(fileContent);
+            const jsNode = parseJs(textDocument.getText());
             for (const producer of jsDiagnosticProducers) {
                 if (results.length >= maxCount) {
                     break;

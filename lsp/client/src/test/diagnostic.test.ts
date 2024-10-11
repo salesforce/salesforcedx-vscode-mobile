@@ -11,7 +11,7 @@ import * as sinon from 'sinon';
 
 import { afterEach } from 'mocha';
 
-suite('Diagnostics Test Suite [Client]', () => {
+suite('LSP Diagnostics Test Suite - Client', () => {
     afterEach(function () {
         sinon.restore();
     });
