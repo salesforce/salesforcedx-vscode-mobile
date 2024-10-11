@@ -8,7 +8,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 
-import { afterEach } from 'mocha';
+import { suite, test, afterEach } from 'mocha';
 
 import { AdaptersLocalChangeNotAware } from '../../../diagnostic/js/adapters_localChangeNotAware';
 import { parseJs } from '../../../utils/babelUtil';
