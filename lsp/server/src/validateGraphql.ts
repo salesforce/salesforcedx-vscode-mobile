@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2024, salesforce.com, inc.
  * All rights reserved.
@@ -17,9 +16,9 @@ const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [];
 diagnosticProducers.push(new MisspelledUiapi());
 
 /**
- * validate the graphql queries in the document.
+ * Validate the graphql queries in the document.
  * @param textDocument 
- * @param maxCount  the max count of diagnostics to return 
+ * @param maxCount  The max count of diagnostics to return 
  */
 export async function validateGraphql(
     textDocument: TextDocument, 
@@ -36,7 +35,8 @@ export async function validateGraphql(
         textDocument.uri,
         textDocument.getText(),
         {
-            skipIndent: true
+            skipIndent: true,
+            globalGqlIdentifierName: ['gql', 'graphql']
         }
     );
 
@@ -63,34 +63,33 @@ export async function validateGraphql(
 }
 
 /**
- * Validate graphql diagnostic rules to a graph query. 
+ * Validate graphql diagnostic rules to a graph query, return empty list if the graphql string is invalid.
  * @param graphql the graph code
  * @param graphqlDiagnosticProducers  the collection of graphql rules. 
+
  */
 export async function validateOneGraphQuery(textDocument: TextDocument, graphql: string): Promise<Diagnostic[]> {
-    const results: Diagnostic[] = []; 
   
-    // graphql string fails to parse will not produce diagnostic
     try {
         const graphqlAstNode = parse(graphql);
-
-        for (const producer of diagnosticProducers) {
-            (await producer.validateDocument(textDocument, graphqlAstNode)).forEach((it) => {
-                results.push(it);
-            });
-        }
+        const allResults = await Promise.all(
+            diagnosticProducers.map((producer) =>
+                producer.validateDocument(textDocument, graphqlAstNode)
+            )
+        );
+        return allResults.flat();
     } catch (e) {
-        // Do nothing here? 
+        // Graphql string fails to parse will not produce diagnostic
     }
 
-    return results;
+    return [];
 }
 
 /**
  * Update the graphql diagnostic offset to offset from the whole js file
  * @param diagnostic 
- * @param lineOffset line offset from the file
- * @param columnOffset column offset from the file
+ * @param lineOffset Line offset from the file
+ * @param columnOffset Column offset from the file
  */
 function updateDiagnosticOffset(diagnostic: Diagnostic, lineOffset: number, columnOffset: number) {
 
