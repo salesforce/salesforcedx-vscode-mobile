@@ -16,9 +16,11 @@ import {
     DocumentDiagnosticReportKind,
     type DocumentDiagnosticReport
 } from 'vscode-languageserver/node';
-
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { validateDocument } from './validateDocument';
+import { validateTextDocument } from './validateMobileOffline';
+import { transformYamlToObject } from './utils/yamlParser';
+import * as path from 'path';
+import * as fs from 'fs';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -26,11 +28,17 @@ const connection = createConnection(ProposedFeatures.all);
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
+// Key used in yaml for list of base components
+const baseComponentValues = 'values';
+
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
 
-let extensionName: string = '';
+// Primitive exports are not mutable across imports. Changes made directly to an exported object
+// after the export won't be reflected in other modules. To allow changes to be reflected, 
+// an object, a deseralized YAML, is wrapped
+export const baseComponentsAttributes = { values: {} };
 
 connection.onInitialize((params: InitializeParams) => {
     extensionName = params.initializationOptions?.extensionName;
@@ -67,6 +75,19 @@ connection.onInitialize((params: InitializeParams) => {
             }
         };
     }
+
+    const yamlPath = path.join(
+        __dirname,
+        'resources',
+        'component-experiences.yaml'
+    );
+
+    const data = fs.readFileSync(yamlPath, 'utf-8');
+    baseComponentsAttributes.values = transformYamlToObject(
+        data,
+        baseComponentValues
+    );
+
     return result;
 });
 
@@ -153,6 +174,20 @@ connection.languages.diagnostics.on(async (params) => {
             items: []
         } satisfies DocumentDiagnosticReport;
     }
+});
+
+// The content of a text document has changed. This event is emitted
+// when the text document first opened or when its content has changed.
+documents.onDidChangeContent((change) => {
+    const document = change.document;
+    if (document.uri.endsWith('.html')) {
+        validateTextDocument(document);
+    }
+});
+
+connection.onDidChangeWatchedFiles((_change) => {
+    // Monitored files have change in VSCode
+    connection.console.log('We received a file change event');
 });
 
 // Make the text document manager listen on the connection
