@@ -18,18 +18,24 @@ import {
     CodeAction,
     CodeActionKind
 } from 'vscode-languageserver/node';
-
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
+import { validateTextDocument } from './validateMobileOffline';
+import { transformYamlToObject } from './utils/yamlParser';
+import * as path from 'path';
+import * as fs from 'fs';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
 
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
+
+// Key used in yaml for list of base components
+const baseComponentValues = 'values';
 
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
@@ -42,6 +48,11 @@ let diagnosticsSettingSection = '';
 // initialize default settings
 let settings = getSettings({});
 const documentCache: Map<string, TextDocument> = new Map();
+
+// Primitive exports are not mutable across imports. Changes made directly to an exported object
+// after the export won't be reflected in other modules. To allow changes to be reflected, 
+// an object, a deseralized YAML, is wrapped
+export const baseComponentsAttributes = { values: {} };
 
 connection.onInitialize((params: InitializeParams) => {
     const workspaceFolders = params.workspaceFolders;
@@ -88,6 +99,19 @@ connection.onInitialize((params: InitializeParams) => {
             }
         };
     }
+
+    const yamlPath = path.join(
+        __dirname,
+        'resources',
+        'component-experiences.yaml'
+    );
+
+    const data = fs.readFileSync(yamlPath, 'utf-8');
+    baseComponentsAttributes.values = transformYamlToObject(
+        data,
+        baseComponentValues
+    );
+
     return result;
 });
 
@@ -158,6 +182,15 @@ connection.languages.diagnostics.on(async (params) => {
         } satisfies DocumentDiagnosticReport;
     }
 });
+
+
+documents.onDidChangeContent((change) => {
+    const document = change.document;
+    if (document.uri.endsWith('.html')) {
+        validateTextDocument(document);
+    }
+});
+
 
 // Watch SF config file change
 OrgUtils.watchConfig();
