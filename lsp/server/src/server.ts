@@ -50,7 +50,7 @@ let settings = getSettings({});
 const documentCache: Map<string, TextDocument> = new Map();
 
 // Primitive exports are not mutable across imports. Changes made directly to an exported object
-// after the export won't be reflected in other modules. To allow changes to be reflected, 
+// after the export won't be reflected in other modules. To allow changes to be reflected,
 // an object, a deseralized YAML, is wrapped
 export const baseComponentsAttributes = { values: {} };
 
