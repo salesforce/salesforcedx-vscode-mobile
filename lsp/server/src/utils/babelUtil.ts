@@ -9,9 +9,9 @@ import * as parser from '@babel/parser';
 import { Node } from '@babel/types';
 
 /**
- * parse the input javascript source code and return the corresponding babel node. 
+ * parse the input javascript source code and return the corresponding babel node.
  * @param src the source javascript code
- * @returns babel node 
+ * @returns babel node
  */
 export function parseJs(src: string): Node {
     return parser.parse(src, {

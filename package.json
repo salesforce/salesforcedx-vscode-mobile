@@ -93,15 +93,16 @@
         "node": "18.17.1"
     },
     "scripts": {
-        "clean": "rimraf out ./lsp/server/out ./lsp/client/out",
+        "clean": "rimraf out",
         "compile": "rimraf ./lsp/server/tsconfig.tsbuildinfo ./lsp/client/tsconfig.tsbuildinfo && tsc -b ./",
+        "copy-resources": "copyfiles -s -u 3 'lsp/server/resources/*' 'lsp/server/out/resources/'",
         "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "test-coverage": "node ./out/test/runTest.js --coverage",
-        "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
-        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
+        "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
+        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
         "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
         "vscode:prepublish": "npm run clean && npm run bundle:extension"
     },
@@ -119,6 +120,7 @@
         "@vscode/l10n-dev": "^0.0.35",
         "@vscode/test-electron": "^2.4.1",
         "@vscode/vsce": "^2.31.1",
+        "copyfiles": "2.4.1",
         "esbuild": "^0.23.0",
         "eslint": "^8.52.0",
         "glob": "^8.1.0",
