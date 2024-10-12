@@ -55,7 +55,7 @@ function getKeysWithoutSpecificValue(
     return result;
 }
 
-export async function validateTextDocument(
+export async function validateMobileOffline(
     textDocument: TextDocument
 ): Promise<Diagnostic[]> {
     const nonOfflinebaseComponents = getKeysWithoutSpecificValue(
