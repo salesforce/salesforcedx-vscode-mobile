@@ -43,7 +43,7 @@ export function activate(
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {
         documentSelector: [
-            // Watch all js and htlm files, to be fine-tuned to watch for files in LWC bundle.
+            // Watch all js and html files, to be fine-tuned to watch for files in LWC bundle.
             { scheme: 'file', language: 'javascript' },
             { scheme: 'file', language: 'html' }
         ],

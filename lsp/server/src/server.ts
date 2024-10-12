@@ -24,6 +24,7 @@ import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
 import { validateTextDocument } from './validateMobileOffline';
+import { validateMobileOffline } from './validateMobileOffline';
 import { transformYamlToObject } from './utils/yamlParser';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -171,7 +172,7 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validateDocument(settings, document, extensionTitle)
+            items: await validateDocument(document, extensionName)
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk
@@ -187,7 +188,7 @@ connection.languages.diagnostics.on(async (params) => {
 documents.onDidChangeContent((change) => {
     const document = change.document;
     if (document.uri.endsWith('.html')) {
-        validateTextDocument(document);
+        validateMobileOffline(document);
     }
 });
 
