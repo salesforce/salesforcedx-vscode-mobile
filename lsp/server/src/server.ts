@@ -16,7 +16,9 @@ import {
     DocumentDiagnosticReportKind,
     type DocumentDiagnosticReport
 } from 'vscode-languageserver/node';
+
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import { validateDocument } from './validateDocument';
 import { validateMobileOffline } from './validateMobileOffline';
 import { transformYamlToObject } from './utils/yamlParser';
 import * as path from 'path';
@@ -34,6 +36,8 @@ const baseComponentValues = 'values';
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
+
+let extensionName: string = '';
 
 // Primitive exports are not mutable across imports. Changes made directly to an exported object
 // after the export won't be reflected in other modules. To allow changes to be reflected,
