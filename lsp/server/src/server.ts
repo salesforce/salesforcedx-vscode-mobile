@@ -18,6 +18,7 @@ import {
     CodeAction,
     CodeActionKind
 } from 'vscode-languageserver/node';
+
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
