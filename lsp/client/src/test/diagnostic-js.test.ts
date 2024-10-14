@@ -11,13 +11,13 @@ import * as sinon from 'sinon';
 
 import { afterEach } from 'mocha';
 
-suite('LSP Diagnostics Test Suite - Client', () => {
+suite('JS Diagnostics Test Suite - Client', () => {
     afterEach(function () {
         sinon.restore();
     });
     test('Diagnose local change not aware adapter', async () => {
         const docUri = getDocUri('adapters-localchange-not-aware.js');
-        testDianostics(docUri, [
+        testDiagnostics(docUri, [
             {
                 message:
                     'The wire adapter you are using allows you to work offline, but it does not automatically update its records when data is added or removed while you are disconnected.',
@@ -40,7 +40,7 @@ function toRange(
     );
 }
 
-async function testDianostics(
+async function testDiagnostics(
     docUri: vscode.Uri,
     expectedDiagnostics: vscode.Diagnostic[]
 ) {
@@ -49,9 +49,9 @@ async function testDianostics(
     const actualDiagnostics = vscode.languages.getDiagnostics(docUri);
     assert.equal(actualDiagnostics.length, expectedDiagnostics.length);
     expectedDiagnostics.forEach((expectedDiagnostic, i) => {
-        const actualDignostic = actualDiagnostics[i];
-        assert.equal(actualDignostic.message, expectedDiagnostic.message);
-        assert.deepEqual(actualDignostic.range, expectedDiagnostic.range);
-        assert.equal(actualDignostic.severity, expectedDiagnostic.severity);
+        const actualDiagnostic = actualDiagnostics[i];
+        assert.equal(actualDiagnostic.message, expectedDiagnostic.message);
+        assert.deepEqual(actualDiagnostic.range, expectedDiagnostic.range);
+        assert.equal(actualDiagnostic.severity, expectedDiagnostic.severity);
     });
 }
