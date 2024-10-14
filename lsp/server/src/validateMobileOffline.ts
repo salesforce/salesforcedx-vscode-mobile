@@ -1,4 +1,8 @@
-import { Node, HTMLDocument, getLanguageService } from 'vscode-html-languageservice';
+import {
+    Node,
+    HTMLDocument,
+    getLanguageService
+} from 'vscode-html-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 import { baseComponentsAttributes } from './server';

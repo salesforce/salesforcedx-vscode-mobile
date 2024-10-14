@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import {parse, ASTNode} from 'graphql';
+import { parse, ASTNode } from 'graphql';
 import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
 import { Diagnostic } from 'vscode-languageserver/node';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
@@ -102,12 +102,15 @@ export async function validateOneGraphQuery(
 
 /**
  * Update the graphql diagnostic offset to offset from the whole js file
- * @param diagnostic 
+ * @param diagnostic
  * @param lineOffset Line offset from the file
  * @param columnOffset Column offset from the file
  */
-function updateDiagnosticOffset(diagnostic: Diagnostic, lineOffset: number, columnOffset: number) {
-
+function updateDiagnosticOffset(
+    diagnostic: Diagnostic,
+    lineOffset: number,
+    columnOffset: number
+) {
     const start = diagnostic.range.start;
     const end = diagnostic.range.end;
 
