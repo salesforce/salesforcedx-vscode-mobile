@@ -34,7 +34,8 @@ export function activate(context: ExtensionContext) {
     };
 
     // Get extension name
-    const extensionName = context.extension.packageJSON.contributes.configuration.title;
+    const extensionName =
+        context.extension.packageJSON.contributes.configuration.title;
 
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {

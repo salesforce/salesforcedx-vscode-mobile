@@ -10,7 +10,6 @@ import { validateGraphql } from '../validateGraphql';
 import * as assert from 'assert';
 
 describe('validateGraphql', () => {
-    
     it('valid uiapi missing diagnostic', async () => {
         const textDocument = TextDocument.create(
             'file://test.js',
@@ -63,5 +62,4 @@ describe('validateGraphql', () => {
     
         assert.equal(diagnostics.length, 0);
     });
-
 });

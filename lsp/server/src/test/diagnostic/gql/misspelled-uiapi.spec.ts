@@ -8,10 +8,9 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import * as assert from 'assert';
 import { MisspelledUiapi } from '../../../diagnostic/gql/misspelled-uiapi';
-import {parse, ASTNode} from 'graphql';
+import { parse, ASTNode } from 'graphql';
 
 describe('validateGraphql', () => {
-    
     it('valid uiapi missing diagnostic', async () => {
         const textDocument = TextDocument.create(
             '',
@@ -35,10 +34,12 @@ describe('validateGraphql', () => {
         );
 
         const astNode = parse(textDocument.getText());
-        const diagnostics = await (new MisspelledUiapi).validateDocument(textDocument, astNode);
-    
+        const diagnostics = await new MisspelledUiapi().validateDocument(
+            textDocument,
+            astNode
+        );
+
         assert.equal(diagnostics.length, 1);
         assert.equal(diagnostics[0].message, 'uiapi is misspelled.');
     });
-
 });
