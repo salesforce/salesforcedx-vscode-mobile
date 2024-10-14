@@ -37,19 +37,20 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Mocha Tests",
+            "name": "Mocha LSP Server Tests",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
             "args": [
                 "--no-timeouts",
                 "--colors",
+                "--stdio",
                 "--inspect-brk",
                 "--require",
                 "ts-node/register",
-                "${workspaceFolder}/**/*.spec.ts"
+                "${workspaceFolder}/lsp/server/out/test/**/*.test.js"
             ],
             "internalConsoleOptions": "openOnSessionStart",
             "sourceMaps": true,
-            "outFiles": ["${workspaceFolder}/**/*.spec.ts"]
+            "outFiles": ["${workspaceFolder}/lsp/server/out/test/**/*.test.js"]
         }
     ]
 }

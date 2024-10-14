@@ -22,7 +22,7 @@ import { validateGraphql } from './validateGraphql';
  * @returns Diagnostic results for the document.
  */
 export async function validateDocument(
-    document: TextDocument, 
+    document: TextDocument,
     extensionName: string
 ): Promise<Diagnostic[]> {
     const { uri } = document;
@@ -32,22 +32,21 @@ export async function validateDocument(
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        const jsDiagnostics=  await validateJs(
-            document, 
+        const jsDiagnostics = await validateJs(
+            document,
             setting.maxNumberOfProblems - results.length
         );
         results.push(...jsDiagnostics);
 
         // handle graphql rules
         const graphqlDiagnostics = await validateGraphql(
-            document, 
-            setting.maxNumberOfProblems - results.length, 
+            document,
+            setting.maxNumberOfProblems - results.length
         );
         results.push(...graphqlDiagnostics);
-    } 
+    }
 
     if (document.languageId === 'html') {
-        
     }
 
     // Set the source for diagnostic source.

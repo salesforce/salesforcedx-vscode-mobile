@@ -7,32 +7,32 @@
 
 import * as assert from 'assert';
 import * as sinon from 'sinon';
+import { suite, test, afterEach } from 'mocha';
 import { parseJs } from '../../utils/babelUtil';
-import { describe, beforeEach, it } from 'node:test';
 
-describe('babelUtil', () => {
-    beforeEach(function () {
+suite('BabelUtil Test Suite', () => {
+    afterEach(function () {
         sinon.restore();
     });
 
-    it('parse valid js correctly', () => {
-      const node = parseJs(`
+    test('Parse valid js correctly', () => {
+        const node = parseJs(`
           import { LightningElement, wire } from "lwc";
           import { getRelatedListRecords } from "lightning/uiRelatedListApi";
         `);
-      
-       assert.equal(node.type, 'File');
+
+        assert.equal(node.type, 'File');
     });
 
-    it('throw exception for invalid js code', () => {
+    test('Throw exception for invalid js code', () => {
         assert.throws(
-            () => { 
-                parseJs('var var i=100;') 
-            }, 
+            () => {
+                parseJs('var var i=100;');
+            },
             {
                 code: 'BABEL_PARSER_SYNTAX_ERROR',
                 reasonCode: 'UnexpectedKeyword'
-            } 
-        )
-    })
+            }
+        );
+    });
 });

@@ -10,7 +10,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { parseJs } from './utils/babelUtil';
 import { Node } from '@babel/types';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
-import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters_localChangeNotAware';
+import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-change-not-aware';
 
 const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
 jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
