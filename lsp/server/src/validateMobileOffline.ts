@@ -1,4 +1,4 @@
-import { Node, HTMLDocument } from 'vscode-html-languageservice';
+import { Node, HTMLDocument, getLanguageService } from 'vscode-html-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 import { baseComponentsAttributes } from './server';
@@ -10,8 +10,7 @@ function parseHTMLContent(content: string): HTMLDocument {
         0,
         content
     );
-    const htmlLanguageService =
-        require('vscode-html-languageservice').getLanguageService();
+    const htmlLanguageService = getLanguageService();
     return htmlLanguageService.parseHTMLDocument(document);
 }
 
