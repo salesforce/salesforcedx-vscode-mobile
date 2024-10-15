@@ -58,7 +58,7 @@ export class LiveKomaciAnalyzeCommand {
             let toolingHubUrl =
                 conn.instanceUrl +
                 '/lwr/application/amd/0/e/native/ai/lightningmobileruntime%2Ftoolinghub';
-            toolingHubUrl += `?tab=audit&hideContainer=true&lwcName=${lwcName}&lwcNamespace=${lwcNamespace}&hideForm=true&visualize=true`;
+            toolingHubUrl += `?tab=auditlwcName=${lwcName}&lwcNamespace=${lwcNamespace}&visualize=true`;
             vscode.env.openExternal(toolingHubUrl as any);
         });
     }
