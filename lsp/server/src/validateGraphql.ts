@@ -19,7 +19,7 @@ const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
 
 /**
  * Validate the graphql queries in the document.
- * @param textDocument 
+ * @param textDocument
  */
 export async function validateGraphql(
     setting: DiagnosticSettings,
@@ -70,7 +70,7 @@ export async function validateGraphql(
  * Validate graphql diagnostic rules to a graph query, return empty list if the graphql string is invalid.
  * @param producers The diagnostic producer to run.
  * @param graphql the graph code
- * @param graphqlDiagnosticProducers  the collection of graphql rules. 
+ * @param graphqlDiagnosticProducers  the collection of graphql rules.
  */
 export async function validateOneGraphQuery(
     producers: DiagnosticProducer<ASTNode>[],
