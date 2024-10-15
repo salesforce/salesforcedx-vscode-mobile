@@ -33,7 +33,7 @@ export async function validateDocument(
     if (document.languageId === 'javascript') {
         // handles JS rules
         const jsDiagnostics = await validateJs(document);
-        
+
         // handle graphql rules
         const graphqlDiagnostics = await validateGraphql(document);
 
