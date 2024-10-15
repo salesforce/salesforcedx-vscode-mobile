@@ -4,6 +4,9 @@
     "description": "%extension.description%",
     "version": "0.3.0",
     "publisher": "salesforce",
+    "workspaces": [
+        "lsp/*"
+    ],
     "engines": {
         "vscode": "^1.77.0",
         "node": ">=18"
@@ -90,8 +93,7 @@
         "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
         "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
         "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
-        "vscode:prepublish": "npm run clean && npm run bundle:extension",
-        "postinstall": "cd lsp/client && npm install && cd ../server && npm install && cd ../.."
+        "vscode:prepublish": "npm run clean && npm run bundle:extension"
     },
     "devDependencies": {
         "@istanbuljs/nyc-config-typescript": "^1.0.2",
@@ -123,6 +125,8 @@
         "@salesforce/core": "^5.3.12",
         "@salesforce/lwc-dev-mobile-core": "^3.3.1",
         "@salesforce/sf-plugins-core": "^4.0.0",
-        "@vscode/l10n": "^0.0.18"
+        "@vscode/l10n": "^0.0.18",
+        "mobile-lsp-client": "workspaces:*",
+        "mobile-lsp-server": "workspaces:*"
     }
 }
