@@ -38,7 +38,6 @@ describe('validateGraphql', () => {
             };
             `
         );
-        //const diagnostics = await validateGraphql(textDocument, 100);
         const diagnostics = await validateGraphql(textDocument);
     
         assert.equal(diagnostics.length, 1);
