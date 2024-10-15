@@ -38,7 +38,7 @@ suite('Live Komaci Analyze Command Test Suite', () => {
         // Assert shape of URL opened is good
         assert.equal(
             vscodeEnvOpenExternalSpy.openExternal.args[0][0],
-            'instanceUrl/lwr/application/amd/0/e/native/ai/lightningmobileruntime%2Ftoolinghub?tab=audit&hideContainer=true&lwcName=childCmpA&lwcNamespace=mockLwcNamespace&hideForm=true&visualize=true'
+            'instanceUrl/lwr/application/amd/0/e/native/ai/lightningmobileruntime%2Ftoolinghub?tab=audit&lwcName=childCmpA&lwcNamespace=mockLwcNamespace&visualize=true'
         );
         // Assert telemetry
         assert.equal(sendExceptionStub.callCount, 0);
