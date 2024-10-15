@@ -38,7 +38,8 @@ describe('validateGraphql', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql(textDocument, 100);
+        //const diagnostics = await validateGraphql(textDocument, 100);
+        const diagnostics = await validateGraphql(textDocument);
     
         assert.equal(diagnostics.length, 1);
         assert.equal(diagnostics[0].message, 'uiapi is misspelled.');
@@ -59,7 +60,7 @@ describe('validateGraphql', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql(textDocument, 100);
+        const diagnostics = await validateGraphql(textDocument);
     
         assert.equal(diagnostics.length, 0);
     });

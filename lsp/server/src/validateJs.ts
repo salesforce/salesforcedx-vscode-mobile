@@ -12,48 +12,30 @@ import { Node } from '@babel/types';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-change-not-aware';
 
-const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
-jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
+const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [
+    new AdaptersLocalChangeNotAware()
+];
 
 /**
  * Validate JavaScript file content.
  * @param fileContent The JavaScript file content
- * @param maxCount The maximum number of diagnostics to report
  * @returns An array of diagnostics found within the JavaScript file
  */
 export async function validateJs(
-    textDocument: TextDocument,
-    maxCount: number
+    textDocument: TextDocument
 ): Promise<Diagnostic[]> {
-    const results: Diagnostic[] = [];
-    if (maxCount <= 0) {
-        return results;
-    }
+    let results: Diagnostic[] = [];
 
-    if (jsDiagnosticProducers.length > 0) {
-        try {
-            const jsNode = parseJs(textDocument.getText());
-            for (const producer of jsDiagnosticProducers) {
-                if (results.length >= maxCount) {
-                    break;
-                }
-                const diagnostics = await producer.validateDocument(
-                    textDocument,
-                    jsNode
-                );
+    try {
+        const jsNode = parseJs(textDocument.getText());
+        for (const producer of jsDiagnosticProducers) {
+            const diagnostics = await producer.validateDocument(
+                textDocument,
+                jsNode
+            );
+            results = results.concat(diagnostics);
+        }
+    } catch (e) {} // Silence error since JS parsing error crashes app.
 
-                const allowedCount = maxCount - results.length;
-                const diagnosticsToAppend =
-                    allowedCount >= diagnostics.length
-                        ? diagnostics
-                        : diagnostics.slice(
-                              0,
-                              diagnostics.length - allowedCount
-                          );
-
-                results.push(...diagnosticsToAppend);
-            }
-        } catch (e) {} // Silence error since JS parsing error crashes app.
-    }
     return results;
 }
