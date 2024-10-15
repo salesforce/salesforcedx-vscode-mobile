@@ -28,22 +28,17 @@ export async function validateDocument(
     const { uri } = document;
 
     const setting = await getDocumentSettings(uri);
-    const results: Diagnostic[] = [];
+    let results: Diagnostic[] = [];
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        const jsDiagnostics = await validateJs(
-            document,
-            setting.maxNumberOfProblems - results.length
-        );
-        results.push(...jsDiagnostics);
-
+        const jsDiagnostics = await validateJs(document);
+        
         // handle graphql rules
-        const graphqlDiagnostics = await validateGraphql(
-            document,
-            setting.maxNumberOfProblems - results.length
-        );
-        results.push(...graphqlDiagnostics);
+        const graphqlDiagnostics = await validateGraphql(document);
+
+        results = results.concat(jsDiagnostics, graphqlDiagnostics);
+        results.splice(setting.maxNumberOfProblems);
     }
 
     if (document.languageId === 'html') {

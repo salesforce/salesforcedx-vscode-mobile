@@ -37,7 +37,7 @@ suite('Diagnostics Test Suite - Server - Validate JS', () => {
             }
          `
         );
-        const diagnostics = await validateJs(textDocument, 100);
+        const diagnostics = await validateJs(textDocument);
 
         assert.equal(diagnostics.length, 1);
         assert.equal(diagnostics[0].message, LOCAL_CHANGE_NOT_AWARE_MESSAGE);
@@ -52,7 +52,7 @@ suite('Diagnostics Test Suite - Server - Validate JS', () => {
              var var i = 100;
             `
         );
-        const diagnostics = await validateJs(textDocument, 100);
+        const diagnostics = await validateJs(textDocument);
 
         assert.equal(diagnostics.length, 0);
     });
