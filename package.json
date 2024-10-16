@@ -95,7 +95,7 @@
     "scripts": {
         "clean": "rimraf out ./lsp/server/out ./lsp/client/out",
         "compile": "rimraf ./lsp/server/tsconfig.tsbuildinfo ./lsp/client/tsconfig.tsbuildinfo && npm run copy-resources && tsc -b ./",
-        "copy-resources": "copyfiles -s -u 3 'lsp/server/resources/*' 'lsp/server/out/resources/'",
+        "copy-resources": "copyfiles -V -s -u 3 lsp/server/resources/* lsp/server/out/resources/",
         "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
