@@ -26,9 +26,6 @@ const connection = createConnection(ProposedFeatures.all);
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
-// Key used in yaml for list of base components
-const baseComponentValues = 'values';
-
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
@@ -70,7 +67,6 @@ connection.onInitialize((params: InitializeParams) => {
             }
         };
     }
-
     return result;
 });
 
@@ -157,11 +153,6 @@ connection.languages.diagnostics.on(async (params) => {
             items: []
         } satisfies DocumentDiagnosticReport;
     }
-});
-
-connection.onDidChangeWatchedFiles((_change) => {
-    // Monitored files have change in VSCode
-    connection.console.log('We received a file change event');
 });
 
 // Make the text document manager listen on the connection
