@@ -36,9 +36,6 @@ const connection = createConnection(ProposedFeatures.all);
 // Create a simple text document manager.
 const documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
-// Key used in yaml for list of base components
-const baseComponentValues = 'values';
-
 let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
@@ -96,7 +93,6 @@ connection.onInitialize((params: InitializeParams) => {
             }
         };
     }
-
     return result;
 });
 
