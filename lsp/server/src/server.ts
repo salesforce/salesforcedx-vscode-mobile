@@ -19,10 +19,6 @@ import {
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
-import { validateMobileOffline } from './validateMobileOffline';
-import { transformYamlToObject } from './utils/yamlParser';
-import * as path from 'path';
-import * as fs from 'fs';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -38,11 +34,6 @@ let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
 
 let extensionName: string = '';
-
-// Primitive exports are not mutable across imports. Changes made directly to an exported object
-// after the export won't be reflected in other modules. To allow changes to be reflected,
-// an object, a deseralized YAML, is wrapped
-export const baseComponentsAttributes = { values: {} };
 
 connection.onInitialize((params: InitializeParams) => {
     extensionName = params.initializationOptions?.extensionName;
@@ -79,18 +70,6 @@ connection.onInitialize((params: InitializeParams) => {
             }
         };
     }
-
-    const yamlPath = path.join(
-        __dirname,
-        'resources',
-        'component-experiences.yaml'
-    );
-
-    const data = fs.readFileSync(yamlPath, 'utf-8');
-    baseComponentsAttributes.values = transformYamlToObject(
-        data,
-        baseComponentValues
-    );
 
     return result;
 });
@@ -168,7 +147,7 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validateDocument(document, extensionName) //await validateMobileOffline(document)
+            items: await validateDocument(document, extensionName)
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk
@@ -177,15 +156,6 @@ connection.languages.diagnostics.on(async (params) => {
             kind: DocumentDiagnosticReportKind.Full,
             items: []
         } satisfies DocumentDiagnosticReport;
-    }
-});
-
-// The content of a text document has changed. This event is emitted
-// when the text document first opened or when its content has changed.
-documents.onDidChangeContent((change) => {
-    const document = change.document;
-    if (document.uri.endsWith('.html')) {
-        validateMobileOffline(document);
     }
 });
 
