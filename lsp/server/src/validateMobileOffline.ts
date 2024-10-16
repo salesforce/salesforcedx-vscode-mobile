@@ -9,7 +9,7 @@ import { transformYamlToObject } from './utils/yamlParser';
 import * as path from 'path';
 import * as fs from 'fs';
 
-const baseComponentsAttributes =  {values: getBaseComponentsAttributes()};
+const baseComponentsAttributes = { values: getBaseComponentsAttributes() };
 
 function getBaseComponentsAttributes(): Record<string, string[]> {
     const yamlPath = path.join(
@@ -19,10 +19,7 @@ function getBaseComponentsAttributes(): Record<string, string[]> {
     );
 
     const data = fs.readFileSync(yamlPath, 'utf-8');
-    const values = transformYamlToObject(
-        data,
-        'values'
-    );
+    const values = transformYamlToObject(data, 'values');
     return values;
 }
 
@@ -57,16 +54,18 @@ function findTags(document: HTMLDocument, tagNames: string[]): Node[] {
 }
 
 function camelToKebabCase(str: string): string {
-    return str
-      // Replace uppercase letters with a dash followed by the lowercase letter
-      .replace(/([A-Z])/g, '-$1')
-      // Convert the entire string to lowercase
-      .toLowerCase();
-  }
+    return (
+        str
+            // Replace uppercase letters with a dash followed by the lowercase letter
+            .replace(/([A-Z])/g, '-$1')
+            // Convert the entire string to lowercase
+            .toLowerCase()
+    );
+}
 
 /**
  * Parse componenent-experiences.yaml come in a format like this
- * 
+ *
  * ```
  * {
  *   ...
@@ -75,10 +74,10 @@ function camelToKebabCase(str: string): string {
  *   ...
  * }
  * ```
- * 
+ *
  * This function gets array of converted keys(aka, names of base components how they are used in html),
  * from camel case to kebob case, that doesn't have a specific string in it's array of values.
- * 
+ *
  * @param obj Parsed component-experiences.yaml in a JSON format
  * @param searchString A string that should not be in the key's values.
  * @returns An array of base component names, as used in html, without a certain attribute.
@@ -95,7 +94,7 @@ function getKeysWithoutSpecificValue(
             key.startsWith('lightning:') &&
             !valueArray.includes(searchString)
         ) {
-            // Base component uses '-' isntead of ':'. 
+            // Base component uses '-' isntead of ':'.
             // 'lightning' is the namespace.
             const splittedKeys = key.split(':');
 
@@ -118,7 +117,7 @@ export async function validateMobileOffline(
     textDocument: TextDocument
 ): Promise<Diagnostic[]> {
     const nonOfflinebaseComponents = getKeysWithoutSpecificValue(
-        baseComponentsAttributes.values,        
+        baseComponentsAttributes.values,
         'MobileOffline'
     );
     const content = textDocument.getText();
