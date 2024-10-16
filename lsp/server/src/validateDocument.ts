@@ -11,6 +11,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateJs } from './validateJs'; 
 import { validateGraphql } from './validateGraphql';
 import { DiagnosticSettings } from './diagnostic/DiagnosticSettings';
+import { validateMobileOffline } from './validateMobileOffline';
 
 /**
  * Validate the document based on its extension type.
@@ -26,7 +27,9 @@ export async function validateDocument(
     document: TextDocument,
     extensionName: string
 ): Promise<Diagnostic[]> {
+    const { uri } = document;
 
+    const setting = await getDocumentSettings(uri);
     let results: Diagnostic[] = [];
 
     if (document.languageId === 'javascript') {
@@ -46,7 +49,11 @@ export async function validateDocument(
     }
 
     if (document.languageId === 'html') {
+        const mobileOfflineDiagnostics = await validateMobileOffline(document);
+        results = results.concat(mobileOfflineDiagnostics);
     }
+
+    results.splice(setting.maxNumberOfProblems);
 
     // Set the source for diagnostic source.
     results.forEach((diagnostic) => {

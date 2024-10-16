@@ -51,11 +51,6 @@ let diagnosticsSettingSection = '';
 let settings = getSettings({});
 const documentCache: Map<string, TextDocument> = new Map();
 
-// Primitive exports are not mutable across imports. Changes made directly to an exported object
-// after the export won't be reflected in other modules. To allow changes to be reflected,
-// an object, a deseralized YAML, is wrapped
-export const baseComponentsAttributes = { values: {} };
-
 connection.onInitialize((params: InitializeParams) => {
     const workspaceFolders = params.workspaceFolders;
 
@@ -101,18 +96,6 @@ connection.onInitialize((params: InitializeParams) => {
             }
         };
     }
-
-    const yamlPath = path.join(
-        __dirname,
-        'resources',
-        'component-experiences.yaml'
-    );
-
-    const data = fs.readFileSync(yamlPath, 'utf-8');
-    baseComponentsAttributes.values = transformYamlToObject(
-        data,
-        baseComponentValues
-    );
 
     return result;
 });
