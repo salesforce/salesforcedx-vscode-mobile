@@ -26,7 +26,7 @@ function getBaseComponentsAttributes(): Record<string, string[]> {
     } catch (error) {
         // YAML parsing may fail. In that case log the error but don't bring
         // down LSP with it.
-        console.error(error); 
+        console.error(error);
     }
 
     return values;
@@ -146,10 +146,10 @@ export async function validateMobileOffline(
             };
             diagnostics.push(diagnostic);
         }
-    } catch(error) {
+    } catch (error) {
         // HTML parsing may fail. In that case log the error but don't bring
         // down LSP with it.
-        console.error(error); 
+        console.error(error);
     }
 
     return diagnostics;

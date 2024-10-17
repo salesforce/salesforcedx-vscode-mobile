@@ -16,7 +16,8 @@ suite('YamlParser Test Suite', () => {
     });
 
     test('Parse valid yaml correctly', () => {
-        const yamlObject = transformYamlToObject(`
+        const yamlObject = transformYamlToObject(
+            `
             allowed:
                 Lightning:
                     label: "Lightning Experience"
@@ -38,25 +39,31 @@ suite('YamlParser Test Suite', () => {
                     - MobileOffline
                 "lightning:alert":
                     - Lightning
-            `, 'values');
+            `,
+            'values'
+        );
         assert.equal(Object.keys(yamlObject).length, 4);
     });
 
     test('Throws when designated level can not be found in yaml', () => {
         assert.throws(() => {
-            transformYamlToObject(`
+            transformYamlToObject(
+                `
                 allowed:
                     Lightning:
                         label: "Lightning Experience"
                         includeWithStandard: true
                         sort: 1
-                `, 'values')
+                `,
+                'values'
+            );
         });
     });
 
     test('Throws when properties values are not in correct format can not be found in yaml', () => {
         assert.throws(() => {
-            transformYamlToObject(`
+            transformYamlToObject(
+                `
                 allowed:
                 Lightning:
                     label: "Lightning Experience"
@@ -75,8 +82,9 @@ suite('YamlParser Test Suite', () => {
                         - MobileOffline
                     "lightning:alert":
                         - Lightning
-                `, 'values')
+                `,
+                'values'
+            );
         });
     });
-
 });
