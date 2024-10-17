@@ -18,8 +18,17 @@ function getBaseComponentsAttributes(): Record<string, string[]> {
         'component-experiences.yaml'
     );
 
-    const data = fs.readFileSync(yamlPath, 'utf-8');
-    const values = transformYamlToObject(data, 'values');
+    let values: Record<string, string[]> = {};
+
+    try {
+        const data = fs.readFileSync(yamlPath, 'utf-8');
+        values = transformYamlToObject(data, 'values');
+    } catch (error) {
+        // YAML parsing may fail. In that case log the error but don't bring
+        // down LSP with it.
+        console.error(error); 
+    }
+
     return values;
 }
 
@@ -121,20 +130,26 @@ export async function validateMobileOffline(
         'MobileOffline'
     );
     const content = textDocument.getText();
-    const htmlDocument = parseHTMLContent(content);
-    const customTags = findTags(htmlDocument, nonOfflinebaseComponents);
     const diagnostics: Diagnostic[] = [];
 
-    for (const tag of customTags) {
-        const diagnostic: Diagnostic = {
-            severity: DiagnosticSeverity.Warning,
-            range: {
-                start: textDocument.positionAt(tag.start),
-                end: textDocument.positionAt(tag.end)
-            },
-            message: `<${tag.tag}> is not a mobile offline friendly LWC base component.`
-        };
-        diagnostics.push(diagnostic);
+    try {
+        const htmlDocument = parseHTMLContent(content);
+        const customTags = findTags(htmlDocument, nonOfflinebaseComponents);
+        for (const tag of customTags) {
+            const diagnostic: Diagnostic = {
+                severity: DiagnosticSeverity.Warning,
+                range: {
+                    start: textDocument.positionAt(tag.start),
+                    end: textDocument.positionAt(tag.end)
+                },
+                message: `<${tag.tag}> is not a mobile offline friendly LWC base component.`
+            };
+            diagnostics.push(diagnostic);
+        }
+    } catch(error) {
+        // HTML parsing may fail. In that case log the error but don't bring
+        // down LSP with it.
+        console.error(error); 
     }
 
     return diagnostics;
