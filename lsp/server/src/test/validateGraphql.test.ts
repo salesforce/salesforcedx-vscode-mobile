@@ -11,6 +11,8 @@ import * as assert from 'assert';
 import { suite, test } from 'mocha';
 
 suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
+    const setting = {maxNumberOfProblems: 100};
+    
     test('Valid uiapi missing diagnostic', async () => {
         const textDocument = TextDocument.create(
             'file://test.js',
@@ -38,7 +40,7 @@ suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql(textDocument, 100);
+        const diagnostics = await validateGraphql(setting, textDocument, 100);
 
         assert.equal(diagnostics.length, 1);
         assert.equal(diagnostics[0].message, 'uiapi is misspelled.');
@@ -59,7 +61,7 @@ suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql(textDocument, 100);
+        const diagnostics = await validateGraphql({maxNumberOfProblems: 100}, textDocument, 100);
 
         assert.equal(diagnostics.length, 0);
     });

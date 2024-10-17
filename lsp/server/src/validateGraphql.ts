@@ -8,9 +8,10 @@
 import {parse, ASTNode} from 'graphql';
 import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
 import { Diagnostic } from 'vscode-languageserver/node';
-import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
+import { DiagnosticMetaData, DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { MisspelledUiapi } from './diagnostic/gql/misspelled-uiapi';
+import { DiagnosticSettings, isTheDiagnosticSuppressed } from './diagnostic/DiagnosticSettings';
 
 const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [];
 diagnosticProducers.push(new MisspelledUiapi());
@@ -21,12 +22,21 @@ diagnosticProducers.push(new MisspelledUiapi());
  * @param maxCount  The max count of diagnostics to return 
  */
 export async function validateGraphql(
+    setting: DiagnosticSettings,
     textDocument: TextDocument, 
     maxCount: number
 ): Promise<Diagnostic[]> {
     const results: Diagnostic[] = [];
 
-    if (maxCount <= 0 || diagnosticProducers.length === 0) {
+    if (maxCount <= 0) {
+        return results;
+    }
+
+    const producersToRun = diagnosticProducers.filter((producer) => {
+        return !isTheDiagnosticSuppressed(setting, producer.getId());
+    });
+
+    if ( producersToRun.length === 0) {
         return results;
     }
 
@@ -48,7 +58,7 @@ export async function validateGraphql(
         const lineOffset = query.locationOffset.line - 1;
         const columnOffset = query.locationOffset.column + 1;
         const graphqlTextDocument = TextDocument.create(``, 'graphql', 1, query.body);
-        const diagnostics = await validateOneGraphQuery(graphqlTextDocument, query.body);
+        const diagnostics = await validateOneGraphQuery(producersToRun, graphqlTextDocument, query.body);
         // Update the range offset correctly
         for (const item of diagnostics) {
             if (results.length >= maxCount) {
@@ -64,18 +74,28 @@ export async function validateGraphql(
 
 /**
  * Validate graphql diagnostic rules to a graph query, return empty list if the graphql string is invalid.
- * @param graphql the graph code
+ * @param producers The diagnostic producer to run.
+ * @param graphql The graph code.
  * @param graphqlDiagnosticProducers  the collection of graphql rules. 
 
  */
-export async function validateOneGraphQuery(textDocument: TextDocument, graphql: string): Promise<Diagnostic[]> {
+export async function validateOneGraphQuery(producers: DiagnosticProducer<ASTNode>[], textDocument: TextDocument, graphql: string): Promise<Diagnostic[]> {
   
     try {
         const graphqlAstNode = parse(graphql);
         const allResults = await Promise.all(
-            diagnosticProducers.map((producer) =>
-                producer.validateDocument(textDocument, graphqlAstNode)
-            )
+            producers.map((producer) => {
+               return producer.validateDocument(textDocument, graphqlAstNode)
+                .then((diagnostics) => {
+                    const metaData: DiagnosticMetaData = {
+                        id: producer.getId()
+                    };
+                    diagnostics.forEach((diagnostic) => {
+                        diagnostic.data = metaData;
+                    });
+                    return diagnostics;
+                })
+            })
         );
         return allResults.flat();
     } catch (e) {

@@ -10,6 +10,7 @@
 import * as vscode from 'vscode';
 import * as onboardingWizard from './commands/wizard/onboardingWizard';
 import * as configureLintingToolsCommand from './commands/lint/configureLintingToolsCommand';
+import * as settingsCommand from './commands/settings/settings';
 import { CoreExtensionService } from './services/CoreExtensionService';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import * as lspClient from '../lsp/client/out/extension';
@@ -39,6 +40,8 @@ export function activate(context: vscode.ExtensionContext) {
     onboardingWizard.onActivate(context);
 
     configureLintingToolsCommand.registerCommand(context);
+    settingsCommand.registerCommand(context);
+    
     lspClient.activate(context);
 }
 

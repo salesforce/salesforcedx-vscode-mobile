@@ -11,6 +11,7 @@ import { parseJs } from './utils/babelUtil';
 import { Node } from '@babel/types';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-change-not-aware';
+import { DiagnosticSettings, isTheDiagnosticSuppressed } from './diagnostic/DiagnosticSettings';
 
 const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
 jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
@@ -22,6 +23,7 @@ jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
  * @returns An array of diagnostics found within the JavaScript file
  */
 export async function validateJs(
+    setting: DiagnosticSettings,
     textDocument: TextDocument,
     maxCount: number
 ): Promise<Diagnostic[]> {
@@ -30,7 +32,9 @@ export async function validateJs(
         return results;
     }
 
-    if (jsDiagnosticProducers.length > 0) {
+    if (jsDiagnosticProducers.filter((producer) => {
+        return !isTheDiagnosticSuppressed(setting, producer.getId())
+    }).length > 0) {
         try {
             const jsNode = parseJs(textDocument.getText());
             for (const producer of jsDiagnosticProducers) {

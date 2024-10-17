@@ -9,6 +9,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 import { ASTNode, visit } from 'graphql';
+import { DiagnosticId } from '../DiagnosticSettings';
 
 const LOCAL_CHANGE_NOT_AWARE_MESSAGE = 'uiapi is misspelled.';
 const SEVERITY = DiagnosticSeverity.Error;
@@ -19,6 +20,10 @@ const SEVERITY = DiagnosticSeverity.Error;
 */
 export class MisspelledUiapi implements DiagnosticProducer<ASTNode> {
    
+    getId(): DiagnosticId {
+        return 'missspelled-uiapi' ;
+    }
+
     validateDocument(
         textDocument: TextDocument,
         rootNode: ASTNode

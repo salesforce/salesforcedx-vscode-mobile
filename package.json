@@ -72,6 +72,15 @@
                     "type": "string",
                     "default": "^8.47.0",
                     "description": "%extension.commands.salesforce-mobile-offline.eslint.version%"
+                },
+                "salesforce.salesforcedx-vscode-mobile.lsp.diagnostics": {
+                    "type":"object",
+                    "default": {
+                        "suppress.all": false,
+                        "suppressed.rule.Ids": [],
+                        "maxProblemNumber": 200
+                    },
+                    "description": "lsp diagnostics configuration"
                 }
             }
         }

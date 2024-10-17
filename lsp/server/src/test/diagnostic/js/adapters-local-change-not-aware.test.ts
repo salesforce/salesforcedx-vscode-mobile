@@ -30,6 +30,8 @@ export default class RelatedListRecords extends LightningElement {
     fields: ["Opportunity.Name"],
   })
   relatedListHandler({ error, data }) {
+
+  ....
   }
 }
 `;
