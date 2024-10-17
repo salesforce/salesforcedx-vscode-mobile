@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import {parse, ASTNode} from 'graphql';
+import { parse, ASTNode } from 'graphql';
 import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
 import { Diagnostic } from 'vscode-languageserver/node';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
@@ -18,7 +18,7 @@ const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
 
 /**
  * Validate the graphql queries in the document.
- * @param textDocument 
+ * @param textDocument
  */
 export async function validateGraphql(
     textDocument: TextDocument
@@ -39,8 +39,16 @@ export async function validateGraphql(
     for (const query of graphQueries) {
         const lineOffset = query.locationOffset.line - 1;
         const columnOffset = query.locationOffset.column + 1;
-        const graphqlTextDocument = TextDocument.create(``, 'graphql', 1, query.body);
-        const diagnostics = await validateOneGraphQuery(graphqlTextDocument, query.body);
+        const graphqlTextDocument = TextDocument.create(
+            ``,
+            'graphql',
+            1,
+            query.body
+        );
+        const diagnostics = await validateOneGraphQuery(
+            graphqlTextDocument,
+            query.body
+        );
         // Update the range offset correctly
         for (const item of diagnostics) {
             updateDiagnosticOffset(item, lineOffset, columnOffset);
@@ -54,10 +62,12 @@ export async function validateGraphql(
 /**
  * Validate graphql diagnostic rules to a graph query, return empty list if the graphql string is invalid.
  * @param graphql the graph code
- * @param graphqlDiagnosticProducers  the collection of graphql rules. 
+ * @param graphqlDiagnosticProducers  the collection of graphql rules.
  */
-export async function validateOneGraphQuery(textDocument: TextDocument, graphql: string): Promise<Diagnostic[]> {
-  
+export async function validateOneGraphQuery(
+    textDocument: TextDocument,
+    graphql: string
+): Promise<Diagnostic[]> {
     try {
         const graphqlAstNode = parse(graphql);
         const allResults = await Promise.all(
@@ -75,12 +85,15 @@ export async function validateOneGraphQuery(textDocument: TextDocument, graphql:
 
 /**
  * Update the graphql diagnostic offset to offset from the whole js file
- * @param diagnostic 
+ * @param diagnostic
  * @param lineOffset Line offset from the file
  * @param columnOffset Column offset from the file
  */
-function updateDiagnosticOffset(diagnostic: Diagnostic, lineOffset: number, columnOffset: number) {
-
+function updateDiagnosticOffset(
+    diagnostic: Diagnostic,
+    lineOffset: number,
+    columnOffset: number
+) {
     const start = diagnostic.range.start;
     const end = diagnostic.range.end;
 

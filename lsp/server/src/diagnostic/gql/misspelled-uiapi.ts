@@ -13,34 +13,34 @@ import { ASTNode, visit } from 'graphql';
 const LOCAL_CHANGE_NOT_AWARE_MESSAGE = 'uiapi is misspelled.';
 const SEVERITY = DiagnosticSeverity.Error;
 
-/** 
- * DUMMY demo implementation showcasing graphql parsing and diagnostic geneation for scaffolding. 
+/**
+ * DUMMY demo implementation showcasing graphql parsing and diagnostic geneation for scaffolding.
  * Produce diagnostic when graphql uiapi node is misspelled.
-*/
+ */
 export class MisspelledUiapi implements DiagnosticProducer<ASTNode> {
-   
     validateDocument(
         textDocument: TextDocument,
         rootNode: ASTNode
     ): Promise<Diagnostic[]> {
-
         const results: Diagnostic[] = [];
 
         visit(rootNode, {
             Name: {
                 enter(node, key, parent, path, ancestors) {
                     const name = node.value.toLocaleLowerCase();
-                    if (name.startsWith('uiapi') && name!== 'uiapi') {
-                        results.push(
-                            {
-                                severity: SEVERITY,
-                                range: {
-                                    start: textDocument.positionAt(node.loc?.start as number),
-                                    end: textDocument.positionAt(node.loc?.end as number)
-                                },
-                                message: LOCAL_CHANGE_NOT_AWARE_MESSAGE
-                            } as Diagnostic
-                        );
+                    if (name.startsWith('uiapi') && name !== 'uiapi') {
+                        results.push({
+                            severity: SEVERITY,
+                            range: {
+                                start: textDocument.positionAt(
+                                    node.loc?.start as number
+                                ),
+                                end: textDocument.positionAt(
+                                    node.loc?.end as number
+                                )
+                            },
+                            message: LOCAL_CHANGE_NOT_AWARE_MESSAGE
+                        } as Diagnostic);
                     }
                 }
             }

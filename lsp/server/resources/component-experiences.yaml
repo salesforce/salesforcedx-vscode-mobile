@@ -1,0 +1,882 @@
+# Edit this file to update the supported targets (experiences) for a component.
+
+allowed:
+  Lightning:
+    label: "Lightning Experience"
+    includeWithStandard: true
+    sort: 1
+  Communities:
+    label: "Experience Builder Sites"
+    includeWithStandard: true
+    sort: 2
+  Mobile:
+    label: "Salesforce Mobile App"
+    includeWithStandard: true
+    sort: 3
+  Out:
+    label: "Lightning Out / Visualforce"
+    includeWithStandard: true
+    sort: 4
+  Standalone:
+    label: "Standalone Lightning App"
+    includeWithStandard: true
+    sort: 5
+  Snapins:
+    label: "Embedded Service Chat"
+    includeWithStandard: false
+    sort: 6
+  MobileOffline:
+    label: "Mobile Offline"
+    includeWithStandard: false
+    sort: 7
+
+# All Aura components, interfaces and events, and all LWC modules should be
+# referenced using the ":" format.
+#
+# Specify "Standard" to indicate the component works in every standard
+# experience. See above for the experiences that will be included with
+# "Standard".
+values:
+  "aura:component":
+    - Standard
+  "aura:expression":
+    - Standard
+  "aura:html":
+    - Standard
+  "aura:if":
+    - Standard
+  "aura:iteration":
+    - Standard
+  "aura:renderIf":
+    - Standard
+  "aura:template":
+    - Standard
+  "aura:text":
+    - Standard
+  "aura:unescapedHtml":
+    - Standard
+  "force:appHostable":
+    - Lightning
+    - Mobile
+  "force:canvasApp":
+    - Lightning
+    - Communities
+    - Mobile
+  "force:cardPayment":
+    - Lightning
+    - Communities
+  "force:hasRecordId":
+    - Lightning
+    - Communities
+    - Mobile
+  "force:hasSObjectName":
+    - Lightning
+    - Communities
+    - Mobile
+  "force:inputField":
+    - Lightning
+    - Communities
+    - Mobile
+  "force:lightningQuickAction":
+    - Lightning
+    - Mobile
+  "force:lightningQuickActionWithoutHeader":
+    - Lightning
+    - Mobile
+  "force:outputField":
+    - Communities
+    - Mobile
+    - Lightning
+  "force:recordData":
+    - Lightning
+    - Communities
+    - Mobile
+  "force:recordEdit":
+    - Lightning
+    - Communities
+    - Out
+    - Standalone
+  "force:recordView":
+    - Lightning
+    - Communities
+    - Out
+    - Standalone
+  "forceChatter:feed":
+    - Lightning
+    - Communities
+  "forceChatter:fullFeed":
+    - Out
+    - Standalone
+  "forceChatter:publisher":
+    - Lightning
+    - Communities
+  "forceCommunity:appLauncher":
+    - Communities
+  "forceCommunity:navigationMenuBase":
+    - Communities
+  "forceCommunity:notifications":
+    - Lightning
+    - Communities
+    - Mobile
+  "forceCommunity:routeLink":
+    - Communities
+  "forceCommunity:waveDashboard":
+    - Communities
+  "lightning:accordion":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:accordionSection":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:actionOverride":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:alert":
+    - Lightning
+    - Communities
+    - Out
+    - Standalone
+  "lightning:analyticsWaveApi":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:avatar":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:badge":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:barcodeScanner":
+    - Mobile
+  "lightning:breadcrumb":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:breadcrumbs":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:button":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:buttonGroup":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:buttonIcon":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:buttonIconStateful":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:buttonMenu":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:buttonStateful":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:card":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:carousel":
+    - Standard
+  "lightning:carouselImage":
+    - Standard
+  "lightning:checkboxGroup":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:clickToDial":
+    - Lightning
+  "lightning:cmsDeliveryApi":
+    - Communities
+  "lightning:combobox":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:confirm":
+    - Lightning
+    - Communities
+    - Out
+    - Standalone
+  "lightning:container":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:conversationToolkitApi":
+    - Lightning
+  "lightning:conversationToolkitAPI":
+    - Lightning
+  "lightning:datatable":
+    - Lightning
+    - Communities
+    - Out
+    - Standalone
+  "lightning:dualListbox":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:dynamicIcon":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:empApi":
+    - Lightning
+  "lightning:fileCard":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:fileUpload":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:flexipageRegionInfo":
+    - Lightning
+    - Mobile
+  "lightning:flexipageService":
+    - Lightning
+    - Mobile
+  "lightning:flow":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+  "lightning:flowSupport":
+    - Lightning
+  "lightning:formattedAddress":
+    - Standard
+  "lightning:formattedDateTime":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:formattedEmail":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:formattedLocation":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:formattedName":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:formattedNumber":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:formattedPhone":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:formattedRichText":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:formattedText":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:formattedTime":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:formattedUrl":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:helptext":
+    - Standard
+  "lightning:icon":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:industriesEducationPublicApi":
+    - Lightning
+  "lightning:input":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:inputAddress":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:inputField":
+    - Lightning
+    - Communities
+    - Mobile
+    - MobileOffline
+  "lightning:inputLocation":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:inputName":
+    - Standard
+  "lightning:inputRichText":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+  "lightning:richTextToolbarButton":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+  "lightning:richTextToolbarButtonGroup":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+  "lightning:insertImageButton":
+    - Lightning
+    - Communities
+    - Out
+    - Standalone
+  "lightning:layout":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:layoutItem":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:listView":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:logger":
+    - Lightning
+  "lightning:map":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+  "lightning:mediaUtils":
+    - Standard
+  "lightning:menuDivider":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:menuItem":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:menuSubheader":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:messageService":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:modal":
+    - Lightning
+    - Standalone
+  "lightning:modalHeader":
+    - Lightning
+    - Standalone
+  "lightning:modalBody":
+    - Lightning
+    - Standalone
+  "lightning:modalFooter":
+    - Lightning
+    - Standalone
+  "lightning:navigation":
+    - Lightning
+    - Communities
+    - Mobile
+    - MobileOffline
+  "lightning:navigationItemAPI":
+    - Lightning
+  "lightning:notificationsLibrary":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:omniToolkitAPI":
+    - Lightning
+  "lightning:outputField":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:overlayLibrary":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:pageReferenceUtils":
+    - Lightning
+  "lightning:path":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:picklistPath":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:pill":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:pillContainer":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:platformResourceLoader":
+    - Lightning
+  "lightning:platformShowToastEvent":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:platformUtilityBarApi":
+    - Lightning
+  "lightning:platformWorkspaceApi":
+    - Lightning
+  "lightning:progressBar":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:progressIndicator":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:progressRing":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:progressStep":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:prompt":
+    - Lightning
+    - Communities
+    - Out
+    - Standalone
+  "lightning:quickActionPanel":
+    - Lightning
+  "lightning:quickActionAPI":
+    - Lightning
+  "lightning:quipCard":
+    - Lightning
+    - Communities
+    - Out
+    - Standalone
+  "lightning:radioGroup":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:recordEditForm":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:recordForm":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+  "lightning:recordPicker":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:recordViewForm":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:refresh":
+    - Standard
+  "lightning:relativeDateTime":
+    - Standard
+  "lightning:select":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:serviceCloudVoiceToolkitApi":
+    - Lightning
+  "lightning:serviceKnowledgeApi":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:slider":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:spinner":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:tab":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:tabset":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:textarea":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:tile":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:toast":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:toastContainer":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:tree":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:treeGrid":
+    - Lightning
+    - Communities
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:uiAppsApi":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:uiListApi":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:uiListsApi":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:uiObjectInfoApi":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:uiRecordApi":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:uiRelatedListApi":
+    - Lightning
+    - Communities
+    - Mobile
+  "lightning:unsavedChanges":
+    - Lightning
+  "lightning:userConsentCookie":
+    - Communities
+  "lightning:utilityBarAPI":
+    - Lightning
+  "lightning:verticalNavigation":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:verticalNavigationItem":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:verticalNavigationItemBadge":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:verticalNavigationItemIcon":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:verticalNavigationOverflow":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:verticalNavigationSection":
+    - Lightning
+    - Communities
+    - Mobile
+    - Out
+    - Standalone
+    - MobileOffline
+  "lightning:workspaceAPI":
+    - Lightning
+  "lightningcommunity:backButton":
+    - Mobile
+  "lightningsnapin:baseChatHeader":
+    - Snapins
+  "lightningsnapin:baseChatMessage":
+    - Snapins
+  "lightningsnapin:basePrechat":
+    - Snapins
+  "lightningsnapin:minimized":
+    - Snapins
+  "lightningsnapin:minimizedAPI":
+    - Snapins
+  "lightningsnapin:prechatAPI":
+    - Snapins
+  "lightningsnapin:settingsAPI":
+    - Snapins
+  "ltng:require":
+    - Standard
+  "ui:actionMenuItem":
+    - Standard
+  "ui:button":
+    - Standard
+  "ui:checkboxMenuItem":
+    - Standard
+  "ui:inputCheckbox":
+    - Standard
+  "ui:inputCurrency":
+    - Standard
+  "ui:inputDate":
+    - Standard
+  "ui:inputDateTime":
+    - Standard
+  "ui:inputDefaultError":
+    - Standard
+  "ui:inputEmail":
+    - Standard
+  "ui:inputNumber":
+    - Standard
+  "ui:inputPhone":
+    - Standard
+  "ui:inputRadio":
+    - Standard
+  "ui:inputRichText":
+    - Standard
+  "ui:inputSecret":
+    - Standard
+  "ui:inputSelect":
+    - Standard
+  "ui:inputSelectOption":
+    - Standard
+  "ui:inputText":
+    - Standard
+  "ui:inputTextArea":
+    - Standard
+  "ui:inputURL":
+    - Standard
+  "ui:menu":
+    - Standard
+  "ui:menuItem":
+    - Standard
+  "ui:menuItemSeparator":
+    - Standard
+  "ui:menuList":
+    - Standard
+  "ui:menuTrigger":
+    - Standard
+  "ui:menuTriggerLink":
+    - Standard
+  "ui:message":
+    - Standard
+  "ui:outputCheckbox":
+    - Standard
+  "ui:outputCurrency":
+    - Standard
+  "ui:outputDate":
+    - Standard
+  "ui:outputDateTime":
+    - Standard
+  "ui:outputEmail":
+    - Standard
+  "ui:outputNumber":
+    - Standard
+  "ui:outputPhone":
+    - Standard
+  "ui:outputRichText":
+    - Standard
+  "ui:outputText":
+    - Standard
+  "ui:outputTextArea":
+    - Standard
+  "ui:outputURL":
+    - Standard
+  "ui:radioMenuItem":
+    - Standard
+  "ui:scrollerWrapper":
+    - Mobile
+  "wave:sdk":
+    - Standard
+  "wave:waveDashboard":
+    - Lightning

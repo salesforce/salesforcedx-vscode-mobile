@@ -10,10 +10,9 @@ import * as assert from 'assert';
 import { validateDocument } from '../validateDocument';
 
 /**
- * Verify validateDocument calls into js, graphql and html diagnostic rule. 
+ * Verify validateDocument calls into js, graphql and html diagnostic rule.
  */
 describe('validateDocument', () => {
-    
     it('call in validateGraphql', async () => {
         const textDocument = TextDocument.create(
             'file://test.js',
@@ -41,12 +40,12 @@ describe('validateDocument', () => {
             };
             `
         );
-        const source = "xyz";
+        const source = 'xyz';
         const diagnostics = await validateDocument(textDocument, source);
-    
+
         assert.equal(diagnostics.length, 1);
         const diagnostic = diagnostics[0];
-        assert.equal(diagnostic.message, 'uiapi is misspelled.')
+        assert.equal(diagnostic.message, 'uiapi is misspelled.');
         assert.equal(diagnostic.source, source);
     });
 
@@ -54,7 +53,6 @@ describe('validateDocument', () => {
         //TODO: to be implemented
     });
 
-    
     it('call in validateHtml', async () => {
         //TODO: to be implemented
     });
