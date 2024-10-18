@@ -5,8 +5,8 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-export type DiagnosticId = 
-    | 'missspelled-uiapi' 
+export type ProducerId = 
+    | 'misspelled-uiapi' 
     | 'adapters-local-change-not-aware'; 
 
 /**
@@ -15,7 +15,7 @@ export type DiagnosticId =
 export type DiagnosticSettings = {
     maxNumberOfProblems: number;
     suppressAll?: boolean;
-    suppressedIds?: Set<DiagnosticId>
+    suppressedIds?: Set<ProducerId>
 }
 
 /**
@@ -24,7 +24,7 @@ export type DiagnosticSettings = {
  * @param id The configuration id to check.
  * @returns True if suppressed.
  */
-export function isTheDiagnosticSuppressed(settings: DiagnosticSettings, id: DiagnosticId) {
+export function isTheDiagnosticSuppressed(settings: DiagnosticSettings, id: ProducerId) {
     return settings.suppressAll === true || settings.suppressedIds?.has(id);
 }
 
@@ -35,25 +35,29 @@ export const defaultDiagnosticSettings: DiagnosticSettings = {
 }
 
 /**
- * Take in input, possibly a diagnostic json setting true and get valid settings 
+ * Take in currentSetting and an input, return a new diagnosticSettings
+ * @param currentSetting the current setting
  * @param input the input, a well format tree is like 
  * 
  *  {
-            "salesforce.salesforcedx-vscode-mobile.diagnostics.suppressAll": true,
-            "salesforce.salesforcedx-vscode-mobile.diagnostics.suppressedIds": ["adapters-local-change-not-aware"],
-            "salesforce.salesforcedx-vscode-mobile.diagnostics.maxProblemNumber": 50
+            "suppressAll": true,
+            "suppressedIds": ["adapters-local-change-not-aware"],
+            "maxProblemNumber": 50
     }
  * 
- * @returns 
+ * @returns the settings for diagnostics
  */
 export function getSettings(currentSetting: DiagnosticSettings, input: any): DiagnosticSettings {
     if (input === undefined) {
         return currentSetting;
     }
+    // pull the values from input
     const maxNumberOfProblems = parseInt(input['maxProblemNumber']);
     const suppressAll = input['suppressAll'] === true?true:(input['suppressAll'] === false?false:undefined);
     const inputIdArray = input['suppressedIds'];
     const suppressedRuleIds = inputIdArray instanceof Array? new Set(inputIdArray): new Set();
+    
+    // take value currentSetting if value pulled from input is missing or invalid.
     return {
         maxNumberOfProblems: isNaN(maxNumberOfProblems)? currentSetting.maxNumberOfProblems : maxNumberOfProblems,
         suppressAll: suppressAll === undefined? currentSetting.suppressAll: suppressAll,

@@ -1,5 +1,9 @@
-
-// Settings for Mobile LSP
+/*
+ * Copyright (c) 2024, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
+ */
 
 import { 
     defaultDiagnosticSettings, 
@@ -21,8 +25,11 @@ export const defaultSettings: Settings = {
 export let globalSettings: Settings = defaultSettings;
 
 /**
- * 
- * @param input 
+ * return a setting for currentSetting and input. 
+ * The result setting's individual property value will from current setting 
+ * if the property from input is missing or invalid. 
+ * @param currentSetting current setting
+ * @param input the input to pull setting value from.
  */
 export function getSettings(currentSetting: Settings, input: any): Settings {
     const diagnosticSetting = getDiagnosticSettings(currentSetting.diagnostic, input);
@@ -30,7 +37,3 @@ export function getSettings(currentSetting: Settings, input: any): Settings {
         diagnostic: diagnosticSetting
     }
 }
-
-
-
-

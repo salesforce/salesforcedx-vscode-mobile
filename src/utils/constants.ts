@@ -12,4 +12,3 @@ export const PACKAGE_JSON = 'package.json';
 export const JSON_INDENTATION_SPACES = 2;
 
 export const SETTING_SECTION_DIAGNOSTIC = `${CORE_EXTENSION_ID}.diagnostics`;
-

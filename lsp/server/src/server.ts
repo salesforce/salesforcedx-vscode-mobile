@@ -34,17 +34,15 @@ let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
 
-let extensionId: string = '';
-let extensionName: string = '';
-let updateDiagnosticsSettingCommand: string = '';
-let diagnosticsSettingSection: string = '';
+let extensionName = '';
+let updateDiagnosticsSettingCommand = '';
+let diagnosticsSettingSection = '';
 
 // Cache the settings
 let settings: Settings = globalSettings
 const documentCache: Map<string, TextDocument> = new Map;
 
 connection.onInitialize((params: InitializeParams) => {
-    extensionId = params.initializationOptions?.extensionId;
     extensionName = params.initializationOptions?.extensionName;
     updateDiagnosticsSettingCommand = params.initializationOptions?.updateDiagnosticsSettingCommand;
     diagnosticsSettingSection = params.initializationOptions?.diagnosticsSettingSection;
@@ -109,12 +107,9 @@ connection.onDidChangeConfiguration((change) => {
 
     settings = hasConfigurationCapability? getSettings(settings, changedSetting): globalSettings;
 
-    // Refresh the diagnostics since the `maxNumberOfProblems` could have changed.
-    // We could optimize things here and re-fetch the setting first can compare it
-    // to the existing setting, but this is out of scope for this example.
+    // Refresh the diagnostics since the diagnostic settings might have changed. 
     connection.languages.diagnostics.refresh();
 });
-
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
@@ -158,12 +153,12 @@ connection.onCodeAction((params) => {
         const { data } = item;
         if (data !== undefined) {
             const metData = data as DiagnosticMetaData;
-            if (metData.id !== undefined) {
+            if (metData.producerId !== undefined) {
 
                 const suppressedIds = new Set(settings.diagnostic.suppressedIds);
-                suppressedIds.add(metData.id);
+                suppressedIds.add(metData.producerId);
                 const suppressThisDiagnostic: CodeAction = {
-                    title: `Suppress such diagnostic: ${metData.id}`, 
+                    title: `Suppress such diagnostic: ${metData.producerId}`, 
                     kind: CodeActionKind.QuickFix,
                     diagnostics: [item],
                     command: {

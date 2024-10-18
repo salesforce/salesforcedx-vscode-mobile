@@ -37,7 +37,7 @@ export async function validateJs(
             const jsNode = parseJs(textDocument.getText());
             for (const producer of jsDiagnosticProducers) {
                 const metData: DiagnosticMetaData = {
-                     id: producer.getId()
+                     producerId: producer.getId()
                 }
                 const diagnostics = await producer.validateDocument(
                     textDocument,

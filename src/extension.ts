@@ -14,8 +14,10 @@ import * as settingsCommand from './commands/settings/settings';
 import { CoreExtensionService } from './services/CoreExtensionService';
 import { getExtensionId, WorkspaceUtils } from './utils/workspaceUtils';
 import * as lspClient from 'mobile-lsp-client';
-import { getDiagnosticsSettingSection, getUpdateDiagnosticsSettingCommand } from './commands/settings/settings';
-
+import {
+    getDiagnosticsSettingSection,
+    getUpdateDiagnosticsSettingCommand
+} from './commands/settings/settings';
 
 export function activate(context: vscode.ExtensionContext) {
     // We need to do this first in case any other services need access to those provided by the core extension
@@ -48,12 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
     const command = getUpdateDiagnosticsSettingCommand(context);
     const section = getDiagnosticsSettingSection(context);
 
-    lspClient.activate(
-        context, 
-        extensionId, 
-        command,
-        section
-    );
+    lspClient.activate(context, extensionId, command, section);
 }
 
 // This method is called when your extension is deactivated

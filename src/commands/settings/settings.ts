@@ -9,38 +9,60 @@ import * as vscode from 'vscode';
 import { CORE_EXTENSION_ID } from '../../utils/constants';
 import { getExtensionId } from '../../utils/workspaceUtils';
 
-export function getUpdateDiagnosticsSettingCommand(context: vscode.ExtensionContext): string {
-    return `${getExtensionId(context)}.updateDiagnosticsSetting`
-};
+export function getUpdateDiagnosticsSettingCommand(
+    context: vscode.ExtensionContext
+): string {
+    return `${getExtensionId(context)}.updateDiagnosticsSetting`;
+}
 
-export function getDiagnosticsSettingSection(context: vscode.ExtensionContext): string {
-    return `${getExtensionId(context)}.diagnostics`; 
-};
+export function getDiagnosticsSettingSection(
+    context: vscode.ExtensionContext
+): string {
+    return `${getExtensionId(context)}.diagnostics`;
+}
 
 export function registerCommand(context: vscode.ExtensionContext) {
-    const command = getUpdateDiagnosticsSettingCommand(context); 
-    context.subscriptions.push(vscode.commands.registerCommand(
-        command,
-        async (diagnosticSetting) => {
+    const command = getUpdateDiagnosticsSettingCommand(context);
+    context.subscriptions.push(
+        vscode.commands.registerCommand(command, async (diagnosticSetting) => {
             const section = getDiagnosticsSettingSection(context);
             const config = vscode.workspace.getConfiguration(section);
             try {
-                const {suppressAll, suppressedIds, maxProblemNumber } = diagnosticSetting;
-                if (suppressAll!== undefined && (suppressAll === true || suppressAll === false)) {
-                    await config.update('suppressAll', suppressAll, vscode.ConfigurationTarget.Workspace);
+                const { suppressAll, suppressedIds, maxProblemNumber } =
+                    diagnosticSetting;
+                if (
+                    suppressAll !== undefined &&
+                    (suppressAll === true || suppressAll === false)
+                ) {
+                    await config.update(
+                        'suppressAll',
+                        suppressAll,
+                        vscode.ConfigurationTarget.Workspace
+                    );
                 }
-                if (suppressedIds !== undefined && suppressedIds instanceof Array) {
-                    await config.update('suppressedIds', suppressedIds, vscode.ConfigurationTarget.Workspace);
+                if (
+                    suppressedIds !== undefined &&
+                    suppressedIds instanceof Array
+                ) {
+                    await config.update(
+                        'suppressedIds',
+                        suppressedIds,
+                        vscode.ConfigurationTarget.Workspace
+                    );
                 }
                 if (maxProblemNumber !== undefined) {
                     const maxCount = Number.parseInt(maxProblemNumber);
                     if (maxCount >= 0) {
-                        await config.update('maxProblemNumber', maxProblemNumber, vscode.ConfigurationTarget.Workspace);
+                        await config.update(
+                            'maxProblemNumber',
+                            maxProblemNumber,
+                            vscode.ConfigurationTarget.Workspace
+                        );
                     }
                 }
-            } catch(error) {
+            } catch (error) {
                 const i = 100;
             }
-        }
-    ));
+        })
+    );
 }

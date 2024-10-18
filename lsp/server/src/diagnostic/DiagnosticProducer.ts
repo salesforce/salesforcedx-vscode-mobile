@@ -7,14 +7,14 @@
 
 import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { DiagnosticId } from './DiagnosticSettings';
+import { ProducerId } from './DiagnosticSettings';
 
 export interface DiagnosticProducer<T> {
 
     /**
      * Get the Id for the diagnostic producer. 
      */
-    getId(): DiagnosticId;
+    getId(): ProducerId;
 
     /**
      * Validate the parsed text document as astNode and return a list of diagnostics.
@@ -30,5 +30,5 @@ export interface DiagnosticProducer<T> {
 }
 
 export interface DiagnosticMetaData {
-    id: DiagnosticId
+    producerId: ProducerId
 }

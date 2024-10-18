@@ -85,7 +85,7 @@ export async function validateOneGraphQuery(
                 return producer.validateDocument(textDocument, graphqlAstNode)
                  .then((diagnostics) => {
                      const metaData: DiagnosticMetaData = {
-                         id: producer.getId()
+                         producerId: producer.getId()
                      };
                      diagnostics.forEach((diagnostic) => {
                          diagnostic.data = metaData;

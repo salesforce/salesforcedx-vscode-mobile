@@ -138,5 +138,5 @@ export class NoStaticResourcesDirError extends Error {
 }
 
 export function getExtensionId(context: ExtensionContext): string {
-    return `${context.extension.packageJSON.publisher}.${context.extension.packageJSON.name}`
+    return `${context.extension.packageJSON.publisher}.${context.extension.packageJSON.name}`;
 }
