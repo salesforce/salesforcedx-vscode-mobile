@@ -68,7 +68,7 @@ export class OrgUtils {
     }
 
     // Retrieves default organiztion's name.
-    public static async getDefaultOrg(): Promise<string> {
+    private static async getDefaultOrg(): Promise<string> {
         const aggregator = await ConfigAggregator.create();
 
         await aggregator.reload();
@@ -85,7 +85,6 @@ export class OrgUtils {
     }
 
     private static onAuthOrgChanged() {
-        this.authStatus = AuthStatus.UNKNOWN;
         this.clearCache();
     }
 
@@ -118,6 +117,8 @@ export class OrgUtils {
         }
         const connection = await this.getConnection();
         if (connection === undefined) {
+            //It is possible that orgName exists and connection expires
+            this.orgName = '';
             this.authStatus = AuthStatus.UNAUTHORIZED;
         } else {
             this.authStatus = AuthStatus.AUTHORIZED;
@@ -159,9 +160,9 @@ export class OrgUtils {
             });
             if (connect !== undefined && connect.getUsername() !== undefined) {
                 this.connection = connect;
+                return connect;
             }
-
-            return connect;
+            return undefined;
         } catch (error) {
             this.connection = undefined;
             return undefined;
@@ -178,6 +179,9 @@ export class OrgUtils {
     // Retrieves objectInfo folder path, which is '<projectRoot>/.sf/orgName/objectInfos/'
     public static objectInfoFolderPath(): string {
         const projectPath = WorkspaceUtils.getWorkspaceDir();
+        if (this.orgName === undefined || this.orgName.length === 0) {
+            throw new Error('AuthError: No Org exists');
+        }
         const objectInfoFolder = path.posix.join(
             projectPath,
             this.sfFolder,
@@ -294,16 +298,21 @@ export class OrgUtils {
         fs.writeFileSync(objectInfoFile, objectInfoStr, { mode: 0o666 });
     }
 
-    private static clearCache() {
+    public static clearCache() {
+        this.authStatus = AuthStatus.UNKNOWN;
         this.entities.splice(0, this.entities.length);
         this.objectInfoInMemoCache.clear();
         this.objectInfoPromises.clear();
         this.connection = undefined;
         if (this.orgName.length > 0) {
-            fs.rmdirSync(this.objectInfoFolderPath(), {
-                recursive: true,
-                maxRetries: 3
-            });
+            try {
+                fs.rmdirSync(this.objectInfoFolderPath(), {
+                    recursive: true,
+                    maxRetries: 3
+                });
+            } catch (e) {
+                console.log(e);
+            }
             this.orgName = '';
         }
     }

@@ -47,12 +47,6 @@ export class MisspelledUiapi implements DiagnosticProducer<ASTNode> {
             }
         });
 
-        if (results.length > 0) {
-            const objectInfo = await OrgUtils.getObjectInfo('Account');
-
-            console.log(objectInfo);
-        }
-
         return Promise.resolve(results);
     }
 }

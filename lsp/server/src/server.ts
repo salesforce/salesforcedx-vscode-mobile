@@ -163,6 +163,7 @@ connection.languages.diagnostics.on(async (params) => {
     }
 });
 
+// Watch SF config file change
 OrgUtils.watchConfig();
 documents.listen(connection);
 
