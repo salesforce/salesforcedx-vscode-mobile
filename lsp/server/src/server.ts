@@ -101,16 +101,19 @@ connection.onInitialized(() => {
     }
 });
 
-
 connection.onDidChangeConfiguration((change) => {
-    settings = hasConfigurationCapability? getSettings(settings, change.settings): globalSettings;
+    const changedSetting =
+        diagnosticsSettingSection
+            .split('.')
+            .reduce((parent, key) => parent[key], change.settings);
+
+    settings = hasConfigurationCapability? getSettings(settings, changedSetting): globalSettings;
 
     // Refresh the diagnostics since the `maxNumberOfProblems` could have changed.
     // We could optimize things here and re-fetch the setting first can compare it
     // to the existing setting, but this is out of scope for this example.
     connection.languages.diagnostics.refresh();
 });
-
 
 
 // The content of a text document has changed. This event is emitted
@@ -157,27 +160,35 @@ connection.onCodeAction((params) => {
             const metData = data as DiagnosticMetaData;
             if (metData.id !== undefined) {
 
-                // const suppressThisDiagnostic: CodeAction = {
-                //     title: 'Suppress this diagnostic', 
-                //     kind: CodeActionKind.QuickFix,
-                //     diagnostics: [item],
+                const suppressedIds = new Set(settings.diagnostic.suppressedIds);
+                suppressedIds.add(metData.id);
+                const suppressThisDiagnostic: CodeAction = {
+                    title: `Suppress such diagnostic: ${metData.id}`, 
+                    kind: CodeActionKind.QuickFix,
+                    diagnostics: [item],
+                    command: {
+                        title: 'Update workspace setting',
+                        command: updateDiagnosticsSettingCommand,
+                        arguments: [{
+                            suppressedIds: Array.from(suppressedIds)
+                        }]
+                    }
+                };
+                result.push(suppressThisDiagnostic);
 
-                // };
-                // result.push(suppressThisDiagnostic);
-
-                    const suppressAllDiagnostic: CodeAction = {
-                        title: 'Suppress All Salesforce Mobile diagnostic', 
-                        kind: CodeActionKind.QuickFix,
-                        diagnostics: [item],
-                        command: {
-                            title: 'Update workspace setting',
-                            command: updateDiagnosticsSettingCommand,
-                            arguments: [{
-                                'suppressAll': true
-                            }]
-                        }
-                    };
-                    result.push(suppressAllDiagnostic);
+                const suppressAllDiagnostic: CodeAction = {
+                    title: 'Suppress all Salesforce Mobile diagnostics', 
+                    kind: CodeActionKind.QuickFix,
+                    diagnostics: [item],
+                    command: {
+                        title: 'Update workspace setting',
+                        command: updateDiagnosticsSettingCommand,
+                        arguments: [{
+                            'suppressAll': true
+                        }]
+                    }
+                };
+                result.push(suppressAllDiagnostic);
                 
             }
         }

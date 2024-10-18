@@ -27,7 +27,7 @@ const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = [
 export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
 
     getId(): DiagnosticId {
-        return 'missspelled-uiapi' ;
+        return 'adapters-local-change-not-aware' ;
     }
 
     validateDocument(

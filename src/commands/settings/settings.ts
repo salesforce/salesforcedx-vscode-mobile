@@ -27,15 +27,15 @@ export function registerCommand(context: vscode.ExtensionContext) {
             try {
                 const {suppressAll, suppressedIds, maxProblemNumber } = diagnosticSetting;
                 if (suppressAll!== undefined && (suppressAll === true || suppressAll === false)) {
-                    await config.update('suppressAll', diagnosticSetting, vscode.ConfigurationTarget.Workspace);
+                    await config.update('suppressAll', suppressAll, vscode.ConfigurationTarget.Workspace);
                 }
                 if (suppressedIds !== undefined && suppressedIds instanceof Array) {
-                    await config.update('suppressedIds', diagnosticSetting, vscode.ConfigurationTarget.Workspace);
+                    await config.update('suppressedIds', suppressedIds, vscode.ConfigurationTarget.Workspace);
                 }
                 if (maxProblemNumber !== undefined) {
                     const maxCount = Number.parseInt(maxProblemNumber);
                     if (maxCount >= 0) {
-                        await config.update('maxProblemNumber', diagnosticSetting, vscode.ConfigurationTarget.Workspace);
+                        await config.update('maxProblemNumber', maxProblemNumber, vscode.ConfigurationTarget.Workspace);
                     }
                 }
             } catch(error) {

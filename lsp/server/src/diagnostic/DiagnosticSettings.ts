@@ -52,7 +52,7 @@ export function getSettings(currentSetting: DiagnosticSettings, input: any): Dia
     }
     const maxNumberOfProblems = parseInt(input['maxProblemNumber']);
     const suppressAll = input['suppressAll'] === true?true:(input['suppressAll'] === false?false:undefined);
-    const inputIdArray = input['suppressed.rule.Ids'];
+    const inputIdArray = input['suppressedIds'];
     const suppressedRuleIds = inputIdArray instanceof Array? new Set(inputIdArray): new Set();
     return {
         maxNumberOfProblems: isNaN(maxNumberOfProblems)? currentSetting.maxNumberOfProblems : maxNumberOfProblems,

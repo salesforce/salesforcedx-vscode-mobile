@@ -25,7 +25,7 @@ export let globalSettings: Settings = defaultSettings;
  * @param input 
  */
 export function getSettings(currentSetting: Settings, input: any): Settings {
-    const diagnosticSetting = getDiagnosticSettings(currentSetting.diagnostic, input["diagnostic"]);
+    const diagnosticSetting = getDiagnosticSettings(currentSetting.diagnostic, input);
     return {
         diagnostic: diagnosticSetting
     }
