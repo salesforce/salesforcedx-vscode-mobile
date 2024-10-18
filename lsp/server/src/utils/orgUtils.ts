@@ -24,10 +24,10 @@ export interface SObject {
     labelPlural: string;
 }
 
-enum ConnectionStatus {
+enum AuthStatus {
     UNKNOWN,
-    CONNECTED,
-    DISCONNECTED
+    AUTHORIZED,
+    UNAUTHORIZED
 }
 
 export interface Field {
@@ -42,7 +42,7 @@ export class OrgUtils {
     public static entityListFileName = 'entity_list.json';
     public static connection: Connection | undefined;
 
-    private static connectStatus: ConnectionStatus = ConnectionStatus.UNKNOWN;
+    private static authStatus: AuthStatus = AuthStatus.UNKNOWN;
 
     static objectInfoInMemoCache = new Map<string, ObjectInfoRepresentation>();
     static objectInfoPromises = new Map<
@@ -85,7 +85,7 @@ export class OrgUtils {
     }
 
     private static onAuthOrgChanged() {
-        this.connectStatus = ConnectionStatus.UNKNOWN;
+        this.authStatus = AuthStatus.UNKNOWN;
         this.clearCache();
     }
 
@@ -112,15 +112,15 @@ export class OrgUtils {
     }
 
     // Updates the auth state async
-    public static async checkAuthStatus(): Promise<ConnectionStatus> {
-        if (this.connectStatus !== ConnectionStatus.UNKNOWN) {
-            return this.connectStatus;
+    public static async checkAuthStatus(): Promise<AuthStatus> {
+        if (this.authStatus !== AuthStatus.UNKNOWN) {
+            return this.authStatus;
         }
         const connection = await this.getConnection();
         if (connection === undefined) {
-            this.connectStatus = ConnectionStatus.DISCONNECTED;
+            this.authStatus = AuthStatus.UNAUTHORIZED;
         } else {
-            this.connectStatus = ConnectionStatus.CONNECTED;
+            this.authStatus = AuthStatus.AUTHORIZED;
             // Fetches entity list once.
             const entityListFile = path.posix.join(
                 this.objectInfoFolderPath(),
@@ -138,7 +138,7 @@ export class OrgUtils {
             }
         }
 
-        return this.connectStatus;
+        return this.authStatus;
     }
 
     // Retrieves the Connection which fetches ObjectInfo remotely.
@@ -229,7 +229,7 @@ export class OrgUtils {
         objectApiName: string
     ): Promise<ObjectInfoRepresentation | undefined> {
         const connectStatus = await OrgUtils.checkAuthStatus();
-        if (connectStatus !== ConnectionStatus.CONNECTED) {
+        if (connectStatus !== AuthStatus.AUTHORIZED) {
             return undefined;
         }
 
