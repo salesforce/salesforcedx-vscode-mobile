@@ -19,6 +19,8 @@ import {
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
+import { OrgUtils } from './utils/orgUtils';
+import { WorkspaceUtils } from './utils/workspaceUtils';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -34,6 +36,12 @@ let extensionName: string = '';
 
 connection.onInitialize((params: InitializeParams) => {
     extensionName = params.initializationOptions?.extensionName;
+
+    const workspaceFolders = params.workspaceFolders;
+
+    // Sets workspace folder to WorkspaceUtils
+    WorkspaceUtils.setWorkSpaceFolders(workspaceFolders);
+
     const capabilities = params.capabilities;
 
     // Does the client support the `workspace/configuration` request?
@@ -155,8 +163,7 @@ connection.languages.diagnostics.on(async (params) => {
     }
 });
 
-// Make the text document manager listen on the connection
-// for open, change and close text document events
+OrgUtils.watchConfig();
 documents.listen(connection);
 
 // Listen on the connection
