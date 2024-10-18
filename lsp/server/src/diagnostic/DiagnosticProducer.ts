@@ -18,13 +18,13 @@ export interface DiagnosticProducer<T> {
 
     /**
      * Validate the parsed text document as astNode and return a list of diagnostics.
-     * @param textDocument the language server text document
-     * @param astNode parsed astNode for document body
-     * @returns An array of diagnostics found within ast node
+     * @param textDocument the language server text document.
+     * @param data usually parsed document body.
+     * @returns An array of diagnostics found within ast node.
      */
     validateDocument(
         textDocument: TextDocument,
-        astNode: T
+        data: T
     ): Promise<Diagnostic[]>;
 
 }

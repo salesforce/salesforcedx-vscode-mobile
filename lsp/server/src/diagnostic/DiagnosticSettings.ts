@@ -1,4 +1,4 @@
-    /*
+/*
  * Copyright (c) 2024, salesforce.com, inc.
  * All rights reserved.
  * SPDX-License-Identifier: MIT
