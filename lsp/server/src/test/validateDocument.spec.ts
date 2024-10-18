@@ -13,6 +13,7 @@ import { validateDocument } from '../validateDocument';
  * Verify validateDocument calls into js, graphql and html diagnostic rule. 
  */
 describe('validateDocument', () => {
+    const setting = {maxNumberOfProblems: 100};
     
     it('call in validateGraphql', async () => {
         const textDocument = TextDocument.create(
@@ -42,7 +43,7 @@ describe('validateDocument', () => {
             `
         );
         const source = "xyz";
-        const diagnostics = await validateDocument(textDocument, source);
+        const diagnostics = await validateDocument(setting, textDocument, source); 
     
         assert.equal(diagnostics.length, 1);
         const diagnostic = diagnostics[0];

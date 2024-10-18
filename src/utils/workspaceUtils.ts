@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { workspace } from 'vscode';
+import { ExtensionContext, workspace } from 'vscode';
 import { access } from 'fs/promises';
 import {
     PACKAGE_JSON,
@@ -135,4 +135,8 @@ export class NoStaticResourcesDirError extends Error {
         this.name = this.constructor.name;
         Object.setPrototypeOf(this, NoStaticResourcesDirError.prototype);
     }
+}
+
+export function getExtensionId(context: ExtensionContext): string {
+    return `${context.extension.packageJSON.publisher}.${context.extension.packageJSON.name}`
 }

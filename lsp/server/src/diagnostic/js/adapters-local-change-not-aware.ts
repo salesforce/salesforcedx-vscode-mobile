@@ -10,6 +10,7 @@ import traverse from '@babel/traverse';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
+import { DiagnosticId } from '../DiagnosticSettings';
 
 export const LOCAL_CHANGE_NOT_AWARE_MESSAGE =
     'The wire adapter you are using allows you to work offline, but it does not automatically update its records when data is added or removed while you are disconnected.';
@@ -24,6 +25,11 @@ const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = [
  * Produce diagnostics for adapter which works offline but doesn't handle local change.
  */
 export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
+
+    getId(): DiagnosticId {
+        return 'missspelled-uiapi' ;
+    }
+
     validateDocument(
         textDocument: TextDocument,
         node: Node

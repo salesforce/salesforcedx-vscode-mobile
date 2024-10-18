@@ -7,8 +7,15 @@
 
 import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import { DiagnosticId } from './DiagnosticSettings';
 
 export interface DiagnosticProducer<T> {
+
+    /**
+     * Get the Id for the diagnostic producer. 
+     */
+    getId(): DiagnosticId;
+
     /**
      * Validate the parsed text document as astNode and return a list of diagnostics.
      * @param textDocument the language server text document
@@ -19,4 +26,9 @@ export interface DiagnosticProducer<T> {
         textDocument: TextDocument,
         astNode: T
     ): Promise<Diagnostic[]>;
+
+}
+
+export interface DiagnosticMetaData {
+    id: DiagnosticId
 }

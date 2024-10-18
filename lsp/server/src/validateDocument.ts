@@ -8,9 +8,9 @@
 import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
-import { getDocumentSettings } from './server';
-import { validateJs } from './validateJs';
+import { validateJs } from './validateJs'; 
 import { validateGraphql } from './validateGraphql';
+import { DiagnosticSettings } from './diagnostic/DiagnosticSettings';
 
 /**
  * Validate the document based on its extension type.
@@ -22,20 +22,25 @@ import { validateGraphql } from './validateGraphql';
  * @returns Diagnostic results for the document.
  */
 export async function validateDocument(
+    setting: DiagnosticSettings,
     document: TextDocument,
     extensionName: string
 ): Promise<Diagnostic[]> {
-    const { uri } = document;
 
-    const setting = await getDocumentSettings(uri);
     let results: Diagnostic[] = [];
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        const jsDiagnostics = await validateJs(document);
+        const jsDiagnostics = await validateJs(
+            setting,
+            document
+        );
         
         // handle graphql rules
-        const graphqlDiagnostics = await validateGraphql(document);
+        const graphqlDiagnostics = await validateGraphql(
+            setting,
+            document
+        );
 
         results = results.concat(jsDiagnostics, graphqlDiagnostics);
         results.splice(setting.maxNumberOfProblems);

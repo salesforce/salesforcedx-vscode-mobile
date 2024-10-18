@@ -10,7 +10,8 @@ import { validateGraphql } from '../validateGraphql';
 import * as assert from 'assert';
 
 describe('validateGraphql', () => {
-    
+    const setting = {maxNumberOfProblems: 100};
+
     it('valid uiapi missing diagnostic', async () => {
         const textDocument = TextDocument.create(
             'file://test.js',
@@ -38,7 +39,7 @@ describe('validateGraphql', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql(textDocument);
+        const diagnostics = await validateGraphql(setting, textDocument);
     
         assert.equal(diagnostics.length, 1);
         assert.equal(diagnostics[0].message, 'uiapi is misspelled.');
@@ -59,7 +60,7 @@ describe('validateGraphql', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql(textDocument);
+        const diagnostics = await validateGraphql(setting, textDocument);
     
         assert.equal(diagnostics.length, 0);
     });

@@ -75,6 +75,21 @@
                     "type": "string",
                     "default": "^8.47.0",
                     "description": "%extension.commands.salesforce-mobile-offline.eslint.version%"
+                },
+                "salesforce.salesforcedx-vscode-mobile.diagnostics.suppressAll": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Suppress all problem detection."
+                },
+                "salesforce.salesforcedx-vscode-mobile.diagnostics.suppressedIds": {
+                    "type": "array",
+                    "default": [],
+                    "description": "Suppress problem by Id(s)."
+                },
+                "salesforce.salesforcedx-vscode-mobile.diagnostics.maxProblemNumber": {
+                    "type": "integer",
+                    "default": 200,
+                    "description": "The max number of problem to detect."
                 }
             }
         }
