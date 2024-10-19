@@ -7,42 +7,37 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { suite, test, afterEach } from 'mocha';
+import Account from '../../../testFixture/objectInfos/Account.json';
 import { OrgUtils } from '../../utils/orgUtils';
+import { AuthInfo } from '@salesforce/core';
 import {
-    ConfigAggregator,
-    StateAggregator,
-    Connection,
-    AuthInfo
-} from '@salesforce/core';
+    setupTempWorkspaceDirectoryStub,
+    TempProjectDirManager,
+    stubCreateAuth,
+    stubCreateConnection,
+    stubGetInstanceState,
+    stubCreateConfig
+} from '../TestHelper';
+import { ObjectInfoRepresentation } from '../../types';
 
 suite('OrgUtils Test Suite', () => {
+    let sandbox: sinon.SinonSandbox;
+
+    beforeEach(function () {
+        sandbox = sinon.createSandbox();
+    });
     afterEach(function () {
         OrgUtils.clearCache();
-        sinon.restore();
+        sandbox.restore();
     });
 
     let createConfigStub: sinon.SinonStub;
-    let createStateStub: sinon.SinonStub;
+    let getInstanceStateStub: sinon.SinonStub;
     let createConnectionStub: sinon.SinonStub;
     let createAuthStub: sinon.SinonStub;
-    let testOrgConfig = {
-        key: 'target-org',
-        value: 'testOrg'
-    };
-
-    let noOrgConfig = {
-        key: 'target-org'
-    };
 
     test('ObjectInfo is undefined if no org exists', async () => {
-        const mockAggregator = {
-            getInfo: sinon.stub().returns(noOrgConfig),
-            reload: sinon.stub().resolves()
-        };
-
-        createConfigStub = sinon
-            .stub(ConfigAggregator, 'create')
-            .resolves(mockAggregator as unknown as ConfigAggregator);
+        createConfigStub = stubCreateConfig(sandbox, false);
         const objectInfo = await OrgUtils.getObjectInfo('Account');
         assert.strictEqual(
             objectInfo,
@@ -52,24 +47,8 @@ suite('OrgUtils Test Suite', () => {
     });
 
     test('ObjectInfo is undefined if no username exists for the default org', async () => {
-        const mockConfigAggregator = {
-            getInfo: sinon.stub().returns(testOrgConfig),
-            reload: sinon.stub().resolves()
-        };
-
-        const mockStateAggregator = {
-            aliases: {
-                getUsername: sinon.stub().returns(undefined)
-            }
-        };
-
-        createConfigStub = sinon
-            .stub(ConfigAggregator, 'create')
-            .resolves(mockConfigAggregator as unknown as ConfigAggregator);
-
-        createStateStub = sinon
-            .stub(StateAggregator, 'getInstance')
-            .resolves(mockStateAggregator as unknown as StateAggregator);
+        createConfigStub = stubCreateConfig(sandbox, true);
+        getInstanceStateStub = stubGetInstanceState(sandbox, false);
 
         const objectInfo = await OrgUtils.getObjectInfo('Account');
         assert.strictEqual(
@@ -80,38 +59,17 @@ suite('OrgUtils Test Suite', () => {
     });
 
     test('ObjectInfo is undefined if no connection is available for the default user', async () => {
-        // default org exists
-        const mockConfigAggregator = {
-            getInfo: sinon.stub().returns(testOrgConfig),
-            reload: sinon.stub().resolves()
-        };
-
+        // default config exists
+        createConfigStub = stubCreateConfig(sandbox, true);
         // user exists
-        const mockStateAggregator = {
-            aliases: {
-                getPassword: sinon.stub().returns('pssd'),
-                getUsername: sinon.stub().returns('tester')
-            }
-        };
-
+        getInstanceStateStub = stubGetInstanceState(sandbox, true);
         // connection is invalid
-        const mockInvalidConnection = {
-            getUsername: sinon.stub().returns(undefined)
-        };
+        const { connectionStub: createConnectionStub } = stubCreateConnection(
+            sandbox,
+            false
+        );
 
-        createConfigStub = sinon
-            .stub(ConfigAggregator, 'create')
-            .resolves(mockConfigAggregator as unknown as ConfigAggregator);
-
-        createStateStub = sinon
-            .stub(StateAggregator, 'getInstance')
-            .resolves(mockStateAggregator as unknown as StateAggregator);
-
-        createConnectionStub = sinon
-            .stub(Connection, 'create')
-            .resolves(mockInvalidConnection as unknown as Connection);
-
-        createAuthStub = sinon
+        createAuthStub = sandbox
             .stub(AuthInfo, 'create')
             .resolves({} as unknown as AuthInfo);
 
@@ -121,5 +79,62 @@ suite('OrgUtils Test Suite', () => {
             undefined,
             'ObjectInfo should be undefined if no connection is available for the default user'
         );
+    });
+
+    test('ObjectInfo is fetched if auth status is connection is available and auth status is authorized', async () => {
+        // user exists
+
+        createConfigStub = stubCreateConfig(sandbox, true);
+        getInstanceStateStub = stubGetInstanceState(sandbox, true);
+        const { requestStub, connectionStub: createConnectionStub } =
+            stubCreateConnection(sandbox, true);
+        createAuthStub = stubCreateAuth(sandbox);
+
+        // Stub 'getWorkspaceDir'
+        const tempWorkSpaceDirManager =
+            await TempProjectDirManager.createTempProjectDir();
+
+        setupTempWorkspaceDirectoryStub(sandbox, tempWorkSpaceDirManager);
+        let objectInfo: ObjectInfoRepresentation | undefined;
+
+        try {
+            objectInfo = await OrgUtils.getObjectInfo('Account');
+            assert.ok(objectInfo, 'object Info is fetched from web');
+            assert.strictEqual(
+                requestStub.callCount,
+                1,
+                'object info request is issued once'
+            );
+            assert.strictEqual(
+                objectInfo.apiName,
+                'Account',
+                'entity name should be correct'
+            );
+            assert.strictEqual(
+                objectInfo.fields['BillingCity'].dataType,
+                'String',
+                'field data type should be correct'
+            );
+
+            objectInfo = await OrgUtils.getObjectInfo('Account');
+            assert.ok(objectInfo, 'object Info is fetched from cache');
+            assert.strictEqual(
+                objectInfo.apiName,
+                'Account',
+                'entity name should be correct'
+            );
+            assert.strictEqual(
+                objectInfo.fields['BillingCity'].dataType,
+                'String',
+                'field data type should be correct'
+            );
+            assert.strictEqual(
+                requestStub.callCount,
+                1,
+                'object info request is not sent out again since it is already in cache'
+            );
+        } finally {
+            tempWorkSpaceDirManager.removeDir();
+        }
     });
 });

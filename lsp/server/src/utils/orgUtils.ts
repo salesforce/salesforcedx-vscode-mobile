@@ -306,7 +306,8 @@ export class OrgUtils {
         this.connection = undefined;
         if (this.orgName.length > 0) {
             try {
-                fs.rmdirSync(this.objectInfoFolderPath(), {
+                fs.rmSync(this.objectInfoFolderPath(), {
+                    force: true,
                     recursive: true,
                     maxRetries: 3
                 });
