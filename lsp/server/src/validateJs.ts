@@ -9,7 +9,7 @@ import { Diagnostic } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { parseJs } from './utils/babelUtil';
 import { Node } from '@babel/types';
-import { DiagnosticMetaData, DiagnosticProducer } from './diagnostic/DiagnosticProducer';
+import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-change-not-aware';
 import { isTheDiagnosticSuppressed, DiagnosticSettings } from './diagnostic/DiagnosticSettings';
 
@@ -36,15 +36,14 @@ export async function validateJs(
         try {
             const jsNode = parseJs(textDocument.getText());
             for (const producer of jsDiagnosticProducers) {
-                const metData: DiagnosticMetaData = {
-                     producerId: producer.getId()
-                }
+             
+                const producerId = producer.getId()
                 const diagnostics = await producer.validateDocument(
                     textDocument,
                     jsNode
                 );
-                diagnostics.forEach((item) => {
-                    item.data = metData
+                diagnostics.forEach((diagnostic) => {
+                    diagnostic.data = producerId;
                 });
                 results = results.concat(diagnostics);
             }

@@ -76,20 +76,20 @@
                     "default": "^8.47.0",
                     "description": "%extension.commands.salesforce-mobile-offline.eslint.version%"
                 },
-                "salesforce.salesforcedx-vscode-mobile.diagnostics.suppressAll": {
+                "salesforcedx-vscode-mobile.diagnostics.suppressAll": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Suppress all problem detection."
+                    "description": "Suppress all problem detection"
                 },
-                "salesforce.salesforcedx-vscode-mobile.diagnostics.suppressedIds": {
+                "salesforcedx-vscode-mobile.diagnostics.suppressByRuleId": {
                     "type": "array",
                     "default": [],
-                    "description": "Suppress problem by Id(s)."
+                    "description": "Suppress problem detection specifically for one or more rule IDs"
                 },
-                "salesforce.salesforcedx-vscode-mobile.diagnostics.maxProblemNumber": {
+                "salesforcedx-vscode-mobile.diagnostics.maxNumberOfProblems": {
                     "type": "integer",
                     "default": 200,
-                    "description": "The max number of problem to detect."
+                    "description": "The maximum number of detected problems to report"
                 }
             }
         }

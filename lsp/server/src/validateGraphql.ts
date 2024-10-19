@@ -8,7 +8,7 @@
 import {parse, ASTNode} from 'graphql';
 import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
 import { Diagnostic } from 'vscode-languageserver/node';
-import { DiagnosticMetaData, DiagnosticProducer } from './diagnostic/DiagnosticProducer';
+import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { MisspelledUiapi } from './diagnostic/gql/misspelled-uiapi';
 import { DiagnosticSettings, isTheDiagnosticSuppressed } from './diagnostic/DiagnosticSettings';
@@ -84,11 +84,9 @@ export async function validateOneGraphQuery(
             producers.map((producer) => {
                 return producer.validateDocument(textDocument, graphqlAstNode)
                  .then((diagnostics) => {
-                     const metaData: DiagnosticMetaData = {
-                         producerId: producer.getId()
-                     };
+                    const producerId = producer.getId();
                      diagnostics.forEach((diagnostic) => {
-                         diagnostic.data = metaData;
+                         diagnostic.data = producerId;
                      });
                      return diagnostics;
                  })

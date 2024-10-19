@@ -5,32 +5,28 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-export type ProducerId = 
-    | 'misspelled-uiapi' 
-    | 'adapters-local-change-not-aware'; 
-
 /**
  * data structure for diagnostic suppression configuration.
  */
 export type DiagnosticSettings = {
     maxNumberOfProblems: number;
     suppressAll?: boolean;
-    suppressedIds?: Set<ProducerId>
+    suppressByRuleId?: Set<string>
 }
 
 /**
  * Check if the individual diagnostic should be suppressed.
  * @param settings The suppression config
- * @param id The configuration id to check.
+ * @param producerId The producer id to check.
  * @returns True if suppressed.
  */
-export function isTheDiagnosticSuppressed(settings: DiagnosticSettings, id: ProducerId) {
-    return settings.suppressAll === true || settings.suppressedIds?.has(id);
+export function isTheDiagnosticSuppressed(settings: DiagnosticSettings, producerId: string) {
+    return settings.suppressAll === true || settings.suppressByRuleId?.has(producerId);
 }
 
 export const defaultDiagnosticSettings: DiagnosticSettings = {
     suppressAll: false,
-    suppressedIds: new Set(),
+    suppressByRuleId: new Set(),
     maxNumberOfProblems: 200,
 }
 
@@ -52,15 +48,15 @@ export function getSettings(currentSetting: DiagnosticSettings, input: any): Dia
         return currentSetting;
     }
     // pull the values from input
-    const maxNumberOfProblems = parseInt(input['maxProblemNumber']);
+    const maxNumberOfProblems = parseInt(input['maxNumberOfProblems']);
     const suppressAll = input['suppressAll'] === true?true:(input['suppressAll'] === false?false:undefined);
-    const inputIdArray = input['suppressedIds'];
+    const inputIdArray = input['suppressByRuleId'];
     const suppressedRuleIds = inputIdArray instanceof Array? new Set(inputIdArray): new Set();
     
     // take value currentSetting if value pulled from input is missing or invalid.
     return {
         maxNumberOfProblems: isNaN(maxNumberOfProblems)? currentSetting.maxNumberOfProblems : maxNumberOfProblems,
         suppressAll: suppressAll === undefined? currentSetting.suppressAll: suppressAll,
-        suppressedIds: suppressedRuleIds
+        suppressByRuleId: suppressedRuleIds
     };
 }

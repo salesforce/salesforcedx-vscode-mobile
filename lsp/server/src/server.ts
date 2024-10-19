@@ -22,7 +22,6 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
 import { globalSettings, Settings, getSettings} from './settings';
-import { DiagnosticMetaData } from './diagnostic/DiagnosticProducer';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -34,7 +33,7 @@ let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
 
-let extensionName = '';
+let extensionTitle = '';
 let updateDiagnosticsSettingCommand = '';
 let diagnosticsSettingSection = '';
 
@@ -43,7 +42,7 @@ let settings: Settings = globalSettings
 const documentCache: Map<string, TextDocument> = new Map;
 
 connection.onInitialize((params: InitializeParams) => {
-    extensionName = params.initializationOptions?.extensionName;
+    extensionTitle = params.initializationOptions?.extensionTitle;
     updateDiagnosticsSettingCommand = params.initializationOptions?.updateDiagnosticsSettingCommand;
     diagnosticsSettingSection = params.initializationOptions?.diagnosticsSettingSection;
 
@@ -129,7 +128,7 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validateDocument(settings.diagnostic, document, extensionName)
+            items: await validateDocument(settings.diagnostic, document, extensionTitle)
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk
@@ -145,50 +144,46 @@ connection.onCodeAction((params) => {
     const textDocument = documentCache.get(params.textDocument.uri);
     const diagnostics = params.context.diagnostics;
 	if (textDocument === undefined || diagnostics.length === 0) {
-		return undefined;
+	    return undefined;
 	}
     
 	const result: CodeAction[] = [];
-    diagnostics.forEach((item) => {
-        const { data } = item;
-        if (data !== undefined) {
-            const metData = data as DiagnosticMetaData;
-            if (metData.producerId !== undefined) {
 
-                const suppressedIds = new Set(settings.diagnostic.suppressedIds);
-                suppressedIds.add(metData.producerId);
-                const suppressThisDiagnostic: CodeAction = {
-                    title: `Suppress such diagnostic: ${metData.producerId}`, 
-                    kind: CodeActionKind.QuickFix,
-                    diagnostics: [item],
-                    command: {
-                        title: 'Update workspace setting',
-                        command: updateDiagnosticsSettingCommand,
-                        arguments: [{
-                            suppressedIds: Array.from(suppressedIds)
-                        }]
-                    }
-                };
-                result.push(suppressThisDiagnostic);
+    diagnostics.forEach((diagnostic) => {
+        // generate the two suppressing quick fixes 
+        const { data : producerId } = diagnostic;
+        if (typeof producerId === 'string') {
+            const suppressByRuleId = new Set(settings.diagnostic.suppressByRuleId);
+            suppressByRuleId.add(producerId);
+            const suppressThisDiagnostic: CodeAction = {
+                title: `Suppress such diagnostic: ${producerId}`, 
+                kind: CodeActionKind.QuickFix,
+                diagnostics: [diagnostic],
+                command: {
+                    title: 'Update workspace setting',
+                    command: updateDiagnosticsSettingCommand,
+                    arguments: [{
+                        suppressByRuleId: Array.from(suppressByRuleId)
+                    }]
+                }
+            };
+            result.push(suppressThisDiagnostic);
 
-                const suppressAllDiagnostic: CodeAction = {
-                    title: 'Suppress all Salesforce Mobile diagnostics', 
-                    kind: CodeActionKind.QuickFix,
-                    diagnostics: [item],
-                    command: {
-                        title: 'Update workspace setting',
-                        command: updateDiagnosticsSettingCommand,
-                        arguments: [{
-                            'suppressAll': true
-                        }]
-                    }
-                };
-                result.push(suppressAllDiagnostic);
-                
-            }
+            const suppressAllDiagnostic: CodeAction = {
+                title: 'Suppress all Salesforce Mobile diagnostics', 
+                kind: CodeActionKind.QuickFix,
+                diagnostics: [diagnostic],
+                command: {
+                    title: 'Update workspace setting',
+                    command: updateDiagnosticsSettingCommand,
+                    arguments: [{
+                        'suppressAll': true
+                    }]
+                }
+            };
+            result.push(suppressAllDiagnostic);
         }
     });
-
 
     return result;
 });

@@ -12,7 +12,7 @@ import * as onboardingWizard from './commands/wizard/onboardingWizard';
 import * as configureLintingToolsCommand from './commands/lint/configureLintingToolsCommand';
 import * as settingsCommand from './commands/settings/settings';
 import { CoreExtensionService } from './services/CoreExtensionService';
-import { getExtensionId, WorkspaceUtils } from './utils/workspaceUtils';
+import { getExtensionName, WorkspaceUtils } from './utils/workspaceUtils';
 import * as lspClient from 'mobile-lsp-client';
 import {
     getDiagnosticsSettingSection,
@@ -46,11 +46,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     configureLintingToolsCommand.registerCommand(context);
 
-    const extensionId = getExtensionId(context);
     const command = getUpdateDiagnosticsSettingCommand(context);
     const section = getDiagnosticsSettingSection(context);
 
-    lspClient.activate(context, extensionId, command, section);
+    lspClient.activate(context, command, section);
 }
 
 // This method is called when your extension is deactivated

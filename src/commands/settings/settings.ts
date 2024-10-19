@@ -6,19 +6,18 @@
  */
 
 import * as vscode from 'vscode';
-import { CORE_EXTENSION_ID } from '../../utils/constants';
-import { getExtensionId } from '../../utils/workspaceUtils';
+import { getExtensionName } from '../../utils/workspaceUtils';
 
 export function getUpdateDiagnosticsSettingCommand(
     context: vscode.ExtensionContext
 ): string {
-    return `${getExtensionId(context)}.updateDiagnosticsSetting`;
+    return `${getExtensionName(context)}.updateDiagnosticsSetting`;
 }
 
 export function getDiagnosticsSettingSection(
     context: vscode.ExtensionContext
 ): string {
-    return `${getExtensionId(context)}.diagnostics`;
+    return `${getExtensionName(context)}.diagnostics`;
 }
 
 export function registerCommand(context: vscode.ExtensionContext) {
@@ -28,7 +27,7 @@ export function registerCommand(context: vscode.ExtensionContext) {
             const section = getDiagnosticsSettingSection(context);
             const config = vscode.workspace.getConfiguration(section);
             try {
-                const { suppressAll, suppressedIds, maxProblemNumber } =
+                const { suppressAll, suppressByRuleId, maxNumberOfProblems } =
                     diagnosticSetting;
                 if (
                     suppressAll !== undefined &&
@@ -41,21 +40,21 @@ export function registerCommand(context: vscode.ExtensionContext) {
                     );
                 }
                 if (
-                    suppressedIds !== undefined &&
-                    suppressedIds instanceof Array
+                    suppressByRuleId !== undefined &&
+                    suppressByRuleId instanceof Array
                 ) {
                     await config.update(
-                        'suppressedIds',
-                        suppressedIds,
+                        'suppressByRuleId',
+                        suppressByRuleId,
                         vscode.ConfigurationTarget.Workspace
                     );
                 }
-                if (maxProblemNumber !== undefined) {
-                    const maxCount = Number.parseInt(maxProblemNumber);
+                if (maxNumberOfProblems !== undefined) {
+                    const maxCount = Number.parseInt(maxNumberOfProblems);
                     if (maxCount >= 0) {
                         await config.update(
-                            'maxProblemNumber',
-                            maxProblemNumber,
+                            'maxNumberOfProblems',
+                            maxNumberOfProblems,
                             vscode.ConfigurationTarget.Workspace
                         );
                     }
