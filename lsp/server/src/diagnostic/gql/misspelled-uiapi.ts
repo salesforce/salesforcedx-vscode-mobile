@@ -13,6 +13,8 @@ import { ASTNode, visit } from 'graphql';
 const LOCAL_CHANGE_NOT_AWARE_MESSAGE = 'uiapi is misspelled.';
 const SEVERITY = DiagnosticSeverity.Error;
 
+export const RULE_ID = 'misspelled-uiapi';
+
 /** 
  * DUMMY demo implementation showcasing graphql parsing and diagnostic geneation for scaffolding. 
  * Produce diagnostic when graphql uiapi node is misspelled.
@@ -20,7 +22,7 @@ const SEVERITY = DiagnosticSeverity.Error;
 export class MisspelledUiapi implements DiagnosticProducer<ASTNode> {
    
     getId(): string {
-        return 'misspelled-uiapi' ;
+        return RULE_ID;
     }
 
     validateDocument(

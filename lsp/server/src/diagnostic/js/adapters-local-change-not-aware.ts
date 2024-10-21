@@ -20,13 +20,15 @@ const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = [
     'getRelatedListCount'
 ];
 
+export const RULE_ID = 'adapters-local-change-not-aware';
+
 /**
  * Produce diagnostics for adapter which works offline but doesn't handle local change.
  */
 export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
 
     getId(): string {
-        return 'adapters-local-change-not-aware' ;
+        return RULE_ID;
     }
 
     validateDocument(
