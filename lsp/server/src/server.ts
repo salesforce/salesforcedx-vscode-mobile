@@ -100,9 +100,22 @@ connection.onInitialized(() => {
 });
 
 connection.onDidChangeConfiguration((change) => {
-    const changedSetting = diagnosticsSettingSection
-        .split('.')
-        .reduce((parent, key) => parent[key], change.settings);
+    // Get the leaf object of diagnostic from change.
+    // The diagnosticsSettingSection is 'salesforceMobileExtension.diagnostics'
+    // The change.settings is a json tree like blow
+    // {
+    //      salesforceMobileExtension: {
+    //          diagnostics: {
+    //              suppressAll: false,
+    //              suppressByRuleId: []
+    //          }
+    //      }
+    // }
+    const keys = diagnosticsSettingSection.split('.');
+    const changedSetting = keys.reduce(
+        (parent, key) => parent[key],
+        change.settings
+    );
 
     if (hasConfigurationCapability) {
         settings = getSettings(changedSetting);

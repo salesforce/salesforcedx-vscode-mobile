@@ -34,23 +34,21 @@ const defaultDiagnosticSettings: DiagnosticSettings = {
 /**
  * Take in currentSetting and an input, return a new diagnosticSettings
  * @param input the input, a well format tree is like 
- * 
+ *  
  *  {
-            "suppressAll": true,
-            "suppressByRuleId": ["adapters-local-change-not-aware"],
+        "suppressAll": true,
+        "suppressByRuleId": ["adapters-local-change-not-aware"],
     }
  * 
  * @returns the settings for diagnostics
  */
 export function getSettings(input: any): DiagnosticSettings {
-    console.log(input);
 
     // pull the values from input
     const suppressAll = (typeof input[SETTING_KEY_SUPPRESS_ALL] === 'boolean')? input[SETTING_KEY_SUPPRESS_ALL]: defaultDiagnosticSettings.suppressAll;
     const inputIdArray = input[SETTING_KEY_SUPPRESS_BY_RULE_ID];
     const suppressByRuleId = inputIdArray instanceof Array? new Set(inputIdArray): defaultDiagnosticSettings.suppressByRuleId;
     
-    // take value currentSetting if value pulled from input is missing or invalid.
     return {
         suppressAll,
         suppressByRuleId
