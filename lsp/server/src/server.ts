@@ -16,12 +16,12 @@ import {
     DocumentDiagnosticReportKind,
     type DocumentDiagnosticReport,
     CodeAction,
-    CodeActionKind,
+    CodeActionKind
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
-import { globalSettings, Settings, getSettings} from './settings';
+import { getSettings } from './diagnostic/DiagnosticSettings';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -37,14 +37,16 @@ let extensionTitle = '';
 let updateDiagnosticsSettingCommand = '';
 let diagnosticsSettingSection = '';
 
-// Cache the settings
-let settings: Settings = globalSettings
-const documentCache: Map<string, TextDocument> = new Map;
+// initialize default settings
+let settings = getSettings({});
+const documentCache: Map<string, TextDocument> = new Map();
 
 connection.onInitialize((params: InitializeParams) => {
     extensionTitle = params.initializationOptions?.extensionTitle;
-    updateDiagnosticsSettingCommand = params.initializationOptions?.updateDiagnosticsSettingCommand;
-    diagnosticsSettingSection = params.initializationOptions?.diagnosticsSettingSection;
+    updateDiagnosticsSettingCommand =
+        params.initializationOptions?.updateDiagnosticsSettingCommand;
+    diagnosticsSettingSection =
+        params.initializationOptions?.diagnosticsSettingSection;
 
     const capabilities = params.capabilities;
 
@@ -86,10 +88,9 @@ connection.onInitialize((params: InitializeParams) => {
 connection.onInitialized(() => {
     if (hasConfigurationCapability) {
         // Register for all configuration changes.
-        connection.client.register(
-            DidChangeConfigurationNotification.type,
-            { section: diagnosticsSettingSection }
-        );
+        connection.client.register(DidChangeConfigurationNotification.type, {
+            section: diagnosticsSettingSection
+        });
     }
     if (hasWorkspaceFolderCapability) {
         connection.workspace.onDidChangeWorkspaceFolders((_event) => {
@@ -99,28 +100,29 @@ connection.onInitialized(() => {
 });
 
 connection.onDidChangeConfiguration((change) => {
-    const changedSetting =
-        diagnosticsSettingSection
-            .split('.')
-            .reduce((parent, key) => parent[key], change.settings);
+    const changedSetting = diagnosticsSettingSection
+        .split('.')
+        .reduce((parent, key) => parent[key], change.settings);
 
-    settings = hasConfigurationCapability? getSettings(settings, changedSetting): globalSettings;
+    if (hasConfigurationCapability) {
+        settings = getSettings(changedSetting);
+    }
 
-    // Refresh the diagnostics since the diagnostic settings might have changed. 
+    // Refresh the diagnostics since the diagnostic settings might have changed.
     connection.languages.diagnostics.refresh();
 });
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change => {
-	const document = change.document;
-	documentCache.set(document.uri, document);
+documents.onDidChangeContent((change) => {
+    const document = change.document;
+    documentCache.set(document.uri, document);
 });
 
 // Only keep cache for open documents
-documents.onDidClose(e => {
-	const uri = e.document.uri;
-	documentCache.delete(uri);
+documents.onDidClose((e) => {
+    const uri = e.document.uri;
+    documentCache.delete(uri);
 });
 
 connection.languages.diagnostics.on(async (params) => {
@@ -128,7 +130,7 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validateDocument(settings.diagnostic, document, extensionTitle)
+            items: await validateDocument(settings, document, extensionTitle)
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk
@@ -143,46 +145,48 @@ connection.languages.diagnostics.on(async (params) => {
 connection.onCodeAction((params) => {
     const textDocument = documentCache.get(params.textDocument.uri);
     const diagnostics = params.context.diagnostics;
-	if (textDocument === undefined || diagnostics.length === 0) {
-	    return undefined;
-	}
-    
-	const result: CodeAction[] = [];
+    if (textDocument === undefined || diagnostics.length === 0) {
+        return undefined;
+    }
+
+    const result: CodeAction[] = [];
 
     diagnostics.forEach((diagnostic) => {
-        // generate the two suppressing quick fixes 
-        const { data : producerId } = diagnostic;
-        if (typeof producerId === 'string') {
-            const suppressByRuleId = new Set(settings.diagnostic.suppressByRuleId);
-            suppressByRuleId.add(producerId);
-            const suppressThisDiagnostic: CodeAction = {
-                title: `Suppress such diagnostic: ${producerId}`, 
-                kind: CodeActionKind.QuickFix,
-                diagnostics: [diagnostic],
-                command: {
-                    title: 'Update workspace setting',
-                    command: updateDiagnosticsSettingCommand,
-                    arguments: [{
+        // generate the two suppressing quick fixes
+        const { data: producerId } = diagnostic;
+        const suppressByRuleId = new Set(settings.suppressByRuleId);
+        suppressByRuleId.add(producerId);
+        const suppressThisDiagnostic: CodeAction = {
+            title: `Suppress such diagnostic: ${producerId}`,
+            kind: CodeActionKind.QuickFix,
+            diagnostics: [diagnostic],
+            command: {
+                title: 'Update workspace setting',
+                command: updateDiagnosticsSettingCommand,
+                arguments: [
+                    {
                         suppressByRuleId: Array.from(suppressByRuleId)
-                    }]
-                }
-            };
-            result.push(suppressThisDiagnostic);
+                    }
+                ]
+            }
+        };
+        result.push(suppressThisDiagnostic);
 
-            const suppressAllDiagnostic: CodeAction = {
-                title: 'Suppress all Salesforce Mobile diagnostics', 
-                kind: CodeActionKind.QuickFix,
-                diagnostics: [diagnostic],
-                command: {
-                    title: 'Update workspace setting',
-                    command: updateDiagnosticsSettingCommand,
-                    arguments: [{
+        const suppressAllDiagnostic: CodeAction = {
+            title: 'Suppress all Salesforce Mobile diagnostics',
+            kind: CodeActionKind.QuickFix,
+            diagnostics: [diagnostic],
+            command: {
+                title: 'Update workspace setting',
+                command: updateDiagnosticsSettingCommand,
+                arguments: [
+                    {
                         suppressAll: true
-                    }]
-                }
-            };
-            result.push(suppressAllDiagnostic);
-        }
+                    }
+                ]
+            }
+        };
+        result.push(suppressAllDiagnostic);
     });
 
     return result;

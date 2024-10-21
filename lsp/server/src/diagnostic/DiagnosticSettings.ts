@@ -26,14 +26,13 @@ export function isTheDiagnosticSuppressed(settings: DiagnosticSettings, producer
     return settings.suppressAll === true || settings.suppressByRuleId?.has(producerId);
 }
 
-export const defaultDiagnosticSettings: DiagnosticSettings = {
+const defaultDiagnosticSettings: DiagnosticSettings = {
     suppressAll: false,
     suppressByRuleId: new Set()
 }
 
 /**
  * Take in currentSetting and an input, return a new diagnosticSettings
- * @param currentSetting the current setting
  * @param input the input, a well format tree is like 
  * 
  *  {
@@ -43,18 +42,17 @@ export const defaultDiagnosticSettings: DiagnosticSettings = {
  * 
  * @returns the settings for diagnostics
  */
-export function getSettings(currentSetting: DiagnosticSettings, input: any): DiagnosticSettings {
-    if (input === undefined) {
-        return currentSetting;
-    }
+export function getSettings(input: any): DiagnosticSettings {
+    console.log(input);
+
     // pull the values from input
-    const suppressAll = input[SETTING_KEY_SUPPRESS_ALL] === true?true:(input[SETTING_KEY_SUPPRESS_ALL] === false?false:undefined);
+    const suppressAll = (typeof input[SETTING_KEY_SUPPRESS_ALL] === 'boolean')? input[SETTING_KEY_SUPPRESS_ALL]: defaultDiagnosticSettings.suppressAll;
     const inputIdArray = input[SETTING_KEY_SUPPRESS_BY_RULE_ID];
-    const suppressedRuleIds = inputIdArray instanceof Array? new Set(inputIdArray): new Set();
+    const suppressByRuleId = inputIdArray instanceof Array? new Set(inputIdArray): defaultDiagnosticSettings.suppressByRuleId;
     
     // take value currentSetting if value pulled from input is missing or invalid.
     return {
-        suppressAll: suppressAll === undefined? currentSetting.suppressAll: suppressAll,
-        suppressByRuleId: suppressedRuleIds
+        suppressAll,
+        suppressByRuleId
     };
 }
