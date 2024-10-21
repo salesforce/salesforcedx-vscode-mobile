@@ -18,12 +18,6 @@ import * as path from 'path';
 import { WorkspaceUtils } from './workspaceUtils';
 import { ObjectInfoRepresentation } from '../types';
 
-export interface SObject {
-    apiName: string;
-    label: string;
-    labelPlural: string;
-}
-
 enum AuthStatus {
     UNKNOWN,
     AUTHORIZED,
@@ -124,7 +118,7 @@ export class OrgUtils {
         } else {
             this.authStatus = AuthStatus.AUTHORIZED;
             // Fetches entity list once.
-            const entityListFile = path.posix.join(
+            const entityListFile = path.join(
                 this.objectInfoFolderPath(),
                 this.entityListFileName
             );
@@ -183,7 +177,7 @@ export class OrgUtils {
         if (this.orgName === undefined || this.orgName.length === 0) {
             throw new Error('AuthError: No Org exists');
         }
-        const objectInfoFolder = path.posix.join(
+        const objectInfoFolder = path.join(
             projectPath,
             this.sfFolder,
             this.orgName,
@@ -198,7 +192,7 @@ export class OrgUtils {
     private static fetchObjectInfoFromDisk(
         objectApiName: string
     ): ObjectInfoRepresentation | undefined {
-        const objectInfoJsonFile = path.posix.join(
+        const objectInfoJsonFile = path.join(
             this.objectInfoFolderPath(),
             `${objectApiName}.json`
         );
@@ -288,7 +282,7 @@ export class OrgUtils {
     ) {
         this.objectInfoInMemoCache.set(objectApiName, objectInfo);
         const objectInfoStr = JSON.stringify(objectInfo);
-        const objectInfoFile = path.posix.join(
+        const objectInfoFile = path.join(
             this.objectInfoFolderPath(),
             `${objectApiName}.json`
         );
