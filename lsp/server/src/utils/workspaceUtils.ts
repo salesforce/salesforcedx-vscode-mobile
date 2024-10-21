@@ -20,11 +20,6 @@ export class WorkspaceUtils {
         'default'
     );
 
-    static readonly STATIC_RESOURCES_PATH = path.join(
-        WorkspaceUtils.DEFAULT_APP_PATH,
-        'staticresources'
-    );
-
     static readonly LWC_PATH = path.join(
         WorkspaceUtils.DEFAULT_APP_PATH,
         'lwc'
@@ -36,13 +31,7 @@ export class WorkspaceUtils {
         this.workspaceFolders = workSpaceFolders;
     }
 
-    static readonly QUICK_ACTIONS_PATH = path.join(
-        WorkspaceUtils.DEFAULT_APP_PATH,
-        'quickActions'
-    );
-
-    static readonly LWC_TEMPLATE_PATH = path.join('resources', 'templates');
-
+    // LSP server has a different way to fetch WorkSpaceDir than root project which relis on vscode workspace.
     static getWorkspaceDir(): string {
         if (!this.workspaceFolders || this.workspaceFolders.length === 0) {
             throw new NoWorkspaceError(
@@ -50,41 +39,6 @@ export class WorkspaceUtils {
             );
         }
         return new URL(this.workspaceFolders[0].uri).pathname;
-    }
-
-    static async getStaticResourcesDir(): Promise<string> {
-        return new Promise<string>(async (resolve, reject) => {
-            let projectPath: string;
-            try {
-                projectPath = this.getWorkspaceDir();
-            } catch (err) {
-                return reject(err);
-            }
-            const staticResourcesPath = path.join(
-                projectPath,
-                this.STATIC_RESOURCES_PATH
-            );
-            try {
-                await access(staticResourcesPath);
-            } catch (err) {
-                const noAccessError = new NoStaticResourcesDirError(
-                    `Could not read static resources directory at '${staticResourcesPath}'`
-                );
-
-                return reject(noAccessError);
-            }
-            return resolve(staticResourcesPath);
-        });
-    }
-
-    static packageJsonExists(): boolean {
-        try {
-            return fs.existsSync(
-                path.join(this.getWorkspaceDir(), PACKAGE_JSON)
-            );
-        } catch {
-            return false;
-        }
     }
 
     static lwcFolderExists(): boolean {
@@ -113,13 +67,5 @@ export class NoWorkspaceError extends Error {
         super(message);
         this.name = this.constructor.name;
         Object.setPrototypeOf(this, NoWorkspaceError.prototype);
-    }
-}
-
-export class NoStaticResourcesDirError extends Error {
-    constructor(message?: string) {
-        super(message);
-        this.name = this.constructor.name;
-        Object.setPrototypeOf(this, NoStaticResourcesDirError.prototype);
     }
 }

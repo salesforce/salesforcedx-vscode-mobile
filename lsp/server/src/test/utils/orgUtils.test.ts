@@ -6,10 +6,9 @@
  */
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import { suite, test, afterEach } from 'mocha';
-import Account from '../../../testFixture/objectInfos/Account.json';
+import { suite, test, beforeEach, afterEach } from 'mocha';
 import { OrgUtils } from '../../utils/orgUtils';
-import { AuthInfo } from '@salesforce/core';
+
 import {
     setupTempWorkspaceDirectoryStub,
     TempProjectDirManager,
@@ -20,7 +19,7 @@ import {
 } from '../TestHelper';
 import { ObjectInfoRepresentation } from '../../types';
 
-suite('OrgUtils Test Suite', () => {
+suite('OrgUtils Test Suite - Server', () => {
     let sandbox: sinon.SinonSandbox;
 
     beforeEach(function () {
@@ -33,8 +32,6 @@ suite('OrgUtils Test Suite', () => {
 
     let createConfigStub: sinon.SinonStub;
     let getInstanceStateStub: sinon.SinonStub;
-    let createConnectionStub: sinon.SinonStub;
-    let createAuthStub: sinon.SinonStub;
 
     test('ObjectInfo is undefined if no org exists', async () => {
         createConfigStub = stubCreateConfig(sandbox, false);
@@ -69,9 +66,7 @@ suite('OrgUtils Test Suite', () => {
             false
         );
 
-        createAuthStub = sandbox
-            .stub(AuthInfo, 'create')
-            .resolves({} as unknown as AuthInfo);
+        stubCreateAuth(sandbox);
 
         const objectInfo = await OrgUtils.getObjectInfo('Account');
         assert.strictEqual(
@@ -88,7 +83,7 @@ suite('OrgUtils Test Suite', () => {
         getInstanceStateStub = stubGetInstanceState(sandbox, true);
         const { requestStub, connectionStub: createConnectionStub } =
             stubCreateConnection(sandbox, true);
-        createAuthStub = stubCreateAuth(sandbox);
+        stubCreateAuth(sandbox);
 
         // Stub 'getWorkspaceDir'
         const tempWorkSpaceDirManager =

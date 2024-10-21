@@ -97,7 +97,7 @@ export class OrgUtils {
         });
     }
 
-    public static async getDefaultUserName(): Promise<string | undefined> {
+    private static async getDefaultUserName(): Promise<string | undefined> {
         try {
             const orgName = await this.getDefaultOrg();
             const aggregator = await StateAggregator.getInstance();
@@ -111,7 +111,7 @@ export class OrgUtils {
     }
 
     // Updates the auth state async
-    public static async checkAuthStatus(): Promise<AuthStatus> {
+    private static async checkAuthStatus(): Promise<AuthStatus> {
         if (this.authStatus !== AuthStatus.UNKNOWN) {
             return this.authStatus;
         }
@@ -143,7 +143,7 @@ export class OrgUtils {
     }
 
     // Retrieves the Connection which fetches ObjectInfo remotely.
-    public static async getConnection(): Promise<Connection | undefined> {
+    private static async getConnection(): Promise<Connection | undefined> {
         if (
             this.connection !== undefined &&
             this.connection.getUsername() !== undefined
@@ -169,7 +169,7 @@ export class OrgUtils {
         }
     }
 
-    public static async getEntityList(
+    private static async getEntityList(
         connection: Connection
     ): Promise<string[]> {
         const globalResult = await connection.describeGlobal();
@@ -177,7 +177,7 @@ export class OrgUtils {
     }
 
     // Retrieves objectInfo folder path, which is '<projectRoot>/.sf/orgName/objectInfos/'
-    public static objectInfoFolderPath(): string {
+    private static objectInfoFolderPath(): string {
         const projectPath = WorkspaceUtils.getWorkspaceDir();
         if (this.orgName === undefined || this.orgName.length === 0) {
             throw new Error('AuthError: No Org exists');
@@ -194,7 +194,7 @@ export class OrgUtils {
         return objectInfoFolder;
     }
 
-    public static fetchObjectInfoFromDisk(
+    private static fetchObjectInfoFromDisk(
         objectApiName: string
     ): ObjectInfoRepresentation | undefined {
         const objectInfoJsonFile = path.posix.join(
@@ -209,7 +209,7 @@ export class OrgUtils {
         return JSON.parse(objectInfoStr) as ObjectInfoRepresentation;
     }
 
-    public static getObjectInfoFromCache(
+    private static getObjectInfoFromCache(
         objectApiName: string
     ): ObjectInfoRepresentation | undefined {
         // Checks mem cache

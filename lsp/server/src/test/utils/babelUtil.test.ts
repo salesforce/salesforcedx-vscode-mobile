@@ -10,7 +10,7 @@ import * as sinon from 'sinon';
 import { suite, test, afterEach } from 'mocha';
 import { parseJs } from '../../utils/babelUtil';
 
-suite('BabelUtil Test Suite', () => {
+suite('BabelUtil Test Suite - Server', () => {
     afterEach(function () {
         sinon.restore();
     });
