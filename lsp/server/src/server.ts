@@ -177,7 +177,7 @@ connection.onCodeAction((params) => {
                     title: 'Update workspace setting',
                     command: updateDiagnosticsSettingCommand,
                     arguments: [{
-                        'suppressAll': true
+                        suppressAll: true
                     }]
                 }
             };

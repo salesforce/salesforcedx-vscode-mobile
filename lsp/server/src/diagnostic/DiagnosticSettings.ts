@@ -5,11 +5,13 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
+const SETTING_KEY_SUPPRESS_ALL = 'suppressAll';
+const SETTING_KEY_SUPPRESS_BY_RULE_ID = 'suppressByRuleId';
+
 /**
  * data structure for diagnostic suppression configuration.
  */
 export type DiagnosticSettings = {
-    maxNumberOfProblems: number;
     suppressAll?: boolean;
     suppressByRuleId?: Set<string>
 }
@@ -26,8 +28,7 @@ export function isTheDiagnosticSuppressed(settings: DiagnosticSettings, producer
 
 export const defaultDiagnosticSettings: DiagnosticSettings = {
     suppressAll: false,
-    suppressByRuleId: new Set(),
-    maxNumberOfProblems: 200,
+    suppressByRuleId: new Set()
 }
 
 /**
@@ -37,8 +38,7 @@ export const defaultDiagnosticSettings: DiagnosticSettings = {
  * 
  *  {
             "suppressAll": true,
-            "suppressedIds": ["adapters-local-change-not-aware"],
-            "maxProblemNumber": 50
+            "suppressByRuleId": ["adapters-local-change-not-aware"],
     }
  * 
  * @returns the settings for diagnostics
@@ -48,14 +48,12 @@ export function getSettings(currentSetting: DiagnosticSettings, input: any): Dia
         return currentSetting;
     }
     // pull the values from input
-    const maxNumberOfProblems = parseInt(input['maxNumberOfProblems']);
-    const suppressAll = input['suppressAll'] === true?true:(input['suppressAll'] === false?false:undefined);
-    const inputIdArray = input['suppressByRuleId'];
+    const suppressAll = input[SETTING_KEY_SUPPRESS_ALL] === true?true:(input[SETTING_KEY_SUPPRESS_ALL] === false?false:undefined);
+    const inputIdArray = input[SETTING_KEY_SUPPRESS_BY_RULE_ID];
     const suppressedRuleIds = inputIdArray instanceof Array? new Set(inputIdArray): new Set();
     
     // take value currentSetting if value pulled from input is missing or invalid.
     return {
-        maxNumberOfProblems: isNaN(maxNumberOfProblems)? currentSetting.maxNumberOfProblems : maxNumberOfProblems,
         suppressAll: suppressAll === undefined? currentSetting.suppressAll: suppressAll,
         suppressByRuleId: suppressedRuleIds
     };

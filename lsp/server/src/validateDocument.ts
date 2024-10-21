@@ -43,7 +43,6 @@ export async function validateDocument(
         );
 
         results = results.concat(jsDiagnostics, graphqlDiagnostics);
-        results.splice(setting.maxNumberOfProblems);
     }
 
     if (document.languageId === 'html') {
