@@ -26,7 +26,7 @@ suite('OrgUtils Test Suite - Server', () => {
         sandbox = sinon.createSandbox();
     });
     afterEach(function () {
-        OrgUtils.clearCache();
+        OrgUtils.reset();
         sandbox.restore();
     });
 

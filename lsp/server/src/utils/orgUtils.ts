@@ -85,9 +85,10 @@ export class OrgUtils {
     }
 
     private static onAuthOrgChanged() {
-        this.clearCache();
+        this.reset();
     }
 
+    // Watches SF project config changes.
     public static watchConfig() {
         fs.watch(this.SFDX_DIR, (eventType, fileName) => {
             this.onAuthOrgChanged();
@@ -298,7 +299,8 @@ export class OrgUtils {
         fs.writeFileSync(objectInfoFile, objectInfoStr, { mode: 0o666 });
     }
 
-    public static clearCache() {
+    // Resets Org state to its initial state.
+    public static reset() {
         this.authStatus = AuthStatus.UNKNOWN;
         this.entities.splice(0, this.entities.length);
         this.objectInfoInMemoCache.clear();
@@ -315,30 +317,6 @@ export class OrgUtils {
                 console.log(e);
             }
             this.orgName = '';
-        }
-    }
-    public static async getSobjects(): Promise<SObject[]> {
-        try {
-            const conn = await this.getConnection();
-            if (conn === undefined) {
-                return [];
-            }
-            const result = await conn.describeGlobal();
-
-            const sobjects = result.sobjects
-                .map((sobject) => {
-                    const so: SObject = {
-                        apiName: sobject.name,
-                        label: sobject.label,
-                        labelPlural: sobject.labelPlural
-                    };
-                    return so;
-                })
-                .sort((a, b) => a.apiName.localeCompare(b.apiName));
-            return Promise.resolve(sobjects);
-        } catch (error) {
-            console.log(error);
-            return Promise.reject(error);
         }
     }
 }
