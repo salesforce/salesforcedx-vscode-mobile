@@ -12,47 +12,8 @@ import * as path from 'path';
 import * as process from 'process';
 import * as sinon from 'sinon';
 import { WorkspaceUtils } from '../utils/workspaceUtils';
-
-export class TempProjectDirManager {
-    readonly projectDir: string;
-
-    private constructor(projectDir: string) {
-        this.projectDir = projectDir;
-    }
-
-    async removeDir(): Promise<void> {
-        return new Promise(async (resolve, reject) => {
-            let projectDirStats: Stats;
-            try {
-                projectDirStats = await stat(this.projectDir);
-            } catch (err) {
-                return reject(
-                    `Project dir '${this.projectDir}' does not exist or is inaccessible.`
-                );
-            }
-            if (!projectDirStats.isDirectory()) {
-                return reject(
-                    `Project dir '${this.projectDir}' is not a directory.`
-                );
-            }
-            await rm(this.projectDir, { recursive: true, force: true });
-            return resolve();
-        });
-    }
-
-    static async createTempProjectDir(): Promise<TempProjectDirManager> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const projectDir = await mkdtemp(
-                    path.join(os.tmpdir(), 'offlineWizard-')
-                );
-                return resolve(new TempProjectDirManager(projectDir));
-            } catch (err) {
-                return reject(err);
-            }
-        });
-    }
-}
+import { TempProjectDirManager } from 'mobile-lsp-server';
+export { TempProjectDirManager };
 
 // Create a platform-agnostic absolute path to a non-existent folder.
 export function createPlatformAbsolutePath(...pathArgs: string[]): string {
