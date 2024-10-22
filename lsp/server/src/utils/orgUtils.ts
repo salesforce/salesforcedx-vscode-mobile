@@ -24,43 +24,40 @@ enum AuthStatus {
     UNAUTHORIZED
 }
 
-export interface Field {
-    apiName: string;
-    label: string;
-    type: string;
-}
-
 export class OrgUtils {
-    public static orgName: string = '';
-    public static objectInfoFolder = 'objectInfos';
-    public static entityListFileName = 'entity_list.json';
-    public static connection: Connection | undefined;
+    private static orgName: string = '';
+    private static objectInfoFolder = 'objectInfos';
+    private static entityListFileName = 'entity_list.json';
+    private static connection: Connection | undefined;
 
     private static authStatus: AuthStatus = AuthStatus.UNKNOWN;
 
-    static objectInfoInMemoCache = new Map<string, ObjectInfoRepresentation>();
-    static objectInfoPromises = new Map<
+    private static objectInfoInMemoCache = new Map<
+        string,
+        ObjectInfoRepresentation
+    >();
+    private static objectInfoPromises = new Map<
         string,
         Promise<ObjectInfoRepresentation | undefined>
     >();
-    public static entities: string[] = [];
+    private static entities: string[] = [];
 
     private static sfdxDirWatcher: fs.FSWatcher | undefined;
     private static sfDirWatcher: fs.FSWatcher | undefined;
 
-    static sfdxFolder = '.sfdx';
+    private static sfdxFolder = '.sfdx';
     /**
      * The global folder in which sf state is stored.
      */
-    static sfFolder = '.sf';
+    private static sfFolder = '.sf';
 
-    static get SFDX_DIR() {
+    private static get SFDX_DIR() {
         return path.join(os.homedir(), this.sfdxFolder);
     }
     /**
      * The full system path to the global sf state folder.
      */
-    static get SF_DIR() {
+    private static get SF_DIR() {
         return path.join(os.homedir(), this.sfFolder);
     }
 
@@ -182,7 +179,7 @@ export class OrgUtils {
         connection: Connection
     ): Promise<string[]> {
         const globalResult = await connection.describeGlobal();
-        return globalResult.sobjects.map((sobjettResult) => sobjettResult.name);
+        return globalResult.sobjects.map((sobjetResult) => sobjetResult.name);
     }
 
     // Retrieves objectInfo folder path, which is '<projectRoot>/.sf/orgName/objectInfos/'
