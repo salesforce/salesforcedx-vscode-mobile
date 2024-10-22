@@ -101,14 +101,12 @@ connection.onInitialized(() => {
 
 connection.onDidChangeConfiguration((change) => {
     // Get the leaf object of diagnostic from change.
-    // The diagnosticsSettingSection is 'salesforceMobileExtension.diagnostics'
+    // The diagnosticsSettingSection is 'mobileDiagnostics'
     // The change.settings is a json tree like blow
     // {
-    //      salesforceMobileExtension: {
-    //          diagnostics: {
-    //              suppressAll: false,
-    //              suppressByRuleId: []
-    //          }
+    //      mobileDiagnostics: {
+    //          suppressAll: false,
+    //          suppressByRuleId: []
     //      }
     // }
     const keys = diagnosticsSettingSection.split('.');
@@ -166,7 +164,7 @@ connection.onCodeAction((params) => {
 
     diagnostics.forEach((diagnostic) => {
         // generate the two suppressing quick fixes
-        const { data: producerId } = diagnostic;
+        const producerId = diagnostic.data as string;
         const suppressByRuleId = new Set(settings.suppressByRuleId);
         suppressByRuleId.add(producerId);
         const suppressThisDiagnostic: CodeAction = {

@@ -17,7 +17,7 @@ export function getUpdateDiagnosticsSettingCommand(
     return `${getExtensionName(context)}.updateDiagnosticsSetting`;
 }
 
-export const SECTION_DIAGNOSTICS = `salesforceMobileExtension.diagnostics`;
+export const SECTION_DIAGNOSTICS = `mobileDiagnostics`;
 
 export function registerCommand(context: vscode.ExtensionContext) {
     const command = getUpdateDiagnosticsSettingCommand(context);
