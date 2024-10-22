@@ -176,7 +176,7 @@ export class OrgUtils {
         connection: Connection
     ): Promise<string[]> {
         const globalResult = await connection.describeGlobal();
-        return globalResult.sobjects.map((sobjettResult) => sobjettResult.name);
+        return globalResult.sobjects.map((sobjetResult) => sobjetResult.name);
     }
 
     // Retrieves objectInfo folder path, which is '<projectRoot>/.sf/orgName/objectInfos/'
