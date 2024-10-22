@@ -11,22 +11,28 @@ import { Diagnostic } from 'vscode-languageserver/node';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { MisspelledUiapi } from './diagnostic/gql/misspelled-uiapi';
+import { DiagnosticSettings, isTheDiagnosticSuppressed } from './diagnostic/DiagnosticSettings';
 
-const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [];
-diagnosticProducers.push(new MisspelledUiapi());
+const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
+    new MisspelledUiapi()
+];
 
 /**
  * Validate the graphql queries in the document.
  * @param textDocument 
- * @param maxCount  The max count of diagnostics to return 
  */
 export async function validateGraphql(
-    textDocument: TextDocument, 
-    maxCount: number
+    setting: DiagnosticSettings,
+    textDocument: TextDocument
 ): Promise<Diagnostic[]> {
     const results: Diagnostic[] = [];
 
-    if (maxCount <= 0 || diagnosticProducers.length === 0) {
+
+    const producers = diagnosticProducers.filter((producer) => {
+        return !isTheDiagnosticSuppressed(setting, producer.getId());
+    });
+
+    if (producers.length === 0) {
         return results;
     }
 
@@ -42,18 +48,16 @@ export async function validateGraphql(
 
     // Validate each query
     for (const query of graphQueries) {
-        if (results.length >= maxCount) {
-            break;
-        }
         const lineOffset = query.locationOffset.line - 1;
         const columnOffset = query.locationOffset.column + 1;
         const graphqlTextDocument = TextDocument.create(``, 'graphql', 1, query.body);
-        const diagnostics = await validateOneGraphQuery(graphqlTextDocument, query.body);
+        const diagnostics = await validateOneGraphQuery(
+            producers, 
+            graphqlTextDocument, 
+            query.body
+        );
         // Update the range offset correctly
         for (const item of diagnostics) {
-            if (results.length >= maxCount) {
-                break;
-            }
             updateDiagnosticOffset(item, lineOffset, columnOffset);
             results.push(item);
         }
@@ -64,18 +68,29 @@ export async function validateGraphql(
 
 /**
  * Validate graphql diagnostic rules to a graph query, return empty list if the graphql string is invalid.
+ * @param producers The diagnostic producer to run.
  * @param graphql the graph code
  * @param graphqlDiagnosticProducers  the collection of graphql rules. 
-
  */
-export async function validateOneGraphQuery(textDocument: TextDocument, graphql: string): Promise<Diagnostic[]> {
+export async function validateOneGraphQuery(
+    producers: DiagnosticProducer<ASTNode>[],
+    textDocument: TextDocument, 
+    graphql: string
+): Promise<Diagnostic[]> {
   
     try {
         const graphqlAstNode = parse(graphql);
         const allResults = await Promise.all(
-            diagnosticProducers.map((producer) =>
-                producer.validateDocument(textDocument, graphqlAstNode)
-            )
+            producers.map((producer) => {
+                return producer.validateDocument(textDocument, graphqlAstNode)
+                 .then((diagnostics) => {
+                    const producerId = producer.getId();
+                     diagnostics.forEach((diagnostic) => {
+                         diagnostic.data = producerId;
+                     });
+                     return diagnostics;
+                 })
+             })
         );
         return allResults.flat();
     } catch (e) {

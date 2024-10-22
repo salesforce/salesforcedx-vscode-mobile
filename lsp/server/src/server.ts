@@ -14,13 +14,16 @@ import {
     TextDocumentSyncKind,
     InitializeResult,
     DocumentDiagnosticReportKind,
-    type DocumentDiagnosticReport
+    type DocumentDiagnosticReport,
+    CodeAction,
+    CodeActionKind
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
+import { getSettings } from './diagnostic/DiagnosticSettings';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -32,15 +35,24 @@ let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
 
-let extensionName: string = '';
+let extensionTitle = '';
+let updateDiagnosticsSettingCommand = '';
+let diagnosticsSettingSection = '';
+
+// initialize default settings
+let settings = getSettings({});
+const documentCache: Map<string, TextDocument> = new Map();
 
 connection.onInitialize((params: InitializeParams) => {
-    extensionName = params.initializationOptions?.extensionName;
-
     const workspaceFolders = params.workspaceFolders;
 
     // Sets workspace folder to WorkspaceUtils
     WorkspaceUtils.setWorkSpaceFolders(workspaceFolders);
+    extensionTitle = params.initializationOptions?.extensionTitle;
+    updateDiagnosticsSettingCommand =
+        params.initializationOptions?.updateDiagnosticsSettingCommand;
+    diagnosticsSettingSection =
+        params.initializationOptions?.diagnosticsSettingSection;
 
     const capabilities = params.capabilities;
 
@@ -64,7 +76,8 @@ connection.onInitialize((params: InitializeParams) => {
             diagnosticProvider: {
                 interFileDependencies: false,
                 workspaceDiagnostics: false
-            }
+            },
+            codeActionProvider: true
         }
     };
 
@@ -81,10 +94,9 @@ connection.onInitialize((params: InitializeParams) => {
 connection.onInitialized(() => {
     if (hasConfigurationCapability) {
         // Register for all configuration changes.
-        connection.client.register(
-            DidChangeConfigurationNotification.type,
-            undefined
-        );
+        connection.client.register(DidChangeConfigurationNotification.type, {
+            section: diagnosticsSettingSection
+        });
     }
     if (hasWorkspaceFolderCapability) {
         connection.workspace.onDidChangeWorkspaceFolders((_event) => {
@@ -93,57 +105,41 @@ connection.onInitialized(() => {
     }
 });
 
-// Settings for Mobile LSP
-export interface MobileSettings {
-    maxNumberOfProblems: number; //max number of diagnostics to detect per document.
-}
-
-// The global settings, used when the `workspace/configuration` request is not supported by the client.
-// Please note that this is not the case when using this server with the client provided
-// but could happen with other clients.
-const defaultSettings: MobileSettings = { maxNumberOfProblems: 1000 };
-let globalSettings: MobileSettings = defaultSettings;
-
-// Cache the settings of all open documents
-const documentSettings: Map<string, MobileSettings> = new Map();
-
 connection.onDidChangeConfiguration((change) => {
+    // Get the leaf object of diagnostic from change.
+    // The diagnosticsSettingSection is 'mobileDiagnostics'
+    // The change.settings is a json tree like blow
+    // {
+    //      mobileDiagnostics: {
+    //          suppressAll: false,
+    //          suppressByRuleId: []
+    //      }
+    // }
+    const keys = diagnosticsSettingSection.split('.');
+    const changedSetting = keys.reduce(
+        (parent, key) => parent[key],
+        change.settings
+    );
+
     if (hasConfigurationCapability) {
-        // Reset all cached document settings
-        documentSettings.clear();
-    } else {
-        globalSettings = <MobileSettings>(
-            (change.settings.mobileLSP || defaultSettings)
-        );
+        settings = getSettings(changedSetting);
     }
-    // Refresh the diagnostics since the `maxNumberOfProblems` could have changed.
-    // We could optimize things here and re-fetch the setting first can compare it
-    // to the existing setting, but this is out of scope for this example.
+
+    // Refresh the diagnostics since the diagnostic settings might have changed.
     connection.languages.diagnostics.refresh();
 });
 
-export async function getDocumentSettings(
-    resource: string
-): Promise<MobileSettings> {
-    if (!hasConfigurationCapability) {
-        return Promise.resolve(globalSettings);
-    }
-    let result = documentSettings.get(resource);
-    if (!result) {
-        result = await connection.workspace.getConfiguration({
-            scopeUri: resource,
-            section: 'mobileLSP'
-        });
-        result = result || defaultSettings;
-        documentSettings.set(resource, result);
-    }
-    return result;
-}
+// The content of a text document has changed. This event is emitted
+// when the text document first opened or when its content has changed.
+documents.onDidChangeContent((change) => {
+    const document = change.document;
+    documentCache.set(document.uri, document);
+});
 
-// Only keep settings for open documents
+// Only keep cache for open documents
 documents.onDidClose((e) => {
     const uri = e.document.uri;
-    documentSettings.delete(uri);
+    documentCache.delete(uri);
 });
 
 connection.languages.diagnostics.on(async (params) => {
@@ -151,7 +147,7 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validateDocument(document, extensionName)
+            items: await validateDocument(settings, document, extensionTitle)
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk
@@ -165,6 +161,58 @@ connection.languages.diagnostics.on(async (params) => {
 
 // Watch SF config file change
 OrgUtils.watchConfig();
+connection.onCodeAction((params) => {
+    const textDocument = documentCache.get(params.textDocument.uri);
+    const diagnostics = params.context.diagnostics;
+    if (textDocument === undefined || diagnostics.length === 0) {
+        return undefined;
+    }
+
+    const result: CodeAction[] = [];
+
+    diagnostics.forEach((diagnostic) => {
+        // generate the two suppressing quick fixes
+        const producerId = diagnostic.data as string;
+        const suppressByRuleId = new Set(settings.suppressByRuleId);
+        suppressByRuleId.add(producerId);
+        const suppressThisDiagnostic: CodeAction = {
+            title: `Suppress such diagnostic: ${producerId}`,
+            kind: CodeActionKind.QuickFix,
+            diagnostics: [diagnostic],
+            command: {
+                title: 'Update workspace setting',
+                command: updateDiagnosticsSettingCommand,
+                arguments: [
+                    {
+                        suppressByRuleId: Array.from(suppressByRuleId)
+                    }
+                ]
+            }
+        };
+        result.push(suppressThisDiagnostic);
+
+        const suppressAllDiagnostic: CodeAction = {
+            title: 'Suppress all Salesforce Mobile diagnostics',
+            kind: CodeActionKind.QuickFix,
+            diagnostics: [diagnostic],
+            command: {
+                title: 'Update workspace setting',
+                command: updateDiagnosticsSettingCommand,
+                arguments: [
+                    {
+                        suppressAll: true
+                    }
+                ]
+            }
+        };
+        result.push(suppressAllDiagnostic);
+    });
+
+    return result;
+});
+
+// Make the text document manager listen on the connection
+// for open, change and close text document events
 documents.listen(connection);
 
 // Listen on the connection

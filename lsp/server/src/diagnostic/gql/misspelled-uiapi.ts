@@ -14,12 +14,18 @@ import { OrgUtils } from '../../utils/orgUtils';
 const LOCAL_CHANGE_NOT_AWARE_MESSAGE = 'uiapi is misspelled.';
 const SEVERITY = DiagnosticSeverity.Error;
 
+export const RULE_ID = 'misspelled-uiapi';
+
 /**
  * DUMMY demo implementation showcasing graphql parsing and diagnostic geneation for scaffolding.
  * Produce diagnostic when graphql uiapi node is misspelled.
  */
 export class MisspelledUiapi implements DiagnosticProducer<ASTNode> {
-    async validateDocument(
+    getId(): string {
+        return RULE_ID;
+    }
+
+    validateDocument(
         textDocument: TextDocument,
         rootNode: ASTNode
     ): Promise<Diagnostic[]> {

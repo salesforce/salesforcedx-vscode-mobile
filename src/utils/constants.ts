@@ -9,3 +9,5 @@ export const MINIMUM_REQUIRED_VERSION_CORE_EXTENSION = '58.4.1';
 export { CORE_EXTENSION_ID, SFDX_PROJECT_FILE };
 export const PACKAGE_JSON = 'package.json';
 export const JSON_INDENTATION_SPACES = 2;
+
+export const SETTING_SECTION_DIAGNOSTIC = `${CORE_EXTENSION_ID}.diagnostics`;
