@@ -24,12 +24,6 @@ enum AuthStatus {
     UNAUTHORIZED
 }
 
-export interface Field {
-    apiName: string;
-    label: string;
-    type: string;
-}
-
 export class OrgUtils {
     public static orgName: string = '';
     public static objectInfoFolder = 'objectInfos';
