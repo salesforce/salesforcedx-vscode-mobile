@@ -5,9 +5,6 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { Stats } from 'fs';
-import { mkdtemp, rm, stat } from 'fs/promises';
-import * as os from 'os';
 import * as path from 'path';
 import * as process from 'process';
 import * as sinon from 'sinon';
