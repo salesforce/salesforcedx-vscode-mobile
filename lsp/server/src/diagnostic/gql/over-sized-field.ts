@@ -27,9 +27,10 @@ export class OversizedField implements DiagnosticProducer<ASTNode> {
                     if (node.name.value !== 'node' || !node.selectionSet) {
                         return;
                     }
-                    if (Array.isArray(ancestors)) {
-                        findEntityNode(ancestors);
+                    if (!Array.isArray(ancestors)) {
+                        return;
                     }
+                    const entityNode = findEntityNode(ancestors);
                 }
             }
         });

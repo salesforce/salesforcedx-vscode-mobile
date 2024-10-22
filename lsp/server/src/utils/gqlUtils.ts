@@ -40,7 +40,8 @@ function findCloseAncestorWithType(
     type: Kind,
     startIndex?: number
 ): number {
-    for (let i = 0; i < ancesters.length; i++) {
+    const sIndex = startIndex === undefined ? 0 : startIndex;
+    for (let i = sIndex; i < ancesters.length; i++) {
         if (ancesters[i].kind === type) {
             return i;
         }
