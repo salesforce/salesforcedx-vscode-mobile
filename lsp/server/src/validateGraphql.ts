@@ -5,28 +5,32 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import {parse, ASTNode} from 'graphql';
+import { parse, ASTNode } from 'graphql';
 import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
 import { Diagnostic } from 'vscode-languageserver/node';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { MisspelledUiapi } from './diagnostic/gql/misspelled-uiapi';
-import { DiagnosticSettings, isTheDiagnosticSuppressed } from './diagnostic/DiagnosticSettings';
+import {
+    DiagnosticSettings,
+    isTheDiagnosticSuppressed
+} from './diagnostic/DiagnosticSettings';
+import { OversizedField } from './diagnostic/gql/over-sized-field';
 
 const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
-    new MisspelledUiapi()
+    new MisspelledUiapi(),
+    new OversizedField()
 ];
 
 /**
  * Validate the graphql queries in the document.
- * @param textDocument 
+ * @param textDocument
  */
 export async function validateGraphql(
     setting: DiagnosticSettings,
     textDocument: TextDocument
 ): Promise<Diagnostic[]> {
     const results: Diagnostic[] = [];
-
 
     const producers = diagnosticProducers.filter((producer) => {
         return !isTheDiagnosticSuppressed(setting, producer.getId());
@@ -50,10 +54,15 @@ export async function validateGraphql(
     for (const query of graphQueries) {
         const lineOffset = query.locationOffset.line - 1;
         const columnOffset = query.locationOffset.column + 1;
-        const graphqlTextDocument = TextDocument.create(``, 'graphql', 1, query.body);
+        const graphqlTextDocument = TextDocument.create(
+            ``,
+            'graphql',
+            1,
+            query.body
+        );
         const diagnostics = await validateOneGraphQuery(
-            producers, 
-            graphqlTextDocument, 
+            producers,
+            graphqlTextDocument,
             query.body
         );
         // Update the range offset correctly
@@ -70,27 +79,27 @@ export async function validateGraphql(
  * Validate graphql diagnostic rules to a graph query, return empty list if the graphql string is invalid.
  * @param producers The diagnostic producer to run.
  * @param graphql the graph code
- * @param graphqlDiagnosticProducers  the collection of graphql rules. 
+ * @param graphqlDiagnosticProducers  the collection of graphql rules.
  */
 export async function validateOneGraphQuery(
     producers: DiagnosticProducer<ASTNode>[],
-    textDocument: TextDocument, 
+    textDocument: TextDocument,
     graphql: string
 ): Promise<Diagnostic[]> {
-  
     try {
         const graphqlAstNode = parse(graphql);
         const allResults = await Promise.all(
             producers.map((producer) => {
-                return producer.validateDocument(textDocument, graphqlAstNode)
-                 .then((diagnostics) => {
-                    const producerId = producer.getId();
-                     diagnostics.forEach((diagnostic) => {
-                         diagnostic.data = producerId;
-                     });
-                     return diagnostics;
-                 })
-             })
+                return producer
+                    .validateDocument(textDocument, graphqlAstNode)
+                    .then((diagnostics) => {
+                        const producerId = producer.getId();
+                        diagnostics.forEach((diagnostic) => {
+                            diagnostic.data = producerId;
+                        });
+                        return diagnostics;
+                    });
+            })
         );
         return allResults.flat();
     } catch (e) {
@@ -102,12 +111,15 @@ export async function validateOneGraphQuery(
 
 /**
  * Update the graphql diagnostic offset to offset from the whole js file
- * @param diagnostic 
+ * @param diagnostic
  * @param lineOffset Line offset from the file
  * @param columnOffset Column offset from the file
  */
-function updateDiagnosticOffset(diagnostic: Diagnostic, lineOffset: number, columnOffset: number) {
-
+function updateDiagnosticOffset(
+    diagnostic: Diagnostic,
+    lineOffset: number,
+    columnOffset: number
+) {
     const start = diagnostic.range.start;
     const end = diagnostic.range.end;
 

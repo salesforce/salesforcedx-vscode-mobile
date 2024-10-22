@@ -8,8 +8,11 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
-import { ASTNode, visit } from 'graphql';
+import type { ASTNode } from 'graphql';
+import { visit } from 'graphql';
+import { findEntityNode } from '../../utils/gqlUtils';
 
+export const RULE_ID = 'over-sized-field';
 export class OversizedField implements DiagnosticProducer<ASTNode> {
     async validateDocument(
         textDocument: TextDocument,
@@ -24,10 +27,17 @@ export class OversizedField implements DiagnosticProducer<ASTNode> {
                     if (node.name.value !== 'node' || !node.selectionSet) {
                         return;
                     }
+                    if (Array.isArray(ancestors)) {
+                        findEntityNode(ancestors);
+                    }
                 }
             }
         });
 
         return results;
+    }
+
+    getId(): string {
+        return RULE_ID;
     }
 }

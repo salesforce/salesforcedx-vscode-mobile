@@ -10,16 +10,40 @@ import { ASTNode, FieldNode, Kind } from 'graphql';
 export function findEntityNode(
     propertyNodeancestors: ReadonlyArray<ASTNode>
 ): FieldNode {
-    if (propertyNodeancestors.length < 2) {
-        throw new Error('No entity node exists');
-    }
-    const parent = propertyNodeancestors[0];
-    if (parent.kind !== Kind.FIELD || parent.name.value !== 'edges') {
+    const parentFieldAncestorIndex = findCloseAncestorWithType(
+        propertyNodeancestors,
+        Kind.FIELD
+    );
+    if (
+        parentFieldAncestorIndex === -1 ||
+        (propertyNodeancestors[parentFieldAncestorIndex] as FieldNode).name
+            .value !== 'edges'
+    ) {
         throw new Error('No edges node exists');
     }
-    const grandParent = propertyNodeancestors[1];
-    if (parent.kind !== Kind.FIELD) {
+
+    const grandParentFieldAncestorIndex = findCloseAncestorWithType(
+        propertyNodeancestors,
+        Kind.FIELD,
+        parentFieldAncestorIndex + 1
+    );
+
+    if (grandParentFieldAncestorIndex === -1) {
         throw new Error('No entity node exists');
     }
-    return grandParent as FieldNode;
+
+    return propertyNodeancestors[grandParentFieldAncestorIndex] as FieldNode;
+}
+
+function findCloseAncestorWithType(
+    ancesters: ReadonlyArray<ASTNode>,
+    type: Kind,
+    startIndex?: number
+): number {
+    for (let i = 0; i < ancesters.length; i++) {
+        if (ancesters[i].kind === type) {
+            return i;
+        }
+    }
+    return -1;
 }
