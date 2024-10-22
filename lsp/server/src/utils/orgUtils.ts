@@ -45,6 +45,9 @@ export class OrgUtils {
     >();
     public static entities: string[] = [];
 
+    private static sfdxDirWatcher: fs.FSWatcher | undefined;
+    private static sfDirWatcher: fs.FSWatcher | undefined;
+
     static sfdxFolder = '.sfdx';
     /**
      * The global folder in which sf state is stored.
@@ -84,12 +87,23 @@ export class OrgUtils {
 
     // Watches SF project config changes.
     public static watchConfig() {
-        fs.watch(this.SFDX_DIR, (eventType, fileName) => {
+        this.sfdxDirWatcher = fs.watch(this.SFDX_DIR, (eventType, fileName) => {
             this.onAuthOrgChanged();
         });
-        fs.watch(this.SF_DIR, (eventType, fileName) => {
+        this.sfDirWatcher = fs.watch(this.SF_DIR, (eventType, fileName) => {
             this.onAuthOrgChanged();
         });
+    }
+
+    public static unWatchConfig() {
+        if (this.sfdxDirWatcher !== undefined) {
+            this.sfdxDirWatcher.close();
+            this.sfdxDirWatcher = undefined;
+        }
+        if (this.sfDirWatcher !== undefined) {
+            this.sfDirWatcher.close();
+            this.sfDirWatcher = undefined;
+        }
     }
 
     private static async getDefaultUserName(): Promise<string | undefined> {
