@@ -17,7 +17,11 @@ import {
 
 let client: LanguageClient;
 
-export function activate(context: ExtensionContext) {
+export function activate(
+    context: ExtensionContext, 
+    updateDiagnosticsSettingCommand: string,
+    diagnosticsSettingSection: string
+) {
     // The server is implemented in node
     const serverModule = context.asAbsolutePath(
         path.join('lsp/server', 'out', 'server.js')
@@ -34,7 +38,7 @@ export function activate(context: ExtensionContext) {
     };
 
     // Get extension name
-    const extensionName = context.extension.packageJSON.contributes.configuration.title;
+    const extensionTitle = context.extension.packageJSON.contributes.configuration.title;
 
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {
@@ -48,7 +52,9 @@ export function activate(context: ExtensionContext) {
             fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
         },
         initializationOptions: {
-            extensionName
+            extensionTitle,
+            updateDiagnosticsSettingCommand,
+            diagnosticsSettingSection
         }
     };
 

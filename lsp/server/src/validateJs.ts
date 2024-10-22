@@ -11,49 +11,45 @@ import { parseJs } from './utils/babelUtil';
 import { Node } from '@babel/types';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-change-not-aware';
+import { isTheDiagnosticSuppressed, DiagnosticSettings } from './diagnostic/DiagnosticSettings';
 
-const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [];
-jsDiagnosticProducers.push(new AdaptersLocalChangeNotAware());
+const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [
+    new AdaptersLocalChangeNotAware()
+];
 
 /**
  * Validate JavaScript file content.
  * @param fileContent The JavaScript file content
- * @param maxCount The maximum number of diagnostics to report
  * @returns An array of diagnostics found within the JavaScript file
  */
 export async function validateJs(
-    textDocument: TextDocument,
-    maxCount: number
+    setting: DiagnosticSettings,
+    textDocument: TextDocument
 ): Promise<Diagnostic[]> {
-    const results: Diagnostic[] = [];
-    if (maxCount <= 0) {
-        return results;
-    }
-
-    if (jsDiagnosticProducers.length > 0) {
+    let results: Diagnostic[] = [];
+    
+    const producers = jsDiagnosticProducers.filter((producer) => {
+        return !isTheDiagnosticSuppressed(setting, producer.getId())
+    });
+    
+    if (producers.length > 0) {
         try {
             const jsNode = parseJs(textDocument.getText());
             for (const producer of jsDiagnosticProducers) {
-                if (results.length >= maxCount) {
-                    break;
-                }
+             
+                const producerId = producer.getId()
                 const diagnostics = await producer.validateDocument(
                     textDocument,
                     jsNode
                 );
-
-                const allowedCount = maxCount - results.length;
-                const diagnosticsToAppend =
-                    allowedCount >= diagnostics.length
-                        ? diagnostics
-                        : diagnostics.slice(
-                              0,
-                              diagnostics.length - allowedCount
-                          );
-
-                results.push(...diagnosticsToAppend);
+                diagnostics.forEach((diagnostic) => {
+                    diagnostic.data = producerId;
+                });
+                results = results.concat(diagnostics);
             }
         } catch (e) {} // Silence error since JS parsing error crashes app.
     }
     return results;
 }
+
+

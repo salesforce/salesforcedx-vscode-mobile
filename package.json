@@ -75,6 +75,16 @@
                     "type": "string",
                     "default": "^8.47.0",
                     "description": "%extension.commands.salesforce-mobile-offline.eslint.version%"
+                },
+                "salesforceMobileExtension.diagnostics.suppressAll": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Suppress all problem detection"
+                },
+                "salesforceMobileExtension.diagnostics.suppressByRuleId": {
+                    "type": "array",
+                    "default": [],
+                    "description": "Suppress problem detection specifically for one or more rule IDs"
                 }
             }
         }
@@ -84,7 +94,7 @@
     },
     "scripts": {
         "clean": "rimraf out ./lsp/server/out ./lsp/client/out",
-        "compile": "tsc -b ./",
+        "compile": "rimraf ./lsp/server/tsconfig.tsbuildinfo ./lsp/client/tsconfig.tsbuildinfo && tsc -b ./",
         "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
