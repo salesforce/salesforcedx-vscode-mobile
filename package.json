@@ -76,12 +76,12 @@
                     "default": "^8.47.0",
                     "description": "%extension.commands.salesforce-mobile-offline.eslint.version%"
                 },
-                "salesforceMobileExtension.diagnostics.suppressAll": {
+                "mobileDiagnostics.suppressAll": {
                     "type": "boolean",
                     "default": false,
                     "description": "Suppress all problem detection"
                 },
-                "salesforceMobileExtension.diagnostics.suppressByRuleId": {
+                "mobileDiagnostics.suppressByRuleId": {
                     "type": "array",
                     "default": [],
                     "description": "Suppress problem detection specifically for one or more rule IDs"
