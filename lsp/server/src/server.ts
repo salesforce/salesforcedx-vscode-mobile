@@ -161,6 +161,10 @@ connection.languages.diagnostics.on(async (params) => {
 
 // Watch SF config file change
 OrgUtils.watchConfig();
+connection.onExit(function () {
+    OrgUtils.unWatchConfig();
+});
+
 connection.onCodeAction((params) => {
     const textDocument = documentCache.get(params.textDocument.uri);
     const diagnostics = params.context.diagnostics;
