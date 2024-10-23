@@ -20,13 +20,27 @@ suite(
                 'graphql',
                 1,
                 `
-            query {
+            sampleQuery {
                 uiapi {
                     query {
-                        Gadget {
+                        Account {
                             edges {
                                 node {
                                     Name { value }
+                                    Contacts {
+                                      edges {
+                                        node {
+                                          name {
+                                            value
+                                          }
+                                        }
+                                      }
+                                    }
+                                    LastModifiedBy {
+                                       name {
+                                         value
+                                       }
+                                    }
                                 }
                             }
                         }
