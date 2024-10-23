@@ -17,6 +17,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { WorkspaceUtils } from './workspaceUtils';
 import { ObjectInfoRepresentation } from '../types';
+import { connection } from '../server';
 
 enum AuthStatus {
     UNKNOWN,
@@ -80,6 +81,9 @@ export class OrgUtils {
 
     private static onAuthOrgChanged() {
         this.reset();
+        if (connection !== null) {
+            connection.languages.diagnostics.refresh();
+        }
     }
 
     // Watches SF project config changes.
