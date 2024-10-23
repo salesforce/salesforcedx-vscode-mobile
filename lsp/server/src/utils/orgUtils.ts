@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
+ * Copyright (c) 2024, salesforce.com, inc.
  * All rights reserved.
  * SPDX-License-Identifier: MIT
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
@@ -73,7 +73,7 @@ export class OrgUtils {
 
         if (currentUserConfig.value) {
             this.orgName = currentUserConfig.value.toString();
-            return Promise.resolve(this.orgName);
+            return this.orgName;
         }
         return Promise.reject('no org');
     }
