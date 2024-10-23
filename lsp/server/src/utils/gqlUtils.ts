@@ -13,12 +13,12 @@ import { OrgUtils } from './orgUtils';
 import { FieldRepresentation, ObjectInfoRepresentation } from '../types';
 import { file } from '@babel/types';
 
-const MAX_FIELD_SIZE = 32768;
+const MAX_FIELD_SIZE = 200;
 
 interface EntityNode {
     node: FieldNode;
     name: string | undefined;
-    size: number;
+    size: number | undefined;
     relationships: Array<RelatedEntity>;
     properties: Array<PropertyNode>;
 }
@@ -38,7 +38,7 @@ export interface RelatedEntity {
 interface PropertyNode {
     node: FieldNode;
     property: string;
-    size: number;
+    size: number | undefined;
 }
 
 interface OperationNode {
@@ -119,7 +119,7 @@ export function generateDiagnosticTree(rootASTNode: ASTNode): RootNode {
                     const entity: EntityNode = {
                         node,
                         name: node.name.value,
-                        size: -1,
+                        size: undefined,
                         relationships: [],
                         properties: []
                     };
@@ -153,31 +153,6 @@ export function generateDiagnosticTree(rootASTNode: ASTNode): RootNode {
                         true
                     );
                 }
-                // if (node.name.value !== 'node' || !node.selectionSet) {
-                //     return;
-                // }
-                // if (!Array.isArray(ancestors)) {
-                //     return;
-                // }
-                // const targetNode = findEntityNode(ancestors);
-                // const propertyNodes = findEntityProperties(node);
-                // const topElement = stack[stack.length - 1];
-                // const entityNode: EntityNode = {
-                //     node: targetNode,
-                //     name: undefined,
-                //     relationships: [],
-                //     size: -1,
-                //     properties: propertyNodes
-                // };
-                // if (isEntityNode(topElement)) {
-                //     const relatedEntitiy: RelatedEntity = {
-                //         relation: Relation.CHILD,
-                //         name: entityNode.node.name.value,
-                //         entity: entityNode
-                //     };
-                //     topElement.relationships.push(relatedEntitiy);
-                // }
-                // stack.push(entityNode);
             },
             leave(node, key, parent, path, ancestors) {
                 if (
@@ -324,6 +299,14 @@ export async function createDiagnostics(
     return results;
 }
 
+function getFieldSize(
+    objectinfo: ObjectInfoRepresentation,
+    fieldName: string
+): number | undefined {
+    const fieldInfo = objectinfo.fields[fieldName];
+
+    return fieldInfo === undefined ? undefined : fieldInfo.length;
+}
 /**
  * Recursively research for FieldNode with large records.
  * @param entityNode
@@ -341,12 +324,11 @@ async function generateDiagnostic(
         }
         const fieldInfos = objectInfo.fields;
         for (const propertyNode of entityNode.properties) {
-            const fieldInfo = fieldInfos[propertyNode.property];
-            if (fieldInfo !== undefined) {
-                propertyNode.size = fieldInfo.length;
-                if (propertyNode.size > MAX_FIELD_SIZE) {
-                    results.push(propertyNode.node);
-                }
+            const fieldSize = getFieldSize(objectInfo, propertyNode.property);
+
+            propertyNode.size = fieldSize;
+            if (fieldSize !== undefined && fieldSize > MAX_FIELD_SIZE) {
+                results.push(propertyNode.node);
             }
         }
         for (const relation of entityNode.relationships) {

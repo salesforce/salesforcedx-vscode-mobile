@@ -15,33 +15,31 @@ import {
     createDiagnostics
 } from '../../utils/gqlUtils';
 
+const OVER_SIZED_FIELD_MESSAGE =
+    'The fetched field max size could be more than 32,768 bytes.';
+const SEVERITY = DiagnosticSeverity.Information;
+
 export const RULE_ID = 'over-sized-field';
 export class OversizedField implements DiagnosticProducer<ASTNode> {
     async validateDocument(
         textDocument: TextDocument,
         rootNode: ASTNode
     ): Promise<Diagnostic[]> {
-        const results: Diagnostic[] = [];
-
         const rootDiagnosticNode = generateDiagnosticTree(rootNode);
         const rawDiagNodes = await createDiagnostics(rootDiagnosticNode);
-
-        // visit(rootNode, {
-        //     // eslint-disable-next-line @typescript-eslint/naming-convention
-        //     Field: {
-        //         enter(node, key, parent, path, ancestors) {
-        //             if (node.name.value !== 'node' || !node.selectionSet) {
-        //                 return;
-        //             }
-        //             if (!Array.isArray(ancestors)) {
-        //                 return;
-        //             }
-        //             const entityNode = findEntityNode(ancestors);
-        //         }
-        //     }
-        // });
-
-        return results;
+        return rawDiagNodes.map((rawNode) => {
+            const nameNode = rawNode.name;
+            return {
+                severity: SEVERITY,
+                range: {
+                    start: textDocument.positionAt(
+                        nameNode.loc?.start as number
+                    ),
+                    end: textDocument.positionAt(nameNode.loc?.end as number)
+                },
+                message: OVER_SIZED_FIELD_MESSAGE
+            };
+        });
     }
 
     getId(): string {

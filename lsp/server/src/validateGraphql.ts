@@ -18,7 +18,7 @@ import {
 import { OversizedField } from './diagnostic/gql/over-sized-field';
 
 const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
-    new MisspelledUiapi(),
+    //new MisspelledUiapi(),
     new OversizedField()
 ];
 

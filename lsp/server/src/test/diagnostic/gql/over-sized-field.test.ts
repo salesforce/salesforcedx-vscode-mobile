@@ -56,7 +56,7 @@ suite(
                                     Contacts {
                                       edges {
                                         node {
-                                          name {
+                                          Name {
                                             value
                                           }
                                           
@@ -64,7 +64,7 @@ suite(
                                       }
                                     }
                                     LastModifiedBy {
-                                       name {
+                                       Name {
                                          value
                                        }
                                     }
@@ -82,6 +82,7 @@ suite(
                 textDocument,
                 astNode
             );
+            assert.equal(diagnostics.length, 1);
         });
     }
 );
