@@ -4,6 +4,8 @@
         "lib": ["es2020"],
         "module": "commonjs",
         "moduleResolution": "node",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
         "sourceMap": true,
         "strict": true,
         "outDir": "out",
@@ -12,5 +14,5 @@
     },
 
     "include": ["src"],
-    "exclude": ["node_modules", ".vscode-test"]
+    "exclude": ["node_modules"]
 }

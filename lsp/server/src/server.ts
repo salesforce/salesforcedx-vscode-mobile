@@ -21,6 +21,8 @@ import {
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
+import { OrgUtils } from './utils/orgUtils';
+import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -42,6 +44,10 @@ let settings = getSettings({});
 const documentCache: Map<string, TextDocument> = new Map();
 
 connection.onInitialize((params: InitializeParams) => {
+    const workspaceFolders = params.workspaceFolders;
+
+    // Sets workspace folder to WorkspaceUtils
+    WorkspaceUtils.setWorkSpaceFolders(workspaceFolders);
     extensionTitle = params.initializationOptions?.extensionTitle;
     updateDiagnosticsSettingCommand =
         params.initializationOptions?.updateDiagnosticsSettingCommand;
@@ -151,6 +157,12 @@ connection.languages.diagnostics.on(async (params) => {
             items: []
         } satisfies DocumentDiagnosticReport;
     }
+});
+
+// Watch SF config file change
+OrgUtils.watchConfig();
+connection.onExit(function () {
+    OrgUtils.unWatchConfig();
 });
 
 connection.onCodeAction((params) => {
