@@ -98,7 +98,12 @@ export function generateDiagnosticTree(rootASTNode: ASTNode): RootNode {
 
         Field: {
             enter(node, key, parent, path, ancestors) {
-                if (!isContentNode(node) || !Array.isArray(ancestors)) {
+                if (
+                    !isContentNode(node) ||
+                    //This is leave like value within {```LastModifiedById { value }} ``` }
+                    node.selectionSet === undefined ||
+                    !Array.isArray(ancestors)
+                ) {
                     return;
                 }
                 const immediateAncestorIndex = findCloseAncestorWithType(
@@ -118,6 +123,12 @@ export function generateDiagnosticTree(rootASTNode: ASTNode): RootNode {
                         relationships: [],
                         properties: []
                     };
+                    const topElement = stack[stack.length - 1];
+                    if (isOperationNode(topElement)) {
+                        topElement.entities.push(entity);
+                        stack.push(entity);
+                    }
+                    // add to tree
                 } else if (immediateAncestor.name.value === 'node') {
                     // child relationship
                     let parentEntity = undefined;
@@ -168,8 +179,12 @@ export function generateDiagnosticTree(rootASTNode: ASTNode): RootNode {
                 // }
                 // stack.push(entityNode);
             },
-            leave(node, key, parent, path, ancesters) {
-                if (!isContentNode(node)) {
+            leave(node, key, parent, path, ancestors) {
+                if (
+                    !isContentNode(node) ||
+                    node.selectionSet === undefined ||
+                    !Array.isArray(ancestors)
+                ) {
                     return;
                 }
                 const topElement = stack[stack.length - 1];
@@ -296,11 +311,17 @@ function handlePropertyWithRelation(
 //     //     size: -1
 //     // };
 // }
-export async function createDiagnostics(rootNode: RootNode) {
+export async function createDiagnostics(
+    rootNode: RootNode
+): Promise<Array<FieldNode>> {
+    const results: FieldNode[] = [];
+
     for (const operationNode of rootNode.operations) {
         for (const entityNode of operationNode.entities) {
+            await generateDiagnostic(entityNode, results);
         }
     }
+    return results;
 }
 
 /**
@@ -341,7 +362,7 @@ async function generateDiagnostic(
                 relation.entity.name = entityName;
             }
 
-            generateDiagnostic(relation.entity, results);
+            await generateDiagnostic(relation.entity, results);
         }
     }
 }
@@ -353,7 +374,7 @@ function findEntityName(
     if (relationship.relation === Relation.CHILD) {
         const childRelationships = objectInfo.childRelationships;
         const targetChildRelation = childRelationships.find((childRelation) => {
-            childRelation.relationshipName === relationship.name;
+            return childRelation.relationshipName === relationship.name;
         });
         if (targetChildRelation) {
             return targetChildRelation.childObjectApiName;
@@ -443,7 +464,7 @@ export function findEntityNodeForProperty(
 
     if (
         grandParentFieldAncestorIndex === -1 ||
-        (propertyNodeancestors[parentFieldAncestorIndex] as FieldNode).name
+        (propertyNodeancestors[grandParentFieldAncestorIndex] as FieldNode).name
             .value !== 'edges'
     ) {
         throw new Error('No edges node exists');

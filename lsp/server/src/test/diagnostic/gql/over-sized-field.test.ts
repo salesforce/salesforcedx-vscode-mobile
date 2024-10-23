@@ -7,20 +7,46 @@
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { suite, test } from 'mocha';
+import Account from '../../../../testFixture/objectInfos/Account.json';
+import User from '../../../../testFixture/objectInfos/User.json';
+import Contact from '../../../../testFixture/objectInfos/Contact.json';
 import * as assert from 'assert';
+import * as sinon from 'sinon';
 
 import { parse } from 'graphql';
 import { OversizedField } from '../../../diagnostic/gql/over-sized-field';
+import { OrgUtils } from '../../../utils/orgUtils';
+import { ObjectInfoRepresentation } from '../../../types';
 suite(
     'GraphQL Diagnostics Test Suite - Server - Oversized GraphQL Field',
     () => {
+        let sandbox: sinon.SinonSandbox;
+        beforeEach(function () {
+            sandbox = sinon.createSandbox();
+        });
+
+        afterEach(function () {
+            sandbox.restore();
+        });
+
         test('Oversized rich text area field', async () => {
+            const getObjectInfoStub = sandbox.stub(OrgUtils, 'getObjectInfo');
+            getObjectInfoStub
+                .onCall(0)
+                .resolves(Account as unknown as ObjectInfoRepresentation);
+            getObjectInfoStub
+                .onCall(1)
+                .resolves(Contact as unknown as ObjectInfoRepresentation);
+            getObjectInfoStub
+                .onCall(2)
+                .resolves(User as unknown as ObjectInfoRepresentation);
+
             const textDocument = TextDocument.create(
                 '',
                 'graphql',
                 1,
                 `
-            sampleQuery {
+            query {
                 uiapi {
                     query {
                         Account {
@@ -33,6 +59,7 @@ suite(
                                           name {
                                             value
                                           }
+                                          
                                         }
                                       }
                                     }

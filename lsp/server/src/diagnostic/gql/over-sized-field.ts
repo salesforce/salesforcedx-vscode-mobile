@@ -10,7 +10,10 @@ import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 import type { ASTNode } from 'graphql';
 import { visit } from 'graphql';
-import { findEntityNode } from '../../utils/gqlUtils';
+import {
+    generateDiagnosticTree,
+    createDiagnostics
+} from '../../utils/gqlUtils';
 
 export const RULE_ID = 'over-sized-field';
 export class OversizedField implements DiagnosticProducer<ASTNode> {
@@ -20,20 +23,23 @@ export class OversizedField implements DiagnosticProducer<ASTNode> {
     ): Promise<Diagnostic[]> {
         const results: Diagnostic[] = [];
 
-        visit(rootNode, {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            Field: {
-                enter(node, key, parent, path, ancestors) {
-                    if (node.name.value !== 'node' || !node.selectionSet) {
-                        return;
-                    }
-                    if (!Array.isArray(ancestors)) {
-                        return;
-                    }
-                    const entityNode = findEntityNode(ancestors);
-                }
-            }
-        });
+        const rootDiagnosticNode = generateDiagnosticTree(rootNode);
+        const rawDiagNodes = await createDiagnostics(rootDiagnosticNode);
+
+        // visit(rootNode, {
+        //     // eslint-disable-next-line @typescript-eslint/naming-convention
+        //     Field: {
+        //         enter(node, key, parent, path, ancestors) {
+        //             if (node.name.value !== 'node' || !node.selectionSet) {
+        //                 return;
+        //             }
+        //             if (!Array.isArray(ancestors)) {
+        //                 return;
+        //             }
+        //             const entityNode = findEntityNode(ancestors);
+        //         }
+        //     }
+        // });
 
         return results;
     }
