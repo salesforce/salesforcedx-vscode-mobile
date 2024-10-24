@@ -43,8 +43,6 @@ export async function validateDocument(
     if (document.languageId === 'html') {
         const diagnostics = await validateHtml(setting, document);
         results = results.concat(diagnostics);
-        var aaa = 0;
-        aaa = 1;
     }
 
     // Set the source for diagnostic source.

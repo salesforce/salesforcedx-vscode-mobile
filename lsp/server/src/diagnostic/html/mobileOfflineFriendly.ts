@@ -5,8 +5,6 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-// import { Node, isCallExpression } from '@babel/types';
-// import traverse from '@babel/traverse';
 import { Node, HTMLDocument } from 'vscode-html-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { DiagnosticProducer } from '../DiagnosticProducer';
@@ -15,7 +13,6 @@ import { transformYamlToObject } from '../../utils/yamlParser';
 import * as path from 'path';
 import * as fs from 'fs';
 
-// const SEVERITY = DiagnosticSeverity.Information;
 const baseComponentsAttributes = { values: getBaseComponentsAttributes() };
 
 export const RULE_ID = 'mobile-offline-friendly';
@@ -37,7 +34,7 @@ export class MobileOfflineFriendly implements DiagnosticProducer<HTMLDocument> {
         const diagnostics: Diagnostic[] = [];
 
         try {
-            const customTags = findTags(data, nonOfflinebaseComponents);
+            const customTags = findTags(data, nonOfflineBaseComponents);
             for (const tag of customTags) {
                 const diagnostic: Diagnostic = {
                     severity: DiagnosticSeverity.Warning,
