@@ -10,16 +10,14 @@ import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
 import { Diagnostic } from 'vscode-languageserver/node';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { MisspelledUiapi } from './diagnostic/gql/misspelled-uiapi';
 import {
     DiagnosticSettings,
     isTheDiagnosticSuppressed
 } from './diagnostic/DiagnosticSettings';
-import { OversizedField } from './diagnostic/gql/over-sized-field';
+import { OversizedRecord as OversizedRequest } from './diagnostic/gql/over-sized-record';
 
 const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
-    //new MisspelledUiapi(),
-    new OversizedField()
+    new OversizedRequest(),
 ];
 
 /**

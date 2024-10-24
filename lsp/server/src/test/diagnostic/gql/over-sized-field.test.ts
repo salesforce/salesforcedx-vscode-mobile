@@ -14,7 +14,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 
 import { parse } from 'graphql';
-import { OversizedField } from '../../../diagnostic/gql/over-sized-field';
+import { OversizedRecord } from '../../../diagnostic/gql/over-sized-record';
 import { OrgUtils } from '../../../utils/orgUtils';
 import { ObjectInfoRepresentation } from '../../../types';
 suite(
@@ -78,7 +78,7 @@ suite(
             );
 
             const astNode = parse(textDocument.getText());
-            const diagnostics = await new OversizedField().validateDocument(
+            const diagnostics = await new OversizedRecord().validateDocument(
                 textDocument,
                 astNode
             );
