@@ -18,7 +18,7 @@ import {
 let client: LanguageClient;
 
 export function activate(
-    context: ExtensionContext, 
+    context: ExtensionContext,
     updateDiagnosticsSettingCommand: string,
     diagnosticsSettingSection: string
 ) {
@@ -38,14 +38,15 @@ export function activate(
     };
 
     // Get extension name
-    const extensionTitle = context.extension.packageJSON.contributes.configuration.title;
+    const extensionTitle =
+        context.extension.packageJSON.contributes.configuration.title;
 
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {
-        // Register the server for plain text documents
         documentSelector: [
-            // watch all js file, to be fine tuned to watch lwc js.
-            { scheme: 'file', language: 'javascript' }
+            // Watch all js and html files, to be fine-tuned to watch for files in LWC bundle.
+            { scheme: 'file', language: 'javascript' },
+            { scheme: 'file', language: 'html' }
         ],
         synchronize: {
             // Notify the server about file changes to '.clientrc files contained in the workspace

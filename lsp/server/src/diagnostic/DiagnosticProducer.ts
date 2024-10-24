@@ -9,9 +9,8 @@ import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 export interface DiagnosticProducer<T> {
-
     /**
-     * Get the Id for the diagnostic producer. 
+     * Get the Id for the diagnostic producer.
      */
     getId(): string;
 
@@ -25,5 +24,4 @@ export interface DiagnosticProducer<T> {
         textDocument: TextDocument,
         data: T
     ): Promise<Diagnostic[]>;
-
 }
