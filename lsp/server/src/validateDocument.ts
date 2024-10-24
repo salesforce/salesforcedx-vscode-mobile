@@ -32,16 +32,10 @@ export async function validateDocument(
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        const jsDiagnostics = await validateJs(
-            setting,
-            document
-        );
-        
+        const jsDiagnostics = await validateJs(setting, document);
+
         // handle graphql rules
-        const graphqlDiagnostics = await validateGraphql(
-            setting,
-            document
-        );
+        const graphqlDiagnostics = await validateGraphql(setting, document);
 
         results = results.concat(jsDiagnostics, graphqlDiagnostics);
     }
@@ -49,8 +43,8 @@ export async function validateDocument(
     if (document.languageId === 'html') {
         const diagnostics = await validateHtml(setting, document);
         results = results.concat(diagnostics);
-        var aaa  = 0;
-        aaa = 1
+        var aaa = 0;
+        aaa = 1;
     }
 
     // Set the source for diagnostic source.

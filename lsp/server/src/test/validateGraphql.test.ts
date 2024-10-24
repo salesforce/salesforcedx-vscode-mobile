@@ -11,7 +11,6 @@ import * as assert from 'assert';
 import { suite, test } from 'mocha';
 
 suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
-
     test('Valid uiapi missing diagnostic', async () => {
         const textDocument = TextDocument.create(
             'file://test.js',

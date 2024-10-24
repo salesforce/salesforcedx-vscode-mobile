@@ -11,7 +11,10 @@ import { parseJs } from './utils/babelUtil';
 import { Node } from '@babel/types';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-change-not-aware';
-import { isTheDiagnosticSuppressed, DiagnosticSettings } from './diagnostic/DiagnosticSettings';
+import {
+    isTheDiagnosticSuppressed,
+    DiagnosticSettings
+} from './diagnostic/DiagnosticSettings';
 
 const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [
     new AdaptersLocalChangeNotAware()
@@ -27,17 +30,16 @@ export async function validateJs(
     textDocument: TextDocument
 ): Promise<Diagnostic[]> {
     let results: Diagnostic[] = [];
-    
+
     const producers = jsDiagnosticProducers.filter((producer) => {
-        return !isTheDiagnosticSuppressed(setting, producer.getId())
+        return !isTheDiagnosticSuppressed(setting, producer.getId());
     });
-    
+
     if (producers.length > 0) {
         try {
             const jsNode = parseJs(textDocument.getText());
             for (const producer of jsDiagnosticProducers) {
-             
-                const producerId = producer.getId()
+                const producerId = producer.getId();
                 const diagnostics = await producer.validateDocument(
                     textDocument,
                     jsNode
@@ -51,5 +53,3 @@ export async function validateJs(
     }
     return results;
 }
-
-

@@ -7,10 +7,7 @@
 
 // import { Node, isCallExpression } from '@babel/types';
 // import traverse from '@babel/traverse';
-import {
-    Node,
-    HTMLDocument,
-} from 'vscode-html-languageservice';
+import { Node, HTMLDocument } from 'vscode-html-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
@@ -24,19 +21,21 @@ const baseComponentsAttributes = { values: getBaseComponentsAttributes() };
 export const RULE_ID = 'mobile-offline-friendly';
 
 export class MobileOfflineFriendly implements DiagnosticProducer<HTMLDocument> {
-
     getId(): string {
         return RULE_ID;
     }
 
-    async validateDocument(textDocument: TextDocument, data: HTMLDocument): Promise<Diagnostic[]> {
+    async validateDocument(
+        textDocument: TextDocument,
+        data: HTMLDocument
+    ): Promise<Diagnostic[]> {
         const nonOfflinebaseComponents = getKeysWithoutSpecificValue(
             baseComponentsAttributes.values,
             'MobileOffline'
         );
-        
+
         const diagnostics: Diagnostic[] = [];
-    
+
         try {
             const customTags = findTags(data, nonOfflinebaseComponents);
             for (const tag of customTags) {
@@ -55,7 +54,7 @@ export class MobileOfflineFriendly implements DiagnosticProducer<HTMLDocument> {
             // down LSP with it.
             console.error(error);
         }
-    
+
         return diagnostics;
     }
 }

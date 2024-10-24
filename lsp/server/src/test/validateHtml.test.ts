@@ -29,7 +29,7 @@ suite('Diagnostics Test Suite - Server - Validate html', () => {
             </template>
             `
         );
-        
+
         const diagnostics = await validateHtml({}, textDocument);
         assert.equal(diagnostics.length, 2);
     });
@@ -56,7 +56,7 @@ suite('Diagnostics Test Suite - Server - Validate html', () => {
             </template>
             `
         );
-        
+
         const diagnostics = await validateHtml({}, textDocument);
         assert.equal(diagnostics.length, 3);
     });

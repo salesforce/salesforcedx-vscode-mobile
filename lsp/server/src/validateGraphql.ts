@@ -11,7 +11,10 @@ import { Diagnostic } from 'vscode-languageserver/node';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { MisspelledUiapi } from './diagnostic/gql/misspelled-uiapi';
-import { DiagnosticSettings, isTheDiagnosticSuppressed } from './diagnostic/DiagnosticSettings';
+import {
+    DiagnosticSettings,
+    isTheDiagnosticSuppressed
+} from './diagnostic/DiagnosticSettings';
 
 const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
     new MisspelledUiapi()
@@ -26,7 +29,6 @@ export async function validateGraphql(
     textDocument: TextDocument
 ): Promise<Diagnostic[]> {
     const results: Diagnostic[] = [];
-
 
     const producers = diagnosticProducers.filter((producer) => {
         return !isTheDiagnosticSuppressed(setting, producer.getId());
@@ -50,10 +52,15 @@ export async function validateGraphql(
     for (const query of graphQueries) {
         const lineOffset = query.locationOffset.line - 1;
         const columnOffset = query.locationOffset.column + 1;
-        const graphqlTextDocument = TextDocument.create(``, 'graphql', 1, query.body);
+        const graphqlTextDocument = TextDocument.create(
+            ``,
+            'graphql',
+            1,
+            query.body
+        );
         const diagnostics = await validateOneGraphQuery(
-            producers, 
-            graphqlTextDocument, 
+            producers,
+            graphqlTextDocument,
             query.body
         );
         // Update the range offset correctly
@@ -74,23 +81,23 @@ export async function validateGraphql(
  */
 export async function validateOneGraphQuery(
     producers: DiagnosticProducer<ASTNode>[],
-    textDocument: TextDocument, 
+    textDocument: TextDocument,
     graphql: string
 ): Promise<Diagnostic[]> {
-  
     try {
         const graphqlAstNode = parse(graphql);
         const allResults = await Promise.all(
             producers.map((producer) => {
-                return producer.validateDocument(textDocument, graphqlAstNode)
-                 .then((diagnostics) => {
-                    const producerId = producer.getId();
-                     diagnostics.forEach((diagnostic) => {
-                         diagnostic.data = producerId;
-                     });
-                     return diagnostics;
-                 })
-             })
+                return producer
+                    .validateDocument(textDocument, graphqlAstNode)
+                    .then((diagnostics) => {
+                        const producerId = producer.getId();
+                        diagnostics.forEach((diagnostic) => {
+                            diagnostic.data = producerId;
+                        });
+                        return diagnostics;
+                    });
+            })
         );
         return allResults.flat();
     } catch (e) {
