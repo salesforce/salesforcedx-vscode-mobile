@@ -89,7 +89,7 @@ function camelToKebabCase(str: string): string {
 }
 
 /**
- * Parse componenent-experiences.yaml come in a format like this
+ * Parse component-experiences.yaml come in a format like this
  *
  * ```
  * {
