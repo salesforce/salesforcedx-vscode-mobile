@@ -33,29 +33,22 @@ export class OversizedRecord implements DiagnosticProducer<ASTNode> {
 
         const { overSizedEntities, overSizedFields } = rawDiagNodes;
 
-        const result: Diagnostic[] = [];
-
-        result.concat(
-            overSizedFields.map((rawNode) => {
+        return [
+            ...overSizedFields.map((rawNode) => {
                 return createLspDiagnostic(
                     textDocument,
                     rawNode,
                     OVER_SIZED_FIELD_MESSAGE
                 );
-            })
-        );
-
-        result.concat(
-            overSizedEntities.map((rawNode) => {
+            }),
+            ...overSizedEntities.map((rawNode) => {
                 return createLspDiagnostic(
                     textDocument,
                     rawNode,
                     OVER_SIZED_RECORD_MESSAGE
                 );
             })
-        );
-
-        return result;
+        ];
     }
 
     getId(): string {
