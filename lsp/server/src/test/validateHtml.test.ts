@@ -6,11 +6,11 @@
  */
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { validateMobileOffline } from '../validateMobileOffline';
-import * as assert from 'assert';
+import { validateHtml } from '../validateHtml';
 import { suite, test } from 'mocha';
+import * as assert from 'assert';
 
-suite('Diagnostics Test Suite - Server - Validate Mobile Offline', () => {
+suite('Diagnostics Test Suite - Server - Validate html', () => {
     test('Correct number of non-friendly mobile offline base components is determined', async () => {
         const textDocument = TextDocument.create(
             'file://test.html',
@@ -29,7 +29,8 @@ suite('Diagnostics Test Suite - Server - Validate Mobile Offline', () => {
             </template>
             `
         );
-        const diagnostics = await validateMobileOffline(textDocument);
+        
+        const diagnostics = await validateHtml({}, textDocument);
         assert.equal(diagnostics.length, 2);
     });
 
@@ -55,7 +56,8 @@ suite('Diagnostics Test Suite - Server - Validate Mobile Offline', () => {
             </template>
             `
         );
-        const diagnostics = await validateMobileOffline(textDocument);
+        
+        const diagnostics = await validateHtml({}, textDocument);
         assert.equal(diagnostics.length, 3);
     });
 });

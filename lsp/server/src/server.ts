@@ -24,11 +24,6 @@ import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
-import { validateTextDocument } from './validateMobileOffline';
-import { validateMobileOffline } from './validateMobileOffline';
-import { transformYamlToObject } from './utils/yamlParser';
-import * as path from 'path';
-import * as fs from 'fs';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -152,7 +147,7 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validateDocument(document, extensionName)
+            items: await validateDocument(settings, document, extensionTitle)
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk
@@ -163,15 +158,6 @@ connection.languages.diagnostics.on(async (params) => {
         } satisfies DocumentDiagnosticReport;
     }
 });
-
-
-documents.onDidChangeContent((change) => {
-    const document = change.document;
-    if (document.uri.endsWith('.html')) {
-        validateMobileOffline(document);
-    }
-});
-
 
 // Watch SF config file change
 OrgUtils.watchConfig();

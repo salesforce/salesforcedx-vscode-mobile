@@ -1,46 +1,63 @@
+/*
+ * Copyright (c) 2024, salesforce.com, inc.
+ * All rights reserved.
+ * SPDX-License-Identifier: MIT
+ * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
+ */
+
+// import { Node, isCallExpression } from '@babel/types';
+// import traverse from '@babel/traverse';
 import {
     Node,
     HTMLDocument,
-    getLanguageService
 } from 'vscode-html-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
-import { transformYamlToObject } from './utils/yamlParser';
+import { transformYamlToObject } from '../../utils/yamlParser';
 import * as path from 'path';
 import * as fs from 'fs';
 
+// const SEVERITY = DiagnosticSeverity.Information;
 const baseComponentsAttributes = { values: getBaseComponentsAttributes() };
 
-function getBaseComponentsAttributes(): Record<string, string[]> {
-    const yamlPath = path.join(
-        __dirname,
-        'resources',
-        'component-experiences.yaml'
-    );
+export const RULE_ID = 'mobile-offline-friendly';
 
-    let values: Record<string, string[]> = {};
+export class MobileOfflineFriendly implements DiagnosticProducer<HTMLDocument> {
 
-    try {
-        const data = fs.readFileSync(yamlPath, 'utf-8');
-        values = transformYamlToObject(data, 'values');
-    } catch (error) {
-        // YAML parsing may fail. In that case log the error but don't bring
-        // down LSP with it.
-        console.error(error);
+    getId(): string {
+        return RULE_ID;
     }
 
-    return values;
-}
-
-function parseHTMLContent(content: string): HTMLDocument {
-    const document = TextDocument.create(
-        'file:///test.html',
-        'html',
-        0,
-        content
-    );
-    const htmlLanguageService = getLanguageService();
-    return htmlLanguageService.parseHTMLDocument(document);
+    async validateDocument(textDocument: TextDocument, data: HTMLDocument): Promise<Diagnostic[]> {
+        const nonOfflinebaseComponents = getKeysWithoutSpecificValue(
+            baseComponentsAttributes.values,
+            'MobileOffline'
+        );
+        
+        const diagnostics: Diagnostic[] = [];
+    
+        try {
+            const customTags = findTags(data, nonOfflinebaseComponents);
+            for (const tag of customTags) {
+                const diagnostic: Diagnostic = {
+                    severity: DiagnosticSeverity.Warning,
+                    range: {
+                        start: textDocument.positionAt(tag.start),
+                        end: textDocument.positionAt(tag.end)
+                    },
+                    message: `<${tag.tag}> is not a mobile offline friendly LWC base component.`
+                };
+                diagnostics.push(diagnostic);
+            }
+        } catch (error) {
+            // HTML parsing may fail. In that case log the error but don't bring
+            // down LSP with it.
+            console.error(error);
+        }
+    
+        return diagnostics;
+    }
 }
 
 function traverse(node: Node, tagNames: string[], tags: Node[]): void {
@@ -103,11 +120,11 @@ function getKeysWithoutSpecificValue(
             key.startsWith('lightning:') &&
             !valueArray.includes(searchString)
         ) {
-            // Base component uses '-' isntead of ':'.
+            // Base component uses '-' instead of ':'.
             // 'lightning' is the namespace.
             const splittedKeys = key.split(':');
 
-            // Base component names appear as camel case in yamel. In html template,
+            // Base component names appear as camel case in yaml. In html template,
             // base component names use kebob case. So convert the name. For example,
             // 'fileUpload' needs to be converted to 'file-upload'.
             const baseComponentNameKebob = camelToKebabCase(splittedKeys[1]);
@@ -122,35 +139,25 @@ function getKeysWithoutSpecificValue(
     return result;
 }
 
-export async function validateMobileOffline(
-    textDocument: TextDocument
-): Promise<Diagnostic[]> {
-    const nonOfflinebaseComponents = getKeysWithoutSpecificValue(
-        baseComponentsAttributes.values,
-        'MobileOffline'
+function getBaseComponentsAttributes(): Record<string, string[]> {
+    const yamlPath = path.join(
+        __dirname,
+        '..',
+        '..',
+        'resources',
+        'component-experiences.yaml'
     );
-    const content = textDocument.getText();
-    const diagnostics: Diagnostic[] = [];
+
+    let values: Record<string, string[]> = {};
 
     try {
-        const htmlDocument = parseHTMLContent(content);
-        const customTags = findTags(htmlDocument, nonOfflinebaseComponents);
-        for (const tag of customTags) {
-            const diagnostic: Diagnostic = {
-                severity: DiagnosticSeverity.Warning,
-                range: {
-                    start: textDocument.positionAt(tag.start),
-                    end: textDocument.positionAt(tag.end)
-                },
-                message: `<${tag.tag}> is not a mobile offline friendly LWC base component.`
-            };
-            diagnostics.push(diagnostic);
-        }
+        const data = fs.readFileSync(yamlPath, 'utf-8');
+        values = transformYamlToObject(data, 'values');
     } catch (error) {
-        // HTML parsing may fail. In that case log the error but don't bring
+        // YAML parsing may fail. In that case log the error but don't bring
         // down LSP with it.
         console.error(error);
     }
 
-    return diagnostics;
+    return values;
 }
