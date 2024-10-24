@@ -29,7 +29,7 @@ export class MobileOfflineFriendly implements DiagnosticProducer<HTMLDocument> {
         textDocument: TextDocument,
         data: HTMLDocument
     ): Promise<Diagnostic[]> {
-        const nonOfflinebaseComponents = getKeysWithoutSpecificValue(
+        const nonOfflineBaseComponents = getKeysWithoutSpecificValue(
             baseComponentsAttributes.values,
             'MobileOffline'
         );
