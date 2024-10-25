@@ -12,10 +12,10 @@ import { visit, Kind } from 'graphql';
 import { OrgUtils } from './orgUtils';
 import { FieldRepresentation, ObjectInfoRepresentation } from '../types';
 
-const MAX_ALLOWED_SIZE = 200;
+const MAX_ALLOWED_SIZE = 32768;
 
 /**
- * Represents an entity node from graphql with total size, and child field grapql ql node.  
+ * Represents an entity node from graphql with total size, and child field grapql ql node.
  */
 export interface EntityNode {
     // The graphql ast node
@@ -24,7 +24,7 @@ export interface EntityNode {
     name: string | undefined;
     // total size of fetched immediate children fields
     size: number | undefined;
-    // Related 
+    // Related
     relationships: Array<RelatedEntity>;
     properties: Array<PropertyNode>;
 }
@@ -41,13 +41,13 @@ export interface RelatedEntity {
     entity: EntityNode | Array<EntityNode>;
 }
 
-// Represents an graphql field node with its pulled from objectInfo. 
+// Represents an graphql field node with its pulled from objectInfo.
 interface PropertyNode {
-    // The field graphql ast node 
+    // The field graphql ast node
     node: FieldNode;
     // The field name
     property: string;
-    // the max size of the field. 
+    // the max size of the field.
     size: number | undefined;
     fieldDefinition?: FieldRepresentation | undefined;
 }
@@ -63,7 +63,7 @@ export interface RootNode {
     operations: Array<OperationNode>;
 }
 
-// Nodes from graphql which doesn't carry information about entity or fields. 
+// Nodes from graphql which doesn't carry information about entity or fields.
 const structureNodeNames = ['uiapi', 'query', 'edges', 'node'];
 
 export type DiagnosticNode =
@@ -186,7 +186,7 @@ export function generateDiagnosticTree(rootASTNode: ASTNode): RootNode {
     return stack.pop() as RootNode;
 }
 
-// The property can be normal property or child relationship. 
+// The property can be normal property or child relationship.
 // It is unkwown at the beginning, but can be evaluated when it is child property is added
 function handlePropertyWithRelation(
     node: FieldNode,
@@ -246,8 +246,8 @@ function handlePropertyWithRelation(
 }
 
 export interface OverSizedDiagnostics {
-    overSizedFields: Array<FieldNode>,
-    overSizedEntities: Array<FieldNode>
+    overSizedFields: Array<FieldNode>;
+    overSizedEntities: Array<FieldNode>;
 }
 
 export async function createDiagnostics(
@@ -289,7 +289,7 @@ async function generateDiagnostic(
         if (objectInfo === undefined) {
             return;
         }
-        const fieldInfos = objectInfo.fields;
+
         let totalSize = 0;
         for (const propertyNode of entityNode.properties) {
             const fieldSize = getFieldSize(objectInfo, propertyNode.property);
@@ -303,11 +303,11 @@ async function generateDiagnostic(
                 if (fieldSize > MAX_ALLOWED_SIZE) {
                     overSizedDiagnostic.overSizedFields.push(propertyNode.node);
                 }
-            } 
+            }
         }
         entityNode.size = totalSize;
         if (totalSize > MAX_ALLOWED_SIZE) {
-            overSizedDiagnostic.overSizedEntities.push(entityNode.node)
+            overSizedDiagnostic.overSizedEntities.push(entityNode.node);
         }
 
         for (const relation of entityNode.relationships) {

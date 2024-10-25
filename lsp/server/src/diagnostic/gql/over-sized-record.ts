@@ -16,13 +16,13 @@ import {
 } from '../../utils/gqlUtils';
 
 const OVER_SIZED_FIELD_MESSAGE =
-    'This field’s value could exceed 32 KB. Large data sizes can have a negative performance impact on mobile apps.';
+    'This field’s value could exceed 32 KB. Large data sizes can negatively affect mobile app performance, potentially resulting in fewer records being returned.';
 const OVER_SIZED_RECORD_MESSAGE =
-    'The total field size of this record could exceed 32 KB. Large data sizes can have a negative performance impact on mobile apps.';
+    'The total data size of all record fields could exceed 32 KB. Large data sizes can negatively affect mobile app performance, potentially resulting in fewer records being returned.';
 
 const SEVERITY = DiagnosticSeverity.Information;
 
-export const RULE_ID = 'over-sized-field';
+export const RULE_ID = 'over-sized-record';
 export class OversizedRecord implements DiagnosticProducer<ASTNode> {
     async validateDocument(
         textDocument: TextDocument,

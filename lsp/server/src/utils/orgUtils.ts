@@ -277,9 +277,8 @@ export class OrgUtils {
                         }
                         return resolve(objectInfo);
                     }
-                } catch (e) {
-                    return resolve(undefined);
-                }
+                } catch (e) {}
+                return resolve(undefined);
             }).finally(() => {
                 this.objectInfoPromises.delete(objectApiName);
             });
