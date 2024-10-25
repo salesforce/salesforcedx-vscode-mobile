@@ -21,9 +21,9 @@ import type { RootNode, EntityNode } from '../../utils/gqlUtils';
 const MAX_ALLOWED_SIZE = 32768;
 
 const OVER_SIZED_FIELD_MESSAGE =
-    'This field’s value could exceed 32 KB. Large data sizes can negatively affect mobile app performance, potentially resulting in fewer records being returned.';
+    'This field’s value could exceed 32 KB. Large data sizes can negatively affect mobile app performance, and potentially result in fewer returned records than expected.';
 const OVER_SIZED_RECORD_MESSAGE =
-    'The total data size of all record fields could exceed 32 KB. Large data sizes can negatively affect mobile app performance, potentially resulting in fewer records being returned.';
+    'The total data size of all record fields could exceed 32 KB. Large data sizes can negatively affect mobile app performance, and potentially result in fewer returned records than expected.';
 
 const SEVERITY = DiagnosticSeverity.Information;
 
