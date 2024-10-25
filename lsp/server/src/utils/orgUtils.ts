@@ -61,7 +61,7 @@ export class OrgUtils {
     }
 
     // Retrieves default organiztion's name.
-    private static async getDefaultOrg(): Promise<string> {
+    private static async getDefaultOrg(): Promise<string | undefined> {
         const aggregator = await ConfigAggregator.create();
 
         await aggregator.reload();
@@ -74,12 +74,15 @@ export class OrgUtils {
             this.orgName = currentUserConfig.value.toString();
             return Promise.resolve(this.orgName);
         }
-        throw new Error('No org exists');
+        return undefined;
     }
 
     private static async getDefaultUserName(): Promise<string | undefined> {
         try {
             const orgName = await this.getDefaultOrg();
+            if (orgName === undefined) {
+                return undefined;
+            }
             const aggregator = await StateAggregator.getInstance();
             const username = aggregator.aliases.getUsername(orgName);
             if (username !== null && username !== undefined) {

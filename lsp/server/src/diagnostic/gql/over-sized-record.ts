@@ -75,17 +75,23 @@ export async function createDiagnostics(
 
     for (const operationNode of rootNode.operations) {
         for (const entityNode of operationNode.entities) {
-            await generateDiagnostic(entityNode, results);
+            try {
+                await generateDiagnostic(entityNode, results);
+            } catch (e) {
+                console.log(
+                    `Cannot conduct over-sized record diagnostic for ${entityNode.name} `
+                );
+            }
         }
     }
     return results;
 }
 
 /**
- * Recursively research for FieldNode with large records.
- * @param entityNode
+ * Recursively search for FieldNode with over-sized record
+ * @param entityNode Entity node
  * @param overSizedFields
- * @returns
+ * @returns over-sized diagnostics
  */
 async function generateDiagnostic(
     entityNode: EntityNode,
@@ -133,7 +139,13 @@ async function generateDiagnostic(
                 relation.entity.name = entityName;
             }
 
-            await generateDiagnostic(relation.entity, overSizedDiagnostic);
+            try {
+                await generateDiagnostic(relation.entity, overSizedDiagnostic);
+            } catch (e) {
+                console.log(
+                    `Cannot conduct over-sized record diagnostic for ${entityNode.name} `
+                );
+            }
         }
     }
 }

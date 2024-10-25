@@ -9,8 +9,7 @@
 import type { ASTNode, FieldNode, OperationDefinitionNode } from 'graphql';
 
 import { visit, Kind } from 'graphql';
-import { OrgUtils } from './orgUtils';
-import { FieldRepresentation, ObjectInfoRepresentation } from '../types';
+import { ObjectInfoRepresentation } from '../types';
 
 /**
  * Represent an entity in graphql query.
@@ -161,7 +160,7 @@ export function generateEntityTree(rootASTNode: ASTNode): RootNode {
                     //Add this node as PropertyNode and update its parent node in EntityTree as ChildRelation Entity
                     let parentEntity = undefined;
                     try {
-                        parentEntity = findEntityNodeForProperty(ancestors);
+                        parentEntity = resolveEntityNodeForProperty(ancestors);
                     } catch (e) {}
                     if (parentEntity === undefined) {
                         return;
@@ -287,6 +286,7 @@ export function resolveEntityNameFromMetadata(
     objectInfo: ObjectInfoRepresentation,
     relatedEntity: RelatedEntity
 ): string | undefined {
+    // Hanle child relationship
     if (relatedEntity.relation === Relation.CHILD) {
         const childRelationships = objectInfo.childRelationships;
         const targetChildRelation = childRelationships.find((childRelation) => {
@@ -296,15 +296,15 @@ export function resolveEntityNameFromMetadata(
             return targetChildRelation.childObjectApiName;
         }
     } else if (relatedEntity.relation === Relation.PARENT) {
+        //Handle parent relationship
         const fields = objectInfo.fields;
         for (const key in fields) {
             const fieldInfo = fields[key];
-            //Handle parent relationship
             if (
                 fieldInfo.relationshipName === relatedEntity.name &&
                 !fieldInfo.polymorphicForeignKey &&
                 fieldInfo.referenceToInfos &&
-                Array.isArray(fieldInfo.referenceToInfos)
+                fieldInfo.referenceToInfos.length > 0
             ) {
                 return fieldInfo.referenceToInfos[0].apiName;
             }
@@ -313,53 +313,62 @@ export function resolveEntityNameFromMetadata(
     return undefined;
 }
 
+// Returns true if the specified node is a RootNode.
 function isRootNode(node: DiagnosticNode): node is RootNode {
     return 'operations' in node;
 }
 
+// Returns true if the specified node is an OperationNode.
 function isOperationNode(node: DiagnosticNode): node is OperationNode {
     return 'entities' in node;
 }
 
+// Returns true if the specified node is an EntityNode.
 function isEntityNode(node: DiagnosticNode): node is EntityNode {
     return 'properties' in node;
 }
 
+// Returns true if the specified node is a PropertyNode.
 function isPropertyNode(node: DiagnosticNode): node is PropertyNode {
     return 'property' in node;
 }
 
-export function findEntityNodeForProperty(
-    propertyNodeancestors: ReadonlyArray<ASTNode>
+/**
+ * Identify the EntityNode for a given Property. This Property node is a child under 'edges' or 'node' ASTNode.
+ * @param propertyNodeAncestors - Ancestors of the property node.
+ * @returns The corresponding EntityNode.
+ */
+export function resolveEntityNodeForProperty(
+    propertyNodeAncestors: ReadonlyArray<ASTNode>
 ): FieldNode {
     const parentFieldAncestorIndex = findCloseAncestorWithType(
-        propertyNodeancestors,
+        propertyNodeAncestors,
         Kind.FIELD
     );
     if (
         parentFieldAncestorIndex === -1 ||
-        (propertyNodeancestors[parentFieldAncestorIndex] as FieldNode).name
+        (propertyNodeAncestors[parentFieldAncestorIndex] as FieldNode).name
             .value !== 'node'
     ) {
-        throw new Error('No parent node exists');
+        throw new Error('No correct parent node exists');
     }
 
     const grandParentFieldAncestorIndex = findCloseAncestorWithType(
-        propertyNodeancestors,
+        propertyNodeAncestors,
         Kind.FIELD,
         parentFieldAncestorIndex - 1
     );
 
     if (
         grandParentFieldAncestorIndex === -1 ||
-        (propertyNodeancestors[grandParentFieldAncestorIndex] as FieldNode).name
+        (propertyNodeAncestors[grandParentFieldAncestorIndex] as FieldNode).name
             .value !== 'edges'
     ) {
         throw new Error('No edges node exists');
     }
 
     const grandgrandParentFieldAncestorIndex = findCloseAncestorWithType(
-        propertyNodeancestors,
+        propertyNodeAncestors,
         Kind.FIELD,
         grandParentFieldAncestorIndex - 1
     );
@@ -368,15 +377,21 @@ export function findEntityNodeForProperty(
         throw new Error('No entity node exists');
     }
 
-    return propertyNodeancestors[
+    return propertyNodeAncestors[
         grandgrandParentFieldAncestorIndex
     ] as FieldNode;
 }
 
+/**
+ * Determine if a FieldNode is property or entity.
+ * @param node  a common FieldNode
+ * @returns true if specified node is a property or entity
+ */
 function isContentNode(node: FieldNode): boolean {
     return !structureNodeNames.includes(node.name.value);
 }
 
+// Returns true if the specified node is a FieldNode.
 export function isFieldNode(node: ASTNode): node is FieldNode {
     return node !== undefined && node.kind !== undefined
         ? node.kind === 'Field'
