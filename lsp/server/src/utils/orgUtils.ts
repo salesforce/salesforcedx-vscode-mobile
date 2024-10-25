@@ -17,7 +17,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { WorkspaceUtils } from './workspaceUtils';
 import { ObjectInfoRepresentation } from '../types';
-import { connection } from '../server';
 
 enum AuthStatus {
     UNKNOWN,
@@ -43,22 +42,21 @@ export class OrgUtils {
     >();
     private static entities: string[] = [];
 
-    private static sfdxDirWatcher: fs.FSWatcher | undefined;
-    private static sfDirWatcher: fs.FSWatcher | undefined;
-
     private static sfdxFolder = '.sfdx';
     /**
      * The global folder in which sf state is stored.
      */
     private static sfFolder = '.sf';
 
-    private static get SFDX_DIR() {
+    private static sfMobileFolder = '.sfMobile';
+
+    public static get SFDX_DIR() {
         return path.join(os.homedir(), this.sfdxFolder);
     }
     /**
      * The full system path to the global sf state folder.
      */
-    private static get SF_DIR() {
+    public static get SF_DIR() {
         return path.join(os.homedir(), this.sfFolder);
     }
 
@@ -76,35 +74,7 @@ export class OrgUtils {
             this.orgName = currentUserConfig.value.toString();
             return Promise.resolve(this.orgName);
         }
-        return Promise.reject('no org');
-    }
-
-    private static onAuthOrgChanged() {
-        this.reset();
-        if (connection !== null) {
-            connection.languages.diagnostics.refresh();
-        }
-    }
-
-    // Watches SF project config changes.
-    public static watchConfig() {
-        this.sfdxDirWatcher = fs.watch(this.SFDX_DIR, (eventType, fileName) => {
-            this.onAuthOrgChanged();
-        });
-        this.sfDirWatcher = fs.watch(this.SF_DIR, (eventType, fileName) => {
-            this.onAuthOrgChanged();
-        });
-    }
-
-    public static unWatchConfig() {
-        if (this.sfdxDirWatcher !== undefined) {
-            this.sfdxDirWatcher.close();
-            this.sfdxDirWatcher = undefined;
-        }
-        if (this.sfDirWatcher !== undefined) {
-            this.sfDirWatcher.close();
-            this.sfDirWatcher = undefined;
-        }
+        throw new Error('No org exists');
     }
 
     private static async getDefaultUserName(): Promise<string | undefined> {
@@ -194,7 +164,7 @@ export class OrgUtils {
         }
         const objectInfoFolder = path.join(
             projectPath,
-            this.sfFolder,
+            this.sfMobileFolder,
             this.orgName,
             OrgUtils.objectInfoFolder
         );
@@ -314,17 +284,15 @@ export class OrgUtils {
         this.objectInfoInMemoCache.clear();
         this.objectInfoPromises.clear();
         this.connection = undefined;
-        if (this.orgName.length > 0) {
-            try {
-                fs.rmSync(this.objectInfoFolderPath(), {
-                    force: true,
-                    recursive: true,
-                    maxRetries: 3
-                });
-            } catch (e) {
-                console.log(e);
-            }
-            this.orgName = '';
+        try {
+            fs.rmSync(this.sfMobileFolder, {
+                force: true,
+                recursive: true,
+                maxRetries: 3
+            });
+        } catch (e) {
+            console.log(e);
         }
+        this.orgName = '';
     }
 }

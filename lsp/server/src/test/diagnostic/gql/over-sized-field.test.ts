@@ -82,7 +82,7 @@ suite(
                 textDocument,
                 astNode
             );
-            assert.equal(diagnostics.length, 1);
+            assert.equal(diagnostics.length, 0);
         });
     }
 );

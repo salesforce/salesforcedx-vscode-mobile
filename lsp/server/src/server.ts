@@ -18,12 +18,16 @@ import {
     CodeAction,
     CodeActionKind
 } from 'vscode-languageserver/node';
-
+import * as fs from 'fs';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
+import { Org } from '@salesforce/core';
+
+let sfdxDirWatcher: fs.FSWatcher | undefined;
+let sfDirWatcher: fs.FSWatcher | undefined;
 
 // Create a connection for the server, using Node's IPC as a transport.
 export const connection = createConnection(ProposedFeatures.all);
@@ -159,10 +163,31 @@ connection.languages.diagnostics.on(async (params) => {
     }
 });
 
-// Watch SF config file change
-OrgUtils.watchConfig();
+// When server establishes, reset org state.
+OrgUtils.reset();
+// Watch SF config file change. For example, when user logs in, <HOME_DIR>/.sfdx/<user>.json has accessToken updated.
+
+sfdxDirWatcher = fs.watch(OrgUtils.SFDX_DIR, () => {
+    onAuthOrgChanged();
+});
+sfDirWatcher = fs.watch(OrgUtils.SF_DIR, () => {
+    onAuthOrgChanged();
+});
+
+function onAuthOrgChanged() {
+    OrgUtils.reset();
+    connection.languages.diagnostics.refresh();
+}
+
 connection.onExit(function () {
-    OrgUtils.unWatchConfig();
+    if (sfdxDirWatcher !== undefined) {
+        sfdxDirWatcher.close();
+        sfdxDirWatcher = undefined;
+    }
+    if (sfDirWatcher !== undefined) {
+        sfDirWatcher.close();
+        sfDirWatcher = undefined;
+    }
 });
 
 connection.onCodeAction((params) => {

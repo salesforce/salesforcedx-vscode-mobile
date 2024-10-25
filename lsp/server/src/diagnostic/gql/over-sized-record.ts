@@ -11,9 +11,14 @@ import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 import type { ASTNode, FieldNode } from 'graphql';
 
 import {
-    generateDiagnosticTree,
-    createDiagnostics
+    generateEntityTree,
+    resolveEntityNameFromMetadata,
+    getFieldSize
 } from '../../utils/gqlUtils';
+import { OrgUtils } from '../../utils/orgUtils';
+import type { RootNode, EntityNode } from '../../utils/gqlUtils';
+
+const MAX_ALLOWED_SIZE = 32768;
 
 const OVER_SIZED_FIELD_MESSAGE =
     'This field’s value could exceed 32 KB. Large data sizes can negatively affect mobile app performance, potentially resulting in fewer records being returned.';
@@ -28,7 +33,7 @@ export class OversizedRecord implements DiagnosticProducer<ASTNode> {
         textDocument: TextDocument,
         rootNode: ASTNode
     ): Promise<Diagnostic[]> {
-        const rootDiagnosticNode = generateDiagnosticTree(rootNode);
+        const rootDiagnosticNode = generateEntityTree(rootNode);
         const rawDiagNodes = await createDiagnostics(rootDiagnosticNode);
 
         const { overSizedEntities, overSizedFields } = rawDiagNodes;
@@ -53,6 +58,83 @@ export class OversizedRecord implements DiagnosticProducer<ASTNode> {
 
     getId(): string {
         return RULE_ID;
+    }
+}
+
+export interface OverSizedDiagnostics {
+    overSizedFields: Array<FieldNode>;
+    overSizedEntities: Array<FieldNode>;
+}
+export async function createDiagnostics(
+    rootNode: RootNode
+): Promise<OverSizedDiagnostics> {
+    const results: OverSizedDiagnostics = {
+        overSizedFields: [],
+        overSizedEntities: []
+    };
+
+    for (const operationNode of rootNode.operations) {
+        for (const entityNode of operationNode.entities) {
+            await generateDiagnostic(entityNode, results);
+        }
+    }
+    return results;
+}
+
+/**
+ * Recursively research for FieldNode with large records.
+ * @param entityNode
+ * @param overSizedFields
+ * @returns
+ */
+async function generateDiagnostic(
+    entityNode: EntityNode,
+    overSizedDiagnostic: OverSizedDiagnostics
+) {
+    if (entityNode.name) {
+        const objectInfo = await OrgUtils.getObjectInfo(entityNode.name);
+        if (objectInfo === undefined) {
+            return;
+        }
+
+        let totalSize = 0;
+        for (const propertyNode of entityNode.properties) {
+            const fieldSize = getFieldSize(objectInfo, propertyNode.property);
+
+            propertyNode.size = fieldSize;
+
+            if (fieldSize !== undefined) {
+                totalSize += fieldSize;
+
+                // do oversized field check
+                if (fieldSize > MAX_ALLOWED_SIZE) {
+                    overSizedDiagnostic.overSizedFields.push(propertyNode.node);
+                }
+            }
+        }
+        entityNode.size = totalSize;
+        if (totalSize > MAX_ALLOWED_SIZE) {
+            overSizedDiagnostic.overSizedEntities.push(entityNode.node);
+        }
+
+        for (const relation of entityNode.relationships) {
+            if (Array.isArray(relation.entity)) {
+                continue;
+            }
+            // Finds entity name. Polymorphic parent relationship will be supported in future.
+            if (relation.entity.name === undefined) {
+                const entityName = resolveEntityNameFromMetadata(
+                    objectInfo,
+                    relation
+                );
+                if (entityName === undefined) {
+                    continue;
+                }
+                relation.entity.name = entityName;
+            }
+
+            await generateDiagnostic(relation.entity, overSizedDiagnostic);
+        }
     }
 }
 
