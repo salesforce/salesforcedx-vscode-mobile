@@ -313,22 +313,22 @@ export function resolveEntityNameFromMetadata(
     return undefined;
 }
 
-// Returns true if the specified node is a RootNode.
+// Return true if the specified node is a RootNode.
 function isRootNode(node: DiagnosticNode): node is RootNode {
     return 'operations' in node;
 }
 
-// Returns true if the specified node is an OperationNode.
+// Return true if the specified node is an OperationNode.
 function isOperationNode(node: DiagnosticNode): node is OperationNode {
     return 'entities' in node;
 }
 
-// Returns true if the specified node is an EntityNode.
+// Return true if the specified node is an EntityNode.
 function isEntityNode(node: DiagnosticNode): node is EntityNode {
     return 'properties' in node;
 }
 
-// Returns true if the specified node is a PropertyNode.
+// Return true if the specified node is a PropertyNode.
 function isPropertyNode(node: DiagnosticNode): node is PropertyNode {
     return 'property' in node;
 }
