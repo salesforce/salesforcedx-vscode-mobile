@@ -51,7 +51,7 @@ connection.onInitialize((params: InitializeParams) => {
     const workspaceFolders = params.workspaceFolders;
 
     // Sets workspace folder to WorkspaceUtils
-    WorkspaceUtils.setWorkSpaceFolders(workspaceFolders);
+    WorkspaceUtils.initWorkspaceFolders(workspaceFolders);
     extensionTitle = params.initializationOptions?.extensionTitle;
     updateDiagnosticsSettingCommand =
         params.initializationOptions?.updateDiagnosticsSettingCommand;

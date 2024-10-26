@@ -76,7 +76,7 @@ suite('OrgUtils Test Suite - Server', () => {
         );
     });
 
-    test('ObjectInfo is fetched if auth status is connection is available and auth status is authorized', async () => {
+    test('ObjectInfo is fetched if connection is available and auth status is authorized', async () => {
         // user exists
 
         createConfigStub = stubCreateConfig(sandbox, true);

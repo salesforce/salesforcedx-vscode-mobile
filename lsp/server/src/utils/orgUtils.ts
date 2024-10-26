@@ -25,7 +25,7 @@ enum AuthStatus {
 }
 
 export class OrgUtils {
-    private static orgName: string = '';
+    private static orgName: string | undefined;
     private static objectInfoFolder = 'objectInfos';
     private static entityListFileName = 'entity_list.json';
     private static connection: Connection | undefined;
@@ -60,7 +60,7 @@ export class OrgUtils {
         return path.join(os.homedir(), this.sfFolder);
     }
 
-    // Retrieves default organiztion's name.
+    // Retrieve default organiztion's name.
     private static async getDefaultOrg(): Promise<string | undefined> {
         const aggregator = await ConfigAggregator.create();
 
@@ -70,11 +70,9 @@ export class OrgUtils {
             OrgConfigProperties.TARGET_ORG
         );
 
-        if (currentUserConfig.value) {
-            this.orgName = currentUserConfig.value.toString();
-            return Promise.resolve(this.orgName);
-        }
-        return undefined;
+        return currentUserConfig.value
+            ? currentUserConfig.value.toString()
+            : undefined;
     }
 
     private static async getDefaultUserName(): Promise<string | undefined> {
@@ -93,18 +91,26 @@ export class OrgUtils {
         }
     }
 
-    // Updates the auth state async
+    // Update the auth state async
     private static async checkAuthStatus(): Promise<AuthStatus> {
         if (this.authStatus !== AuthStatus.UNKNOWN) {
             return this.authStatus;
         }
+        try {
+            this.orgName = await this.getDefaultOrg();
+        } catch (e) {
+            this.orgName = undefined;
+        }
         const connection = await this.getConnection();
         if (connection === undefined) {
             //It is possible that orgName exists and connection expires
-            this.orgName = '';
+            this.orgName = undefined;
             this.authStatus = AuthStatus.UNAUTHORIZED;
         } else {
             this.authStatus = AuthStatus.AUTHORIZED;
+            if (this.orgName === undefined) {
+                throw new Error('Authorized Org does not have org name!');
+            }
             // Fetches entity list once.
             const entityListFile = path.join(
                 this.objectInfoFolderPath(),
@@ -125,7 +131,7 @@ export class OrgUtils {
         return this.authStatus;
     }
 
-    // Retrieves the Connection which fetches ObjectInfo remotely.
+    // Retrieve the Connection which fetches ObjectInfo remotely.
     private static async getConnection(): Promise<Connection | undefined> {
         if (
             this.connection !== undefined &&
@@ -159,7 +165,7 @@ export class OrgUtils {
         return globalResult.sobjects.map((sobjetResult) => sobjetResult.name);
     }
 
-    // Retrieves objectInfo folder path, which is '<projectRoot>/.sf/orgName/objectInfos/'
+    // Retrieve objectInfo folder path, which is '<projectRoot>/.sfMobile/orgName/objectInfos/'
     private static objectInfoFolderPath(): string {
         const projectPath = WorkspaceUtils.getWorkspaceDir();
         if (this.orgName === undefined || this.orgName.length === 0) {
@@ -195,14 +201,14 @@ export class OrgUtils {
     private static getObjectInfoFromCache(
         objectApiName: string
     ): ObjectInfoRepresentation | undefined {
-        // Checks mem cache
+        // Check mem cache
         let objectInfo = this.objectInfoInMemoCache.get(objectApiName);
 
         if (objectInfo !== undefined) {
             return objectInfo;
         }
 
-        // Checks disk cache
+        // Check disk cache
         objectInfo = this.fetchObjectInfoFromDisk(objectApiName);
         if (objectInfo !== undefined) {
             this.objectInfoInMemoCache.set(objectApiName, objectInfo);
@@ -211,7 +217,7 @@ export class OrgUtils {
         return undefined;
     }
 
-    // Acquires ObjectInfo data by first searching in memory, then on disk, and finally over the network.
+    // Acquire ObjectInfo data by first searching in memory, then on disk, and finally over the network.
     public static async getObjectInfo(
         objectApiName: string
     ): Promise<ObjectInfoRepresentation | undefined> {

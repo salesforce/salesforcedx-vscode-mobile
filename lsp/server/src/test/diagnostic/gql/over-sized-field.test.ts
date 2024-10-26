@@ -6,7 +6,7 @@
  */
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { suite, test } from 'mocha';
+import { suite, test, beforeEach, afterEach } from 'mocha';
 import Account from '../../../../testFixture/objectInfos/Account.json';
 import User from '../../../../testFixture/objectInfos/User.json';
 import Contact from '../../../../testFixture/objectInfos/Contact.json';
