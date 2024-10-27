@@ -24,6 +24,7 @@ import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
+import { ValidatorManager } from './validatorManager';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -41,6 +42,9 @@ let diagnosticsSettingSection = '';
 
 // initialize default settings
 let settings = getSettings({});
+
+const validatorManager = ValidatorManager.createInstance();
+
 const documentCache: Map<string, TextDocument> = new Map();
 
 connection.onInitialize((params: InitializeParams) => {
@@ -147,7 +151,12 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validateDocument(settings, document, extensionTitle)
+            //items: await validateDocument(settings, document, extensionTitle)
+            items: await validatorManager.validateDocument(
+                settings,
+                document,
+                extensionTitle
+            )
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk
