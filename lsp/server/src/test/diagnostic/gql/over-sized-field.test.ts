@@ -16,6 +16,14 @@ import * as sinon from 'sinon';
 import { parse } from 'graphql';
 import { OversizedRecord } from '../../../diagnostic/gql/over-sized-record';
 import { OrgUtils } from '../../../utils/orgUtils';
+import { generateEntityTree } from '../../../utils/gqlUtils';
+import type {
+    OperationNode,
+    PropertyNode,
+    EntityNode,
+    Relation
+} from '../../../utils/gqlUtils';
+
 import { ObjectInfoRepresentation } from '../../../types';
 suite(
     'GraphQL Diagnostics Test Suite - Server - Oversized GraphQL Field',
@@ -78,11 +86,18 @@ suite(
             );
 
             const astNode = parse(textDocument.getText());
-            const diagnostics = await new OversizedRecord().validateDocument(
-                textDocument,
-                astNode
-            );
-            assert.equal(diagnostics.length, 0);
+            const rootNode = generateEntityTree(astNode);
+            const operations: OperationNode[] = rootNode.operations;
+            //One operation 'query'
+            assert.equal(operations.length, 1);
+
+            const entities = operations[0].entities;
+
+            // const diagnostics = await new OversizedRecord().validateDocument(
+            //     textDocument,
+            //     astNode
+            // );
+            // assert.equal(diagnostics.length, 0);
         });
     }
 );

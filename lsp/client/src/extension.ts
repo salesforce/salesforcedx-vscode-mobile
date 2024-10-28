@@ -18,7 +18,7 @@ import {
 let client: LanguageClient;
 
 export function activate(
-    context: ExtensionContext, 
+    context: ExtensionContext,
     updateDiagnosticsSettingCommand: string,
     diagnosticsSettingSection: string
 ) {
@@ -38,7 +38,8 @@ export function activate(
     };
 
     // Get extension name
-    const extensionTitle = context.extension.packageJSON.contributes.configuration.title;
+    const extensionTitle =
+        context.extension.packageJSON.contributes.configuration.title;
 
     // Options to control the language client
     const clientOptions: LanguageClientOptions = {
@@ -49,7 +50,7 @@ export function activate(
         ],
         synchronize: {
             // Notify the server about file changes to '.clientrc files contained in the workspace
-            fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+            fileEvents: workspace.createFileSystemWatcher('**/.sf/config.json')
         },
         initializationOptions: {
             extensionTitle,

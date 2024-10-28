@@ -27,7 +27,7 @@ export interface EntityNode {
     properties: Array<PropertyNode>;
 }
 
-enum Relation {
+export enum Relation {
     PARENT,
     CHILD,
     POLYMORPHIC_PARENT
@@ -40,7 +40,7 @@ export interface RelatedEntity {
 }
 
 // Represents an object property field node in GraphQL query
-interface PropertyNode {
+export interface PropertyNode {
     // Graphql AST node
     node: FieldNode;
     // Field name
@@ -52,7 +52,7 @@ interface PropertyNode {
 /**
  * Represent an OperationDefintionNode in GraphQL query. It is at the second level of entity tree.
  */
-interface OperationNode {
+export interface OperationNode {
     node: OperationDefinitionNode;
     // 'Query' in most cases
     name: string;

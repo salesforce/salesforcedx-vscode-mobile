@@ -133,6 +133,14 @@ connection.onDidChangeConfiguration((change) => {
     connection.languages.diagnostics.refresh();
 });
 
+connection.onDidChangeWatchedFiles((changeEvents) => {
+    changeEvents.changes.forEach((change) => {
+        if (change.uri.endsWith('.sf/config.json')) {
+            onAuthOrgChanged();
+        }
+    });
+});
+
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
@@ -167,12 +175,12 @@ connection.languages.diagnostics.on(async (params) => {
 OrgUtils.reset();
 // Watch SF config file change. For example, when user logs in, <HOME_DIR>/.sfdx/<user>.json has accessToken updated.
 
-sfdxDirWatcher = fs.watch(OrgUtils.SFDX_DIR, () => {
-    onAuthOrgChanged();
-});
-sfDirWatcher = fs.watch(OrgUtils.SF_DIR, () => {
-    onAuthOrgChanged();
-});
+// sfdxDirWatcher = fs.watch(OrgUtils.SFDX_DIR, () => {
+//     onAuthOrgChanged();
+// });
+// sfDirWatcher = fs.watch(OrgUtils.SF_DIR, () => {
+//     onAuthOrgChanged();
+// });
 
 function onAuthOrgChanged() {
     OrgUtils.reset();
