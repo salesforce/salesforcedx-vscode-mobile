@@ -18,16 +18,11 @@ import {
     CodeAction,
     CodeActionKind
 } from 'vscode-languageserver/node';
-import * as fs from 'fs';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
-import { Org } from '@salesforce/core';
-
-let sfdxDirWatcher: fs.FSWatcher | undefined;
-let sfDirWatcher: fs.FSWatcher | undefined;
 
 // Create a connection for the server, using Node's IPC as a transport.
 export const connection = createConnection(ProposedFeatures.all);
@@ -133,10 +128,18 @@ connection.onDidChangeConfiguration((change) => {
     connection.languages.diagnostics.refresh();
 });
 
+
+const MAX_WAIT_FOR_STATE_AGGREGATOR = 4000;
 connection.onDidChangeWatchedFiles((changeEvents) => {
     changeEvents.changes.forEach((change) => {
+        /**
+        When the default organization changes, the target_id in config.json will be updated. 
+        To handle this file change, we invoke onAuthOrgChanged. 
+        We've noticed that the StateAggregator in the Salesforce code may take over 3 seconds to stabilize, so 
+        we've implemented a fixed delay of up to 4 seconds here.  
+        */
         if (change.uri.endsWith('.sf/config.json')) {
-            onAuthOrgChanged();
+            setTimeout(onAuthOrgChanged, MAX_WAIT_FOR_STATE_AGGREGATOR);
         }
     });
 });
@@ -173,30 +176,11 @@ connection.languages.diagnostics.on(async (params) => {
 
 // When server establishes, reset org state.
 OrgUtils.reset();
-// Watch SF config file change. For example, when user logs in, <HOME_DIR>/.sfdx/<user>.json has accessToken updated.
-
-// sfdxDirWatcher = fs.watch(OrgUtils.SFDX_DIR, () => {
-//     onAuthOrgChanged();
-// });
-// sfDirWatcher = fs.watch(OrgUtils.SF_DIR, () => {
-//     onAuthOrgChanged();
-// });
 
 function onAuthOrgChanged() {
     OrgUtils.reset();
     connection.languages.diagnostics.refresh();
 }
-
-connection.onExit(function () {
-    if (sfdxDirWatcher !== undefined) {
-        sfdxDirWatcher.close();
-        sfdxDirWatcher = undefined;
-    }
-    if (sfDirWatcher !== undefined) {
-        sfDirWatcher.close();
-        sfDirWatcher = undefined;
-    }
-});
 
 connection.onCodeAction((params) => {
     const textDocument = documentCache.get(params.textDocument.uri);

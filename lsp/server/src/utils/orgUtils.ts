@@ -42,25 +42,10 @@ export class OrgUtils {
     >();
     private static entities: string[] = [];
 
-    private static sfdxFolder = '.sfdx';
-    /**
-     * The global folder in which sf state is stored.
-     */
-    private static sfFolder = '.sf';
 
     private static sfMobileFolder = '.sfMobile';
 
-    public static get SFDX_DIR() {
-        return path.join(os.homedir(), this.sfdxFolder);
-    }
-    /**
-     * The full system path to the global sf state folder.
-     */
-    public static get SF_DIR() {
-        return path.join(os.homedir(), this.sfFolder);
-    }
-
-    // Retrieve default organiztion's name.
+    // Retrieve default organization's name.
     private static async getDefaultOrg(): Promise<string | undefined> {
         const aggregator = await ConfigAggregator.create();
 
@@ -82,6 +67,7 @@ export class OrgUtils {
                 return undefined;
             }
             const aggregator = await StateAggregator.getInstance();
+        
             const username = aggregator.aliases.getUsername(orgName);
             if (username !== null && username !== undefined) {
                 return Promise.resolve(username);
@@ -232,10 +218,10 @@ export class OrgUtils {
         }
 
         // Network loading is going on
-        let objectInfoNetworkReponsePromise =
+        let objectInfoNetworkResponsePromise =
             this.objectInfoPromises.get(objectApiName);
-        if (objectInfoNetworkReponsePromise === undefined) {
-            objectInfoNetworkReponsePromise = new Promise<
+        if (objectInfoNetworkResponsePromise === undefined) {
+            objectInfoNetworkResponsePromise = new Promise<
                 ObjectInfoRepresentation | undefined
             >(async (resolve) => {
                 try {
@@ -256,17 +242,19 @@ export class OrgUtils {
                         }
                         return resolve(objectInfo);
                     }
-                } catch (e) {}
+                } catch (e) {
+                    console.log(`Failed to load entity list from server with error: ${e}`);
+                }
                 return resolve(undefined);
             }).finally(() => {
                 this.objectInfoPromises.delete(objectApiName);
             });
             this.objectInfoPromises.set(
                 objectApiName,
-                objectInfoNetworkReponsePromise
+                objectInfoNetworkResponsePromise
             );
         }
-        return objectInfoNetworkReponsePromise;
+        return objectInfoNetworkResponsePromise;
     }
 
     private static objectInfoResponseCallback(
