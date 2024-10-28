@@ -15,10 +15,8 @@ import {
     isTheDiagnosticSuppressed
 } from './diagnostic/DiagnosticSettings';
 import { OversizedRecord as OversizedRequest } from './diagnostic/gql/over-sized-record';
-import { MisspelledUiapi } from './diagnostic/gql/misspelled-uiapi';
 
 const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
-    new MisspelledUiapi(),
     new OversizedRequest()
 ];
 

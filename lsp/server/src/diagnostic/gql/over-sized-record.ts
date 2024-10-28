@@ -20,9 +20,9 @@ import type { RootNode, EntityNode } from '../../utils/gqlUtils';
 
 const MAX_ALLOWED_SIZE = 32768;
 
-const OVER_SIZED_FIELD_MESSAGE =
+export const OVER_SIZED_FIELD_MESSAGE =
     'This field’s value could exceed 32 KB. Large data sizes can negatively affect mobile app performance, and potentially result in fewer returned records than expected.';
-const OVER_SIZED_RECORD_MESSAGE =
+export const OVER_SIZED_RECORD_MESSAGE =
     'The total data size of all record fields could exceed 32 KB. Large data sizes can negatively affect mobile app performance, and potentially result in fewer returned records than expected.';
 
 const SEVERITY = DiagnosticSeverity.Information;
@@ -88,10 +88,10 @@ export async function createDiagnostics(
 }
 
 /**
- * Recursively search for FieldNode with over-sized record
- * @param entityNode Entity node
- * @param overSizedFields
- * @returns over-sized diagnostics
+ * Recursively search within an EntityNode for FieldNodes containing oversized records.
+ * @param entityNode The EntityNode to search within
+ * @param overSizedFields Array to which oversized FieldNodes are added.
+ * @returns A promise that resolves when diagnostics generation is complete.
  */
 async function generateDiagnostic(
     entityNode: EntityNode,
@@ -112,7 +112,7 @@ async function generateDiagnostic(
             if (fieldSize !== undefined) {
                 totalSize += fieldSize;
 
-                // do oversized field check
+                // Oversized field check
                 if (fieldSize > MAX_ALLOWED_SIZE) {
                     overSizedDiagnostic.overSizedFields.push(propertyNode.node);
                 }
@@ -127,7 +127,7 @@ async function generateDiagnostic(
             if (Array.isArray(relation.entity)) {
                 continue;
             }
-            // Finds entity name. Polymorphic parent relationship will be supported in future.
+            // Find entity name. Polymorphic parent relationship is not supported for now.
             if (relation.entity.name === undefined) {
                 const entityName = resolveEntityNameFromMetadata(
                     objectInfo,
