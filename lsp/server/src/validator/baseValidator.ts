@@ -13,7 +13,7 @@ import type { HTMLDocument } from 'vscode-html-languageservice';
 
 export type SupportedType = Node | ASTNode | HTMLDocument;
 
-export interface Section<SupportedType> {
+export interface DiagnosticSection<SupportedType> {
     data: SupportedType;
     document: TextDocument;
     lineOffset: number;
@@ -38,9 +38,9 @@ export abstract class BaseValidator<SupportedType> {
 
     public removeProducer(producer: DiagnosticProducer<SupportedType>) {}
 
-    abstract prepareDataSections(
+    abstract prepareDiagnosticTargets(
         textDocument: TextDocument
-    ): Array<Section<SupportedType>>;
+    ): Array<DiagnosticSection<SupportedType>>;
 
     async validateData(
         setting: DiagnosticSettings,

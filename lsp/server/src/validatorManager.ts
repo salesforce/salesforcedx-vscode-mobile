@@ -3,7 +3,7 @@ import { Diagnostic } from 'vscode-languageserver';
 import { JSValidator } from './validator/jsValidator';
 import { HTMLValidator } from './validator/htmlValidator';
 import { GraphQLValidator } from './validator/gqlValidator';
-import { Section } from './validator/baseValidator';
+import { DiagnosticSection } from './validator/baseValidator';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
@@ -54,8 +54,8 @@ export class ValidatorManager {
         validator: BaseValidator<SupportedType>
     ): Promise<Diagnostic[]> {
         //Parse document into Section with offsets
-        const sections: Section<SupportedType>[] =
-            validator.prepareDataSections(document);
+        const sections: DiagnosticSection<SupportedType>[] =
+            validator.prepareDiagnosticTargets(document);
 
         const sectionDiagnostics = await Promise.all(
             sections.map(async (section) => {

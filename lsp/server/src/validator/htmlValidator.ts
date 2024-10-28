@@ -1,10 +1,12 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { BaseValidator } from './baseValidator';
 
-import { Section } from './baseValidator';
+import { DiagnosticSection } from './baseValidator';
 import { HTMLDocument, getLanguageService } from 'vscode-html-languageservice';
 export class HTMLValidator extends BaseValidator<HTMLDocument> {
-    prepareDataSections(textDocument: TextDocument): Section<HTMLDocument>[] {
+    prepareDiagnosticTargets(
+        textDocument: TextDocument
+    ): DiagnosticSection<HTMLDocument>[] {
         try {
             const data = getLanguageService().parseHTMLDocument(textDocument);
 
@@ -14,7 +16,7 @@ export class HTMLValidator extends BaseValidator<HTMLDocument> {
                     document: textDocument,
                     lineOffset: 0,
                     columnOffset: 0
-                } satisfies Section<HTMLDocument>
+                } satisfies DiagnosticSection<HTMLDocument>
             ];
         } catch (e) {
             console.log('Failed to parse HTML file.');

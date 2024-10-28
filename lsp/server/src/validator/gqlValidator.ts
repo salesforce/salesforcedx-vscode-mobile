@@ -3,13 +3,15 @@ import { BaseValidator } from './baseValidator';
 import { parse, ASTNode } from 'graphql';
 import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
 
-import { Section } from './baseValidator';
+import { DiagnosticSection } from './baseValidator';
 export class GraphQLValidator extends BaseValidator<ASTNode> {
     getLanguageId(): string {
         return 'javascript';
     }
 
-    prepareDataSections(textDocument: TextDocument): Section<ASTNode>[] {
+    prepareDiagnosticTargets(
+        textDocument: TextDocument
+    ): DiagnosticSection<ASTNode>[] {
         const gqlSources = gqlPluckFromCodeStringSync(
             textDocument.uri,
             textDocument.getText(),
@@ -19,7 +21,7 @@ export class GraphQLValidator extends BaseValidator<ASTNode> {
             }
         );
 
-        const results: Section<ASTNode>[] = [];
+        const results: DiagnosticSection<ASTNode>[] = [];
         for (const source of gqlSources) {
             try {
                 const { line, column } = source.locationOffset;
@@ -37,7 +39,7 @@ export class GraphQLValidator extends BaseValidator<ASTNode> {
                     document: gqlTextDocument,
                     lineOffset: line - 1,
                     columnOffset: column + 1
-                } satisfies Section<ASTNode>;
+                } satisfies DiagnosticSection<ASTNode>;
                 results.push(section);
             } catch (e) {
                 console.log('Unable to parse GQL document.');

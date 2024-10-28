@@ -2,10 +2,12 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { BaseValidator } from './baseValidator';
 import type { Node } from '@babel/types';
 import { parseJs } from '../utils/babelUtil';
-import { Section } from './baseValidator';
+import { DiagnosticSection } from './baseValidator';
 
 export class JSValidator extends BaseValidator<Node> {
-    prepareDataSections(textDocument: TextDocument): Section<Node>[] {
+    prepareDiagnosticTargets(
+        textDocument: TextDocument
+    ): DiagnosticSection<Node>[] {
         try {
             const data = parseJs(textDocument.getText());
             return [
@@ -14,7 +16,7 @@ export class JSValidator extends BaseValidator<Node> {
                     document: textDocument,
                     lineOffset: 0,
                     columnOffset: 0
-                } satisfies Section<Node>
+                } satisfies DiagnosticSection<Node>
             ];
         } catch (e) {
             console.log('Failed to parse JavaScript file.');
