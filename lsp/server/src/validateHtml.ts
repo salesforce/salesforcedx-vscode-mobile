@@ -5,51 +5,51 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { Diagnostic } from 'vscode-languageserver';
+import { HTMLDocument, getLanguageService } from 'vscode-html-languageservice';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { parseJs } from './utils/babelUtil';
-import { Node } from '@babel/types';
+import { Diagnostic } from 'vscode-languageserver/node';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
-import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-change-not-aware';
 import {
-    isTheDiagnosticSuppressed,
-    DiagnosticSettings
+    DiagnosticSettings,
+    isTheDiagnosticSuppressed
 } from './diagnostic/DiagnosticSettings';
+import { MobileOfflineFriendly } from './diagnostic/html/mobileOfflineFriendly';
 
-const jsDiagnosticProducers: DiagnosticProducer<Node>[] = [
-    new AdaptersLocalChangeNotAware()
+const diagnosticProducers: DiagnosticProducer<HTMLDocument>[] = [
+    new MobileOfflineFriendly()
 ];
 
-/**
- * Validate JavaScript file content.
- * @param fileContent The JavaScript file content
- * @returns An array of diagnostics found within the JavaScript file
- */
-export async function validateJs(
+function parseHTMLContent(content: TextDocument): HTMLDocument {
+    const htmlLanguageService = getLanguageService();
+    return htmlLanguageService.parseHTMLDocument(content);
+}
+
+export async function validateHtml(
     setting: DiagnosticSettings,
     textDocument: TextDocument
 ): Promise<Diagnostic[]> {
     let results: Diagnostic[] = [];
 
-    const producers = jsDiagnosticProducers.filter((producer) => {
+    const producers = diagnosticProducers.filter((producer) => {
         return !isTheDiagnosticSuppressed(setting, producer.getId());
     });
 
     if (producers.length > 0) {
         try {
-            const jsNode = parseJs(textDocument.getText());
-            for (const producer of jsDiagnosticProducers) {
+            const htmlDocument = parseHTMLContent(textDocument);
+
+            for (const producer of diagnosticProducers) {
                 const producerId = producer.getId();
                 const diagnostics = await producer.validateDocument(
                     textDocument,
-                    jsNode
+                    htmlDocument
                 );
                 diagnostics.forEach((diagnostic) => {
                     diagnostic.data = producerId;
                 });
                 results = results.concat(diagnostics);
             }
-        } catch (e) {} // Silence error since JS parsing error crashes app.
+        } catch (e) {}
     }
     return results;
 }

@@ -7,9 +7,9 @@
 
 import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-
-import { validateJs } from './validateJs'; 
+import { validateJs } from './validateJs';
 import { validateGraphql } from './validateGraphql';
+import { validateHtml } from './validateHtml';
 import { DiagnosticSettings } from './diagnostic/DiagnosticSettings';
 
 /**
@@ -26,26 +26,23 @@ export async function validateDocument(
     document: TextDocument,
     extensionName: string
 ): Promise<Diagnostic[]> {
+    const { uri } = document;
 
     let results: Diagnostic[] = [];
 
     if (document.languageId === 'javascript') {
         // handles JS rules
-        const jsDiagnostics = await validateJs(
-            setting,
-            document
-        );
-        
+        const jsDiagnostics = await validateJs(setting, document);
+
         // handle graphql rules
-        const graphqlDiagnostics = await validateGraphql(
-            setting,
-            document
-        );
+        const graphqlDiagnostics = await validateGraphql(setting, document);
 
         results = results.concat(jsDiagnostics, graphqlDiagnostics);
     }
 
     if (document.languageId === 'html') {
+        const diagnostics = await validateHtml(setting, document);
+        results = results.concat(diagnostics);
     }
 
     // Set the source for diagnostic source.

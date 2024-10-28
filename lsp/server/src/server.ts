@@ -128,7 +128,6 @@ connection.onDidChangeConfiguration((change) => {
     connection.languages.diagnostics.refresh();
 });
 
-
 const MAX_WAIT_FOR_STATE_AGGREGATOR = 4000;
 connection.onDidChangeWatchedFiles((changeEvents) => {
     changeEvents.changes.forEach((change) => {

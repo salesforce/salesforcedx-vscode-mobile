@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023, salesforce.com, inc.
+ * Copyright (c) 2024, salesforce.com, inc.
  * All rights reserved.
  * SPDX-License-Identifier: MIT
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
@@ -42,7 +42,6 @@ export class OrgUtils {
     >();
     private static entities: string[] = [];
 
-
     private static sfMobileFolder = '.sfMobile';
 
     // Retrieve default organization's name.
@@ -67,7 +66,7 @@ export class OrgUtils {
                 return undefined;
             }
             const aggregator = await StateAggregator.getInstance();
-        
+
             const username = aggregator.aliases.getUsername(orgName);
             if (username !== null && username !== undefined) {
                 return Promise.resolve(username);
@@ -243,7 +242,9 @@ export class OrgUtils {
                         return resolve(objectInfo);
                     }
                 } catch (e) {
-                    console.log(`Failed to load entity list from server with error: ${e}`);
+                    console.log(
+                        `Failed to load entity list from server with error: ${e}`
+                    );
                 }
                 return resolve(undefined);
             }).finally(() => {
