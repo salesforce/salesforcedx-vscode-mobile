@@ -4,7 +4,7 @@ import { BaseValidator } from './baseValidator';
 import { DiagnosticSection } from './baseValidator';
 import { HTMLDocument, getLanguageService } from 'vscode-html-languageservice';
 export class HTMLValidator extends BaseValidator<HTMLDocument> {
-    prepareDiagnosticTargets(
+    gatherDiagnosticSections(
         textDocument: TextDocument
     ): DiagnosticSection<HTMLDocument>[] {
         try {

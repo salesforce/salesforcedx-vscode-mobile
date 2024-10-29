@@ -35,7 +35,7 @@ suite('Diagnostics Test Suite - Server - HTML Validator', () => {
         );
 
         const htmlSections =
-            htmlValidator.prepareDiagnosticTargets(textDocument);
+            htmlValidator.gatherDiagnosticSections(textDocument);
         assert.equal(htmlSections.length, 1);
 
         const diagnostics = await htmlValidator.validateData(
@@ -70,7 +70,7 @@ suite('Diagnostics Test Suite - Server - HTML Validator', () => {
         );
 
         const htmlSections =
-            htmlValidator.prepareDiagnosticTargets(textDocument);
+            htmlValidator.gatherDiagnosticSections(textDocument);
         assert.equal(htmlSections.length, 1);
 
         const diagnostics = await htmlValidator.validateData(

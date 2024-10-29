@@ -46,7 +46,7 @@ suite('Diagnostics Test Suite - Server - JS Validator', () => {
     );
 
     test('Validate local change not aware adapters', async () => {
-        const jsSections = jsValidator.prepareDiagnosticTargets(textDocument);
+        const jsSections = jsValidator.gatherDiagnosticSections(textDocument);
         assert.equal(jsSections.length, 1);
         const diagnostics = await jsValidator.validateData(
             {},
@@ -58,7 +58,7 @@ suite('Diagnostics Test Suite - Server - JS Validator', () => {
     });
 
     test('No diagnostics return if individually suppressed', async () => {
-        const jsSections = jsValidator.prepareDiagnosticTargets(textDocument);
+        const jsSections = jsValidator.gatherDiagnosticSections(textDocument);
 
         const diagnostics = await jsValidator.validateData(
             { suppressByRuleId: new Set([RULE_ID]) },
@@ -70,7 +70,7 @@ suite('Diagnostics Test Suite - Server - JS Validator', () => {
     });
 
     test('No diagnostics return if all suppressed', async () => {
-        const jsSections = jsValidator.prepareDiagnosticTargets(textDocument);
+        const jsSections = jsValidator.gatherDiagnosticSections(textDocument);
 
         const diagnostics = await jsValidator.validateData(
             { suppressAll: true },
@@ -90,7 +90,7 @@ suite('Diagnostics Test Suite - Server - JS Validator', () => {
              var var i = 100;
             `
         );
-        const jsSections = jsValidator.prepareDiagnosticTargets(textDocument);
+        const jsSections = jsValidator.gatherDiagnosticSections(textDocument);
 
         assert.equal(jsSections.length, 0);
     });

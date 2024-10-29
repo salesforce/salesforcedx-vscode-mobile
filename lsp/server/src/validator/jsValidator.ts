@@ -5,11 +5,12 @@ import { parseJs } from '../utils/babelUtil';
 import { DiagnosticSection } from './baseValidator';
 
 export class JSValidator extends BaseValidator<Node> {
-    prepareDiagnosticTargets(
+    gatherDiagnosticSections(
         textDocument: TextDocument
     ): DiagnosticSection<Node>[] {
         try {
             const data = parseJs(textDocument.getText());
+            //One DiagnosticSection with lineOffset and columnOffset as 0
             return [
                 {
                     data,

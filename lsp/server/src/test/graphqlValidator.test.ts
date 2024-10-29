@@ -43,7 +43,7 @@ suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
         const graphqlValidator = new GraphQLValidator();
         graphqlValidator.addProducer(new MisspelledUiapi());
         const sections =
-            graphqlValidator.prepareDiagnosticTargets(textDocument);
+            graphqlValidator.gatherDiagnosticSections(textDocument);
         assert.equal(sections.length, 1);
         const diagnostics = await graphqlValidator.validateData(
             {},
@@ -73,7 +73,7 @@ suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
         const graphqlValidator = new GraphQLValidator();
         graphqlValidator.addProducer(new MisspelledUiapi());
         const sections =
-            graphqlValidator.prepareDiagnosticTargets(textDocument);
+            graphqlValidator.gatherDiagnosticSections(textDocument);
         assert.equal(sections.length, 0);
     });
 });

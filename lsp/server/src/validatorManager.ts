@@ -13,15 +13,34 @@ import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-chan
 import { MobileOfflineFriendly } from './diagnostic/html/mobileOfflineFriendly';
 
 import type { BaseValidator, SupportedType } from './validator/baseValidator';
+
+/**
+ * The ValidatorManager class manages a collection of BaseValidator instances and coordinates the validation process for documents.
+ * It filters relevant validators based on the document's language, applies each to designated sections of the document, and aggregates diagnostics
+ * for consistent, language-specific validation. This class centralizes validation logic, enabling efficient, extensible diagnostic processing
+ * across multiple validators.
+ */
 export class ValidatorManager {
+    // Store all available validators
     private validators: BaseValidator<SupportedType>[] = [];
 
     private constructor() {}
 
+    /**
+     * Adds a validator to the manager’s collection.
+     * @param validator The validator to be added.
+     */
     public addValidator(validator: BaseValidator<SupportedType>) {
         this.validators.push(validator);
     }
 
+    /**
+     * Validate a document by applying all relevant validators based on language.
+     * @param setting The diagnostic settings.
+     * @param document The document to validate.
+     * @param extensionName The name of the extension (sets diagnostic source).
+     * @returns A promise resolving to an array of diagnostics.
+     */
     async validateDocument(
         setting: DiagnosticSettings,
         document: TextDocument,
@@ -48,15 +67,23 @@ export class ValidatorManager {
         return results;
     }
 
+    /**
+     * Apply a specific validator to designated sections within the document.
+     * @param setting The diagnostic settings.
+     * @param document The document to validate.
+     * @param validator The validator to apply.
+     * @returns A promise resolving to an array of diagnostics from the validator.
+     */
     private async applyValidator(
         setting: DiagnosticSettings,
         document: TextDocument,
         validator: BaseValidator<SupportedType>
     ): Promise<Diagnostic[]> {
-        //Parse document into Section with offsets
+        // Gather sections of the document relevant to diagnostics
         const sections: DiagnosticSection<SupportedType>[] =
-            validator.prepareDiagnosticTargets(document);
+            validator.gatherDiagnosticSections(document);
 
+        // Validate each section and apply line and column offsets to diagnostics
         const sectionDiagnostics = await Promise.all(
             sections.map(async (section) => {
                 const { data, document, lineOffset, columnOffset } = section;
@@ -66,7 +93,7 @@ export class ValidatorManager {
                         document,
                         data
                     );
-                    // Update offset for final diagnostics
+                    // Adjust diagnostics with section-specific offsets
                     for (const diagnostic of diagnostics) {
                         this.updateDiagnosticOffset(
                             diagnostic,
@@ -84,10 +111,10 @@ export class ValidatorManager {
     }
 
     /**
-     * Update the graphql diagnostic offset to offset from the whole js file
-     * @param diagnostic
-     * @param lineOffset Line offset from the file
-     * @param columnOffset Column offset from the file
+     * Update the line and column positions of a diagnostic based on section offsets.
+     * @param diagnostic The diagnostic to adjust.
+     * @param lineOffset The line offset to apply.
+     * @param columnOffset The column offset to apply.
      */
     private updateDiagnosticOffset(
         diagnostic: Diagnostic,
@@ -109,6 +136,12 @@ export class ValidatorManager {
         end.line += lineOffset;
     }
 
+    /**
+     * The createInstance method is a static factory method that creates and returns an instance of ValidatorManager with pre-configured validators.
+     * It initializes ValidatorManager, then adds instances of GraphQLValidator, JSValidator, and HTMLValidator to it. Each validator is configured
+     * with relevant diagnostic producers.
+     * @returns ValidatorManager instance
+     */
     public static createInstance(): ValidatorManager {
         const validatorManager = new ValidatorManager();
         // Populate GraphQLValidator

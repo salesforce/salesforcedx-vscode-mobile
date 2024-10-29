@@ -9,7 +9,12 @@ export class GraphQLValidator extends BaseValidator<ASTNode> {
         return 'javascript';
     }
 
-    prepareDiagnosticTargets(
+    /**
+     * Each GQL text document can have more than 1 `DiagnosticSection`
+     * @param textDocument
+     * @returns
+     */
+    gatherDiagnosticSections(
         textDocument: TextDocument
     ): DiagnosticSection<ASTNode>[] {
         const gqlSources = gqlPluckFromCodeStringSync(
