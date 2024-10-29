@@ -17,10 +17,7 @@ import * as sinon from 'sinon';
 import { parse } from 'graphql';
 import { OrgUtils } from '../../utils/orgUtils';
 import { generateEntityTree } from '../../utils/gqlUtils';
-import {
-    OperationNode,
-    Relation
-} from '../../utils/gqlUtils';
+import { OperationNode, Relation } from '../../utils/gqlUtils';
 
 import { ObjectInfoRepresentation } from '../../types';
 suite('GraphQL Utils Test Suite - Server', () => {
