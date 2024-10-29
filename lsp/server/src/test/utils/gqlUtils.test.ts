@@ -15,13 +15,10 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 
 import { parse } from 'graphql';
-import { OversizedRecord } from '../../diagnostic/gql/over-sized-record';
 import { OrgUtils } from '../../utils/orgUtils';
 import { generateEntityTree } from '../../utils/gqlUtils';
 import {
     OperationNode,
-    PropertyNode,
-    EntityNode,
     Relation
 } from '../../utils/gqlUtils';
 
@@ -53,35 +50,35 @@ suite('GraphQL Utils Test Suite - Server', () => {
             'graphql',
             1,
             `
-                query {
-                    uiapi {
-                        query {
-                            Account {
-                                edges {
-                                    node {
-                                        Name { value }
-                                        Contacts {
-                                        edges {
-                                            node {
-                                            Name {
-                                                value
-                                            }
-                                            
-                                            }
-                                        }
-                                        }
-                                        LastModifiedBy {
+            query {
+                uiapi {
+                    query {
+                        Account {
+                            edges {
+                                node {
+                                    Name { value }
+                                    Contacts {
+                                    edges {
+                                        node {
                                         Name {
                                             value
                                         }
+                                        
                                         }
+                                    }
+                                    }
+                                    LastModifiedBy {
+                                    Name {
+                                        value
+                                    }
                                     }
                                 }
                             }
                         }
                     }
-                }   
-                `
+                }
+            }
+            `
         );
 
         const astNode = parse(textDocument.getText());

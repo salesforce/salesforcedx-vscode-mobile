@@ -44,23 +44,23 @@ suite(
                 'graphql',
                 1,
                 `
-            query {
-                uiapi {
-                    query {
-                        Book__c {
-                            edges {
-                                node {
-                                    Name { value }
-                                    Chapter1__c {
-                                      value
+                query {
+                    uiapi {
+                        query {
+                            Book__c {
+                                edges {
+                                    node {
+                                        Name { value }
+                                        Chapter1__c {
+                                        value
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
-            }   
-        `
+                }   
+                `
             );
             const astNode = parse(textDocument.getText());
             const diagnostics = await oversizedRecordProducer.validateDocument(
@@ -92,7 +92,7 @@ suite(
                         }
                     }
                 }   
-        `
+                `
             );
             const astNode = parse(textDocument.getText());
             const diagnostics = await oversizedRecordProducer.validateDocument(
@@ -137,7 +137,7 @@ suite(
                         }
                     }
                 }   
-        `
+                `
             );
             const astNode = parse(textDocument.getText());
             const diagnostics = await oversizedRecordProducer.validateDocument(
