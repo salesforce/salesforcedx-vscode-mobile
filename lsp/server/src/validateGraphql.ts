@@ -14,15 +14,16 @@ import {
     DiagnosticSettings,
     isTheDiagnosticSuppressed
 } from './diagnostic/DiagnosticSettings';
-import { OversizedRecord as OversizedRequest } from './diagnostic/gql/over-sized-record';
+import { OversizedRecord } from './diagnostic/gql/over-sized-record';
 
 const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
-    new OversizedRequest()
+    new OversizedRecord()
 ];
 
 /**
  * Validate the graphql queries in the document.
- * @param textDocument
+ * @param setting The diagnostic settings.
+ * @param textDocument The document to validate.
  */
 export async function validateGraphql(
     setting: DiagnosticSettings,

@@ -49,8 +49,8 @@ export function activate(
             { scheme: 'file', language: 'html' }
         ],
         synchronize: {
-            // .sf/config.json in the workspace is updated when org authorized, switched or logout by sf core extension.
-            // Notify the server to revaluate for the updated org.
+            // .sf/config.json in the workspace is updated when org is authorized, switched or logged out by sf core extension.
+            // Notify the server to reevaluate for the updated org.
             fileEvents: workspace.createFileSystemWatcher('**/.sf/config.json')
         },
         initializationOptions: {
