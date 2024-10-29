@@ -6,11 +6,12 @@
  */
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { validateGraphql } from '../validateGraphql';
+import { GraphQLValidator } from '../../validator/gqlValidator';
+import { MisspelledUiapi } from '../../diagnostic/gql/misspelled-uiapi';
 import * as assert from 'assert';
 import { suite, test } from 'mocha';
 
-suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
+suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
     test('Valid uiapi missing diagnostic', async () => {
         const textDocument = TextDocument.create(
             'file://test.js',
@@ -38,7 +39,17 @@ suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql({}, textDocument);
+
+        const graphqlValidator = new GraphQLValidator();
+        graphqlValidator.addProducer(new MisspelledUiapi());
+        const sections =
+            graphqlValidator.gatherDiagnosticSections(textDocument);
+        assert.equal(sections.length, 1);
+        const diagnostics = await graphqlValidator.validateData(
+            {},
+            sections[0].document,
+            sections[0].data
+        );
 
         assert.equal(diagnostics.length, 1);
         assert.equal(diagnostics[0].message, 'uiapi is misspelled.');
@@ -59,8 +70,10 @@ suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql({}, textDocument);
-
-        assert.equal(diagnostics.length, 0);
+        const graphqlValidator = new GraphQLValidator();
+        graphqlValidator.addProducer(new MisspelledUiapi());
+        const sections =
+            graphqlValidator.gatherDiagnosticSections(textDocument);
+        assert.equal(sections.length, 0);
     });
 });

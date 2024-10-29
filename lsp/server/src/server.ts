@@ -20,7 +20,6 @@ import {
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
@@ -151,7 +150,6 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            //items: await validateDocument(settings, document, extensionTitle)
             items: await validatorManager.validateDocument(
                 settings,
                 document,
