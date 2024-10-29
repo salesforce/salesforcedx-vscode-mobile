@@ -23,6 +23,7 @@ import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
+import { debounce } from './utils/commonUtils';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -129,6 +130,13 @@ connection.onDidChangeConfiguration((change) => {
 });
 
 const MAX_WAIT_FOR_STATE_AGGREGATOR = 4000;
+
+// Since both '.sf/config.json' and '.sfdx/sfdx-config.json' are being watched, file change events can
+// occur in quick succession. Use debounce to prevent unnecessary diagnostic refreshes.
+const debounceOnOrgChange = debounce(
+    onAuthOrgChanged,
+    MAX_WAIT_FOR_STATE_AGGREGATOR
+);
 connection.onDidChangeWatchedFiles((changeEvents) => {
     changeEvents.changes.forEach((change) => {
         /**
@@ -137,8 +145,11 @@ connection.onDidChangeWatchedFiles((changeEvents) => {
         We've noticed that the StateAggregator in the Salesforce code may take over 3 seconds to stabilize, so 
         we've implemented a fixed delay of up to 4 seconds here.  
         */
-        if (change.uri.endsWith('.sf/config.json')) {
-            setTimeout(onAuthOrgChanged, MAX_WAIT_FOR_STATE_AGGREGATOR);
+        if (
+            change.uri.endsWith('.sf/config.json') ||
+            change.uri.endsWith('.sfdx/sfdx-config.json')
+        ) {
+            debounceOnOrgChange();
         }
     });
 });
