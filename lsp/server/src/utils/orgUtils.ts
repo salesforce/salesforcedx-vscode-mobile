@@ -93,9 +93,7 @@ export class OrgUtils {
             this.authStatus = AuthStatus.UNAUTHORIZED;
         } else {
             this.authStatus = AuthStatus.AUTHORIZED;
-            if (this.orgName === undefined) {
-                throw new Error('Authorized Org does not have org name!');
-            }
+
             // Fetches entity list once.
             const entityListFile = path.join(
                 this.objectInfoFolderPath(),
