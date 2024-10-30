@@ -143,15 +143,16 @@ documents.onDidClose((e) => {
 });
 
 connection.languages.diagnostics.on(async (params) => {
-    const document = documents.get(params.textDocument.uri);
-    if (document !== undefined) {
+    const uri = params.textDocument.uri;
+    const document = documents.get(uri);
+
+    // Do diagnostics if document is under LWC folder and already in cache.
+    if (uri.indexOf(WorkspaceUtils.LWC_PATH) > 0 && document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
             items: await validateDocument(settings, document, extensionTitle)
         } satisfies DocumentDiagnosticReport;
     } else {
-        // We don't know the document. We can either try to read it from disk
-        // or we don't report problems for it.
         return {
             kind: DocumentDiagnosticReportKind.Full,
             items: []

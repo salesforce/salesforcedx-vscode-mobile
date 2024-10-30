@@ -12,7 +12,9 @@ import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 
 export const LOCAL_CHANGE_NOT_AWARE_MESSAGE =
-    'The wire adapter you are using allows you to work offline, but it does not automatically update its records when data is added or removed while you are disconnected.';
+    'You are using a wire adapter that will work with records while offline, but will not update to add or remove records that are created or deleted while offline. Consider using GraphQL to create a related list with records that are editable offline. To learn more, view';
+export const LOCAL_CHANGE_NOT_AWARE_EXTERNAL_DOC_URL =
+    'https://developer.salesforce.com/docs/platform/graphql/guide/query-related-list-info.html';
 const SEVERITY = DiagnosticSeverity.Information;
 
 const LOCAL_CHANGE_NOT_AWARE_ADAPTERS: string[] = [
@@ -45,22 +47,26 @@ export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
                         start: textDocument.positionAt(item.start as number),
                         end: textDocument.positionAt(item.end as number)
                     },
-                    message: LOCAL_CHANGE_NOT_AWARE_MESSAGE
+                    message: LOCAL_CHANGE_NOT_AWARE_MESSAGE,
+                    code: LOCAL_CHANGE_NOT_AWARE_EXTERNAL_DOC_URL,
+                    codeDescription: {
+                        href: LOCAL_CHANGE_NOT_AWARE_EXTERNAL_DOC_URL
+                    }
                 } as Diagnostic;
             })
         );
     }
 
     /**
-     * Find @wire adapter call which called in the local change not aware adapters. For example: 
+     * Find a list of adapters which are not draft change aware. For example: getRelatedListRecords from below LWC. 
         export default class RelatedListRecords extends LightningElement {
             ...
             @wire(getRelatedListRecords, 
             ...
         }
-     * @param astNode root node to search
-     * @param adapterNames adapter which are not able to reflect the local change.
-     * @returns nodes with adapter name
+     * @param astNode The AST root node for the LWC js file.
+     * @param adapterNames Adapter names which are not able to reflect the local change.
+     * @returns A list of AST nodes whose names match the adapter names. 
      */
     private findLocalChangeNotAwareAdapterNode(
         astNode: Node,

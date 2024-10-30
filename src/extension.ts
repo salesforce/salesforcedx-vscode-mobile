@@ -48,7 +48,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const command = getUpdateDiagnosticsSettingCommand(context);
 
-    lspClient.activate(context, command, SECTION_DIAGNOSTICS);
+    // Only initialize the LSP if opened project is a SFDX project.
+    if (WorkspaceUtils.isSfdxProjectOpened()) {
+        lspClient.activate(context, command, SECTION_DIAGNOSTICS);
+    }
 }
 
 // This method is called when your extension is deactivated

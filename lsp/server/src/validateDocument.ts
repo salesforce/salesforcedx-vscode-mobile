@@ -45,10 +45,5 @@ export async function validateDocument(
         results = results.concat(diagnostics);
     }
 
-    // Set the source for diagnostic source.
-    results.forEach((diagnostic) => {
-        diagnostic.source = extensionName;
-    });
-
     return results;
 }
