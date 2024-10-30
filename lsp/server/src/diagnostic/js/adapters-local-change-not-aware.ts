@@ -12,7 +12,7 @@ import { DiagnosticProducer } from '../DiagnosticProducer';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver/node';
 
 export const LOCAL_CHANGE_NOT_AWARE_MESSAGE =
-    'You are using a wire adapter that will work with records while offline, but will not update to add or remove records that are created or deleted while offline. Consider using GraphQL to create a related list with records that are editable offline. To learn more, view';
+    'You are using a wire adapter that will work with records while offline, but will not update to add or remove records that are created or deleted while offline. Consider using GraphQL to create a related list with records that are editable offline.';
 export const LOCAL_CHANGE_NOT_AWARE_EXTERNAL_DOC_URL =
     'https://developer.salesforce.com/docs/platform/graphql/guide/query-related-list-info.html';
 const SEVERITY = DiagnosticSeverity.Information;
