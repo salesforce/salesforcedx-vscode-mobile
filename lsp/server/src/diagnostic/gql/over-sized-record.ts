@@ -79,7 +79,7 @@ export async function createDiagnostics(
                 await generateDiagnostic(entityNode, results);
             } catch (e) {
                 console.log(
-                    `Cannot conduct over-sized record diagnostic for ${entityNode.name} `
+                    `Cannot conduct over-sized record diagnostic for ${entityNode.name}: ${(e as Error).message} `
                 );
             }
         }
@@ -143,7 +143,7 @@ async function generateDiagnostic(
                 await generateDiagnostic(relation.entity, overSizedDiagnostic);
             } catch (e) {
                 console.log(
-                    `Cannot conduct over-sized record diagnostic for ${entityNode.name} `
+                    `Cannot conduct over-sized record diagnostic for ${entityNode.name}: ${(e as Error).message}`
                 );
             }
         }

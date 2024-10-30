@@ -76,7 +76,8 @@ export class OrgUtils {
         }
     }
 
-    // Update the auth state async
+    // Update the authentication status if needed and return the latest status. This is the central hub for managing the organization's state,
+    // including properties like OrgName and authStatus.
     private static async checkAuthStatus(): Promise<AuthStatus> {
         if (this.authStatus !== AuthStatus.UNKNOWN) {
             return this.authStatus;
@@ -224,27 +225,28 @@ export class OrgUtils {
                 try {
                     const connection = await OrgUtils.getConnection();
                     if (
-                        connection !== undefined &&
-                        OrgUtils.entities.indexOf(objectApiName) >= 0
+                        connection === undefined ||
+                        !OrgUtils.entities.includes(objectApiName)
                     ) {
-                        const objectInfo = (await connection.request(
-                            `${connection.baseUrl()}/ui-api/object-info/${objectApiName}`
-                        )) as ObjectInfoRepresentation;
-
-                        if (objectInfo !== undefined) {
-                            this.objectInfoResponseCallback(
-                                objectApiName,
-                                objectInfo
-                            );
-                        }
-                        return resolve(objectInfo);
+                        return resolve(undefined);
                     }
+                    const objectInfo = (await connection.request(
+                        `${connection.baseUrl()}/ui-api/object-info/${objectApiName}`
+                    )) as ObjectInfoRepresentation;
+
+                    if (objectInfo !== undefined) {
+                        this.objectInfoResponseCallback(
+                            objectApiName,
+                            objectInfo
+                        );
+                    }
+                    return resolve(objectInfo);
                 } catch (e) {
                     console.log(
                         `Failed to load entity list from server with error: ${e}`
                     );
+                    return resolve(undefined); // Return undefined in case of an error
                 }
-                return resolve(undefined);
             }).finally(() => {
                 this.objectInfoPromises.delete(objectApiName);
             });
