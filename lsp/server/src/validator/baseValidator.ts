@@ -1,6 +1,4 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
-{
-}
 import { DiagnosticProducer } from '../diagnostic/DiagnosticProducer';
 import {
     DiagnosticSettings,
@@ -16,7 +14,7 @@ export type SupportedType = Node | ASTNode | HTMLDocument;
 /**
  * The DiagnosticSection interface represents a distinct segment of a document that a DiagnosticProducer can process independently.
  * Each data field corresponds to a specific part of the document, with lineOffset and columnOffset indicating the section’s relative position
- * within the entire document. This allows diagnostic producers to localize and process specific portions effectively.
+ * within the entire document. This allows diagnostic producers to process specific portions effectively.
  */
 export interface DiagnosticSection<SupportedType> {
     data: SupportedType;
@@ -51,7 +49,7 @@ export abstract class BaseValidator<SupportedType> {
     }
 
     /**
-     * Removes a diagnostic producer from the list.
+     * Remove a diagnostic producer from the list.
      * @param producerId The Id of diagnostic producer to be removed.
      */
     public removeProducer(producerId: string) {
@@ -61,7 +59,7 @@ export abstract class BaseValidator<SupportedType> {
     }
 
     /**
-     * Prepares diagnostic sections for each producer to process.
+     * Prepare diagnostic sections for each producer to process.
      * @param textDocument The document to analyze.
      * @returns An array of diagnostic sections relevant to the producers.
      */
@@ -70,7 +68,7 @@ export abstract class BaseValidator<SupportedType> {
     ): Array<DiagnosticSection<SupportedType>>;
 
     /**
-     * Validates data against active diagnostic producers and generates diagnostics.
+     * Validate data against active diagnostic producers and generates diagnostics.
      * @param setting The diagnostic settings.
      * @param textDocument The document to analyze.
      * @param data The data to validate.
@@ -95,7 +93,7 @@ export abstract class BaseValidator<SupportedType> {
                     return await producer.validateDocument(textDocument, data);
                 } catch (e) {
                     console.log(
-                        `Cannot diagnose document with rule ID ${producer.getId()}`
+                        `Cannot diagnose document with rule ID ${producer.getId()}: ${(e as Error).message}`
                     );
                 }
                 return [];
@@ -104,5 +102,8 @@ export abstract class BaseValidator<SupportedType> {
         return diagnosticsArray.flat();
     }
 
+    /**
+     * Language Id this validator handles
+     */
     abstract getLanguageId(): string;
 }

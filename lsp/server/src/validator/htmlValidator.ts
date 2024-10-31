@@ -19,7 +19,7 @@ export class HTMLValidator extends BaseValidator<HTMLDocument> {
                 } satisfies DiagnosticSection<HTMLDocument>
             ];
         } catch (e) {
-            console.log('Failed to parse HTML file.');
+            console.log(`Failed to parse HTML file: : ${(e as Error).message}`);
         }
         return [];
     }

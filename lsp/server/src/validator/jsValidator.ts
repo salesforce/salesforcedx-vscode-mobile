@@ -20,7 +20,9 @@ export class JSValidator extends BaseValidator<Node> {
                 } satisfies DiagnosticSection<Node>
             ];
         } catch (e) {
-            console.log('Failed to parse JavaScript file.');
+            console.log(
+                `Failed to parse JavaScript file: : ${(e as Error).message}`
+            );
         }
         return [];
     }

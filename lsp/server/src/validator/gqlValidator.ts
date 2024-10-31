@@ -11,8 +11,8 @@ export class GraphQLValidator extends BaseValidator<ASTNode> {
 
     /**
      * Each GQL text document can have more than 1 `DiagnosticSection`
-     * @param textDocument
-     * @returns
+     * @param textDocument  The gql document to analyze.
+     * @returns An array of diagnostic sections relevant to the producers.
      */
     gatherDiagnosticSections(
         textDocument: TextDocument
@@ -47,7 +47,9 @@ export class GraphQLValidator extends BaseValidator<ASTNode> {
                 } satisfies DiagnosticSection<ASTNode>;
                 results.push(section);
             } catch (e) {
-                console.log('Unable to parse GQL document.');
+                console.log(
+                    `Unable to parse GQL document: ${(e as Error).message}`
+                );
             }
         }
         return results;
