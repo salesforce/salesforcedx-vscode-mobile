@@ -49,8 +49,12 @@ export function activate(
             { scheme: 'file', language: 'html' }
         ],
         synchronize: {
-            // Notify the server about file changes to '.clientrc files contained in the workspace
-            fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
+            // '.sf/config.json' and '.sfdx/sfdx-config.json' in the workspace is updated when org is authorized, switched or logged out by sf core extension.
+            // Notify the server to re-evaluate for the updated org.
+            fileEvents: [
+                workspace.createFileSystemWatcher('**/.sf/config.json'),
+                workspace.createFileSystemWatcher('**/.sfdx/sfdx-config.json')
+            ]
         },
         initializationOptions: {
             extensionTitle,

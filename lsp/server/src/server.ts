@@ -18,12 +18,12 @@ import {
     CodeAction,
     CodeActionKind
 } from 'vscode-languageserver/node';
-
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
+import { debounce } from './utils/commonUtils';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -47,7 +47,7 @@ connection.onInitialize((params: InitializeParams) => {
     const workspaceFolders = params.workspaceFolders;
 
     // Sets workspace folder to WorkspaceUtils
-    WorkspaceUtils.setWorkSpaceFolders(workspaceFolders);
+    WorkspaceUtils.initWorkspaceFolders(workspaceFolders);
     extensionTitle = params.initializationOptions?.extensionTitle;
     updateDiagnosticsSettingCommand =
         params.initializationOptions?.updateDiagnosticsSettingCommand;
@@ -129,6 +129,31 @@ connection.onDidChangeConfiguration((change) => {
     connection.languages.diagnostics.refresh();
 });
 
+const MAX_WAIT_FOR_STATE_AGGREGATOR = 4000;
+
+// Since both '.sf/config.json' and '.sfdx/sfdx-config.json' are being watched, file change events can
+// occur in quick succession. Use debounce to prevent unnecessary diagnostic refreshes.
+const debounceOnOrgChange = debounce(
+    onAuthOrgChanged,
+    MAX_WAIT_FOR_STATE_AGGREGATOR
+);
+connection.onDidChangeWatchedFiles((changeEvents) => {
+    changeEvents.changes.forEach((change) => {
+        /**
+        When the default organization changes, the target_id in config.json will be updated. 
+        To handle this file change, we invoke onAuthOrgChanged. 
+        We've noticed that the StateAggregator in the Salesforce code may take over 3 seconds to stabilize, so 
+        we've implemented a fixed delay of up to 4 seconds here.  
+        */
+        if (
+            change.uri.endsWith('.sf/config.json') ||
+            change.uri.endsWith('.sfdx/sfdx-config.json')
+        ) {
+            debounceOnOrgChange();
+        }
+    });
+});
+
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change) => {
@@ -160,11 +185,13 @@ connection.languages.diagnostics.on(async (params) => {
     }
 });
 
-// Watch SF config file change
-OrgUtils.watchConfig();
-connection.onExit(function () {
-    OrgUtils.unWatchConfig();
-});
+// When server establishes, reset org state.
+OrgUtils.reset();
+
+function onAuthOrgChanged() {
+    OrgUtils.reset();
+    connection.languages.diagnostics.refresh();
+}
 
 connection.onCodeAction((params) => {
     const textDocument = documentCache.get(params.textDocument.uri);
