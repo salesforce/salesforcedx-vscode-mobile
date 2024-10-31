@@ -27,7 +27,7 @@ enum AuthStatus {
     UNAUTHORIZED
 }
 
-class OrgState {
+class OrgInfo {
     status: AuthStatus;
     connection?: Connection;
     orgName?: string;
@@ -63,20 +63,24 @@ class OrgState {
 
     // Get the file path for entity list.
     getEntityFilePath(): string {
-        return path.join(
-            this.getObjectInfoPath(),
-            ENTITY_LIST_FILE_NAME
-        );
+        return path.join(this.getObjectInfoPath(), ENTITY_LIST_FILE_NAME);
+    }
+
+    getObjectInfoRestEndPoint(objectApiName: string): string {
+        if (this.connection === undefined) {
+            throw Error('Not authorized to org');
+        }
+        return `${this.connection.baseUrl()}/ui-api/object-info/${objectApiName}`;
     }
 }
 
 /**
  * Utility class for Org
  * - fetching data and cache it in L1 and L2 for authorized org
- * - wipe out data when logout. 
+ * - wipe out data when logout.
  */
 export class OrgUtils {
-    private static currentOrgState = new OrgState(AuthStatus.UNAUTHORIZED);
+    private static defaultOrgInfo = new OrgInfo(AuthStatus.UNAUTHORIZED);
 
     private static objectInfoInMemoCache = new Map<
         string,
@@ -92,8 +96,8 @@ export class OrgUtils {
     public static async getObjectInfo(
         objectApiName: string
     ): Promise<ObjectInfoRepresentation | undefined> {
-        const orgState = await OrgUtils.refreshOrgState();
-        if (orgState.status !== AuthStatus.AUTHORIZED) {
+        const orgInfo = await OrgUtils.refreshOrgInfo();
+        if (orgInfo.status !== AuthStatus.AUTHORIZED) {
             return undefined;
         }
 
@@ -102,7 +106,7 @@ export class OrgUtils {
             return objectInfo;
         }
 
-        // Network loading is going on
+        // kick off a network call if not going already.
         let objectInfoNetworkResponsePromise =
             this.objectInfoPromises.get(objectApiName);
         if (objectInfoNetworkResponsePromise === undefined) {
@@ -117,8 +121,10 @@ export class OrgUtils {
                     ) {
                         return resolve(undefined);
                     }
+                    const url =
+                        orgInfo.getObjectInfoRestEndPoint(objectApiName);
                     const objectInfo = (await connection.request(
-                        `${connection.baseUrl()}/ui-api/object-info/${objectApiName}`
+                        url
                     )) as ObjectInfoRepresentation;
 
                     if (objectInfo !== undefined) {
@@ -145,9 +151,9 @@ export class OrgUtils {
         return objectInfoNetworkResponsePromise;
     }
 
-    // Resets Org state to its initial state.
+    // Resets Org state to its initial state and wipe out L1 and L2 cache.
     public static reset() {
-        this.currentOrgState = new OrgState(AuthStatus.UNKNOWN);
+        this.defaultOrgInfo = new OrgInfo(AuthStatus.UNKNOWN);
         this.entities.splice(0, this.entities.length);
         this.objectInfoInMemoCache.clear();
         this.objectInfoPromises.clear();
@@ -179,7 +185,7 @@ export class OrgUtils {
         if (orgName === undefined) {
             return undefined;
         }
-        
+
         const aggregator = await StateAggregator.getInstance();
         const userName = aggregator.aliases.getUsername(orgName);
         if (userName) {
@@ -188,30 +194,30 @@ export class OrgUtils {
         return undefined;
     }
 
-    // Refresh the org authentication state if needed and return the latest state. 
+    // Refresh the org info if needed and return the latest state.
     // If state changes from unknown to authorized,  it will kick off call to fetch entity list.
-    private static async refreshOrgState(): Promise<OrgState> {
+    private static async refreshOrgInfo(): Promise<OrgInfo> {
         // Already settled, not unknown, no need to refresh.
-        if (this.currentOrgState.status !== AuthStatus.UNKNOWN) {
-            return this.currentOrgState;
+        if (this.defaultOrgInfo.status !== AuthStatus.UNKNOWN) {
+            return this.defaultOrgInfo;
         }
 
         // Figured out new org state.
-        let orgState: OrgState;
+        let orgInfo: OrgInfo;
         const connection = await this.getConnection();
         if (connection !== undefined) {
             const orgName = await this.getDefaultOrg();
-            orgState = new OrgState(AuthStatus.AUTHORIZED, connection, orgName);
+            orgInfo = new OrgInfo(AuthStatus.AUTHORIZED, connection, orgName);
         } else {
-            orgState = new OrgState(AuthStatus.UNAUTHORIZED);
+            orgInfo = new OrgInfo(AuthStatus.UNAUTHORIZED);
         }
 
         // Kick off the call to fetch entity list the user has access to.
-        if (orgState.status === AuthStatus.AUTHORIZED) {
+        if (orgInfo.status === AuthStatus.AUTHORIZED) {
             // Fetches entity list once.
-            const entityListFile = orgState.getEntityFilePath();
+            const entityListFile = orgInfo.getEntityFilePath();
             const entityList = (
-                await orgState.connection!!.describeGlobal()
+                await orgInfo.connection!!.describeGlobal()
             ).sobjects.map((sObj) => sObj.name);
 
             this.entities = entityList;
@@ -220,8 +226,8 @@ export class OrgUtils {
             });
         }
 
-        this.currentOrgState = orgState;
-        return orgState;
+        this.defaultOrgInfo = orgInfo;
+        return orgInfo;
     }
 
     // Retrieve the Connection which fetches ObjectInfo remotely.
@@ -247,7 +253,7 @@ export class OrgUtils {
         objectApiName: string
     ): ObjectInfoRepresentation | undefined {
         const objectInfoJsonFile = path.join(
-            this.currentOrgState.getObjectInfoPath(),
+            this.defaultOrgInfo.getObjectInfoPath(),
             `${objectApiName}.json`
         );
         if (!fs.existsSync(objectInfoJsonFile)) {
@@ -287,7 +293,7 @@ export class OrgUtils {
         this.objectInfoInMemoCache.set(objectApiName, objectInfo);
         const objectInfoStr = JSON.stringify(objectInfo);
         const objectInfoFile = path.join(
-            this.currentOrgState.getObjectInfoPath(),
+            this.defaultOrgInfo.getObjectInfoPath(),
             `${objectApiName}.json`
         );
         if (fs.existsSync(objectInfoFile)) {
