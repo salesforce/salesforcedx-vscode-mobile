@@ -7,27 +7,44 @@
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { GraphQLValidator } from '../../validator/gqlValidator';
-import { MisspelledUiapi } from '../../diagnostic/gql/misspelled-uiapi';
+import { OversizedRecord } from '../../diagnostic/gql/over-sized-record';
+
 import * as assert from 'assert';
-import { suite, test } from 'mocha';
+import { suite, test, beforeEach, afterEach } from 'mocha';
+import * as sinon from 'sinon';
+import { OrgUtils } from '../../utils/orgUtils';
+import Book__c from '../../../testFixture/objectInfos/Book__c.json';
+import { ObjectInfoRepresentation } from '../../types';
 
 suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
-    test('Valid uiapi missing diagnostic', async () => {
+    let sandbox: sinon.SinonSandbox;
+    beforeEach(function () {
+        sandbox = sinon.createSandbox();
+        sandbox
+            .stub(OrgUtils, 'getObjectInfo')
+            .resolves(Book__c as unknown as ObjectInfoRepresentation);
+    });
+
+    afterEach(function () {
+        sandbox.restore();
+    });
+
+    test('Valid over sized record diagnostic', async () => {
         const textDocument = TextDocument.create(
             'file://test.js',
             'javascript',
             1,
             `
-            export default class graphqlBatchTest extends LightningElement {
+            export default class graphqlRecordSizeTest extends LightningElement {
 
                 gqlQuery = gql\`
                     query {
                         uiapia {
                             query {
-                                Account {
+                                Book__c {
                                     edges {
                                         node {
-                                            Name { value }
+                                            Chapter4__c { value }
                                         }
                                     }
                                 }
@@ -41,7 +58,7 @@ suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
         );
 
         const graphqlValidator = new GraphQLValidator();
-        graphqlValidator.addProducer(new MisspelledUiapi());
+        graphqlValidator.addProducer(new OversizedRecord());
         const sections =
             graphqlValidator.gatherDiagnosticSections(textDocument);
         assert.equal(sections.length, 1);
@@ -51,8 +68,7 @@ suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
             sections[0].data
         );
 
-        assert.equal(diagnostics.length, 1);
-        assert.equal(diagnostics[0].message, 'uiapi is misspelled.');
+        assert.equal(diagnostics.length, 2);
     });
 
     test('Graphql with incorrect syntax produces no diagnostic', async () => {
@@ -71,7 +87,7 @@ suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
             `
         );
         const graphqlValidator = new GraphQLValidator();
-        graphqlValidator.addProducer(new MisspelledUiapi());
+        graphqlValidator.addProducer(new OversizedRecord());
         const sections =
             graphqlValidator.gatherDiagnosticSections(textDocument);
         assert.equal(sections.length, 0);

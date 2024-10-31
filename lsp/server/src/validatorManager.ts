@@ -8,7 +8,7 @@ import { DiagnosticSection } from './validator/baseValidator';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 import { DiagnosticSettings } from './diagnostic/DiagnosticSettings';
-import { MisspelledUiapi } from './diagnostic/gql/misspelled-uiapi';
+import { OversizedRecord } from './diagnostic/gql/over-sized-record';
 import { AdaptersLocalChangeNotAware } from './diagnostic/js/adapters-local-change-not-aware';
 import { MobileOfflineFriendly } from './diagnostic/html/mobileOfflineFriendly';
 
@@ -146,7 +146,7 @@ export class ValidatorManager {
         const validatorManager = new ValidatorManager();
         // Populate GraphQLValidator
         const gqlValidator = new GraphQLValidator();
-        gqlValidator.addProducer(new MisspelledUiapi());
+        gqlValidator.addProducer(new OversizedRecord());
         validatorManager.addValidator(gqlValidator);
 
         const jsValidator = new JSValidator();
