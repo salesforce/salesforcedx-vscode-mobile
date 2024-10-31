@@ -10,19 +10,20 @@ import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
 import { Diagnostic } from 'vscode-languageserver/node';
 import { DiagnosticProducer } from './diagnostic/DiagnosticProducer';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { MisspelledUiapi } from './diagnostic/gql/misspelled-uiapi';
 import {
     DiagnosticSettings,
     isTheDiagnosticSuppressed
 } from './diagnostic/DiagnosticSettings';
+import { OversizedRecord } from './diagnostic/gql/over-sized-record';
 
 const diagnosticProducers: DiagnosticProducer<ASTNode>[] = [
-    new MisspelledUiapi()
+    new OversizedRecord()
 ];
 
 /**
  * Validate the graphql queries in the document.
- * @param textDocument
+ * @param setting The diagnostic settings.
+ * @param textDocument The document to validate.
  */
 export async function validateGraphql(
     setting: DiagnosticSettings,

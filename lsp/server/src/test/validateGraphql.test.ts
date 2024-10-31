@@ -8,25 +8,41 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { validateGraphql } from '../validateGraphql';
 import * as assert from 'assert';
-import { suite, test } from 'mocha';
+import { suite, test, beforeEach, afterEach } from 'mocha';
+import * as sinon from 'sinon';
+import { OrgUtils } from '../utils/orgUtils';
+import Book__c from '../../testFixture/objectInfos/Book__c.json';
+import { ObjectInfoRepresentation } from '../types';
 
 suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
-    test('Valid uiapi missing diagnostic', async () => {
+    let sandbox: sinon.SinonSandbox;
+    beforeEach(function () {
+        sandbox = sinon.createSandbox();
+        sandbox
+            .stub(OrgUtils, 'getObjectInfo')
+            .resolves(Book__c as unknown as ObjectInfoRepresentation);
+    });
+
+    afterEach(function () {
+        sandbox.restore();
+    });
+
+    test('Valid over sized record diagnostic', async () => {
         const textDocument = TextDocument.create(
             'file://test.js',
             'javascript',
             1,
             `
-            export default class graphqlBatchTest extends LightningElement {
+            export default class graphqlRecordSizeTest extends LightningElement {
 
                 gqlQuery = gql\`
                     query {
                         uiapia {
                             query {
-                                Account {
+                                Book__c {
                                     edges {
                                         node {
-                                            Name { value }
+                                            Chapter4__c { value }
                                         }
                                     }
                                 }
@@ -40,8 +56,7 @@ suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
         );
         const diagnostics = await validateGraphql({}, textDocument);
 
-        assert.equal(diagnostics.length, 1);
-        assert.equal(diagnostics[0].message, 'uiapi is misspelled.');
+        assert.equal(diagnostics.length, 2);
     });
 
     test('Graphql with incorrect syntax produces no diagnostic', async () => {

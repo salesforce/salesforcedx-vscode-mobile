@@ -12,11 +12,14 @@ import {
     OrgConfigProperties,
     StateAggregator
 } from '@salesforce/core';
-import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
 import { WorkspaceUtils } from './workspaceUtils';
 import { ObjectInfoRepresentation } from '../types';
+
+const SF_MOBILE_DIR = '.sfMobile';
+const ENTITY_LIST_FILE_NAME = 'entity_list.json';
+const OBJECT_INFO_FOLDER = 'objectInfos';
 
 enum AuthStatus {
     UNKNOWN,
@@ -24,13 +27,60 @@ enum AuthStatus {
     UNAUTHORIZED
 }
 
-export class OrgUtils {
-    private static orgName: string = '';
-    private static objectInfoFolder = 'objectInfos';
-    private static entityListFileName = 'entity_list.json';
-    private static connection: Connection | undefined;
+class OrgInfo {
+    status: AuthStatus;
+    connection?: Connection;
+    orgName?: string;
 
-    private static authStatus: AuthStatus = AuthStatus.UNKNOWN;
+    constructor(status: AuthStatus, connection?: Connection, orgName?: string) {
+        this.status = status;
+        this.connection = connection;
+        this.orgName = orgName;
+    }
+
+    // Get org caching root folder path, which is '<projectRoot>/.sfMobile/orgName'
+    getOrgCachePath(): string {
+        if (this.orgName === undefined) {
+            throw Error('Not authorized to org');
+        }
+        return path.join(
+            path.join(WorkspaceUtils.getWorkspaceDir(), SF_MOBILE_DIR),
+            this.orgName
+        );
+    }
+
+    // Get objectInfo folder path, which is '<projectRoot>/.sfMobile/orgName/objectInfos/'
+    getObjectInfoPath(): string {
+        const objectInfoPath = path.join(
+            this.getOrgCachePath(),
+            OBJECT_INFO_FOLDER
+        );
+        if (!fs.existsSync(objectInfoPath)) {
+            fs.mkdirSync(objectInfoPath, { recursive: true });
+        }
+        return objectInfoPath;
+    }
+
+    // Get the file path for entity list.
+    getEntityFilePath(): string {
+        return path.join(this.getObjectInfoPath(), ENTITY_LIST_FILE_NAME);
+    }
+
+    getObjectInfoRestEndPoint(objectApiName: string): string {
+        if (this.connection === undefined) {
+            throw Error('Not authorized to org');
+        }
+        return `${this.connection.baseUrl()}/ui-api/object-info/${objectApiName}`;
+    }
+}
+
+/**
+ * Utility class for Org
+ * - fetching data and cache it in L1 and L2 for authorized org
+ * - wipe out data when logout.
+ */
+export class OrgUtils {
+    private static defaultOrgInfo = new OrgInfo(AuthStatus.UNAUTHORIZED);
 
     private static objectInfoInMemoCache = new Map<
         string,
@@ -42,120 +92,146 @@ export class OrgUtils {
     >();
     private static entities: string[] = [];
 
-    private static sfdxDirWatcher: fs.FSWatcher | undefined;
-    private static sfDirWatcher: fs.FSWatcher | undefined;
+    // Acquire ObjectInfo data by first searching in memory, then on disk, and finally over the network.
+    public static async getObjectInfo(
+        objectApiName: string
+    ): Promise<ObjectInfoRepresentation | undefined> {
+        const orgInfo = await OrgUtils.refreshOrgInfo();
+        if (orgInfo.status !== AuthStatus.AUTHORIZED) {
+            return undefined;
+        }
 
-    private static sfdxFolder = '.sfdx';
-    /**
-     * The global folder in which sf state is stored.
-     */
-    private static sfFolder = '.sf';
+        const objectInfo = this.getObjectInfoFromCache(objectApiName);
+        if (objectInfo !== undefined) {
+            return objectInfo;
+        }
 
-    private static get SFDX_DIR() {
-        return path.join(os.homedir(), this.sfdxFolder);
+        // kick off a network call if not going already.
+        let objectInfoNetworkResponsePromise =
+            this.objectInfoPromises.get(objectApiName);
+        if (objectInfoNetworkResponsePromise === undefined) {
+            objectInfoNetworkResponsePromise = new Promise<
+                ObjectInfoRepresentation | undefined
+            >(async (resolve) => {
+                try {
+                    const connection = await OrgUtils.getConnection();
+                    if (
+                        connection === undefined ||
+                        !OrgUtils.entities.includes(objectApiName)
+                    ) {
+                        return resolve(undefined);
+                    }
+                    const url =
+                        orgInfo.getObjectInfoRestEndPoint(objectApiName);
+                    const objectInfo = (await connection.request(
+                        url
+                    )) as ObjectInfoRepresentation;
+
+                    if (objectInfo !== undefined) {
+                        this.objectInfoResponseCallback(
+                            objectApiName,
+                            objectInfo
+                        );
+                    }
+                    return resolve(objectInfo);
+                } catch (e) {
+                    console.log(
+                        `Failed to load entity list from server with error: ${e}`
+                    );
+                    return resolve(undefined); // Return undefined in case of an error
+                }
+            }).finally(() => {
+                this.objectInfoPromises.delete(objectApiName);
+            });
+            this.objectInfoPromises.set(
+                objectApiName,
+                objectInfoNetworkResponsePromise
+            );
+        }
+        return objectInfoNetworkResponsePromise;
     }
-    /**
-     * The full system path to the global sf state folder.
-     */
-    private static get SF_DIR() {
-        return path.join(os.homedir(), this.sfFolder);
+
+    // Resets Org state to its initial state and wipe out L1 and L2 cache.
+    public static reset() {
+        this.defaultOrgInfo = new OrgInfo(AuthStatus.UNKNOWN);
+        this.entities.splice(0, this.entities.length);
+        this.objectInfoInMemoCache.clear();
+        this.objectInfoPromises.clear();
+        try {
+            fs.rmSync(SF_MOBILE_DIR, {
+                force: true,
+                recursive: true,
+                maxRetries: 3
+            });
+        } catch (e) {
+            console.log(e);
+        }
     }
 
-    // Retrieves default organiztion's name.
-    private static async getDefaultOrg(): Promise<string> {
+    // Get default organization's name.
+    private static async getDefaultOrg(): Promise<string | undefined> {
         const aggregator = await ConfigAggregator.create();
 
         await aggregator.reload();
 
-        const currentUserConfig = aggregator.getInfo(
-            OrgConfigProperties.TARGET_ORG
-        );
+        const targetOrg = aggregator.getInfo(OrgConfigProperties.TARGET_ORG);
 
-        if (currentUserConfig.value) {
-            this.orgName = currentUserConfig.value.toString();
-            return this.orgName;
-        }
-        return Promise.reject('no org');
+        return targetOrg.value ? targetOrg.value.toString() : undefined;
     }
 
-    private static onAuthOrgChanged() {
-        this.reset();
-    }
-
-    // Watches SF project config changes.
-    public static watchConfig() {
-        this.sfdxDirWatcher = fs.watch(this.SFDX_DIR, (eventType, fileName) => {
-            this.onAuthOrgChanged();
-        });
-        this.sfDirWatcher = fs.watch(this.SF_DIR, (eventType, fileName) => {
-            this.onAuthOrgChanged();
-        });
-    }
-
-    public static unWatchConfig() {
-        if (this.sfdxDirWatcher !== undefined) {
-            this.sfdxDirWatcher.close();
-            this.sfdxDirWatcher = undefined;
-        }
-        if (this.sfDirWatcher !== undefined) {
-            this.sfDirWatcher.close();
-            this.sfDirWatcher = undefined;
-        }
-    }
-
+    // Get default user name
     private static async getDefaultUserName(): Promise<string | undefined> {
-        try {
-            const orgName = await this.getDefaultOrg();
-            const aggregator = await StateAggregator.getInstance();
-            const username = aggregator.aliases.getUsername(orgName);
-            if (username !== null && username !== undefined) {
-                return Promise.resolve(username);
-            }
-        } catch (error) {
+        const orgName = await this.getDefaultOrg();
+        if (orgName === undefined) {
             return undefined;
         }
+
+        const aggregator = await StateAggregator.getInstance();
+        const userName = aggregator.aliases.getUsername(orgName);
+        if (userName) {
+            return userName;
+        }
+        return undefined;
     }
 
-    // Updates the auth state async
-    private static async checkAuthStatus(): Promise<AuthStatus> {
-        if (this.authStatus !== AuthStatus.UNKNOWN) {
-            return this.authStatus;
+    // Refresh the org info if needed and return the latest state.
+    // If state changes from unknown to authorized,  it will kick off call to fetch entity list.
+    private static async refreshOrgInfo(): Promise<OrgInfo> {
+        // Already settled, not unknown, no need to refresh.
+        if (this.defaultOrgInfo.status !== AuthStatus.UNKNOWN) {
+            return this.defaultOrgInfo;
         }
+
+        // Figured out new org state.
+        let orgInfo: OrgInfo;
         const connection = await this.getConnection();
-        if (connection === undefined) {
-            //It is possible that orgName exists and connection expires
-            this.orgName = '';
-            this.authStatus = AuthStatus.UNAUTHORIZED;
+        if (connection !== undefined) {
+            const orgName = await this.getDefaultOrg();
+            orgInfo = new OrgInfo(AuthStatus.AUTHORIZED, connection, orgName);
         } else {
-            this.authStatus = AuthStatus.AUTHORIZED;
-            // Fetches entity list once.
-            const entityListFile = path.join(
-                this.objectInfoFolderPath(),
-                this.entityListFileName
-            );
-            if (!fs.existsSync(entityListFile)) {
-                const objectList = await this.getEntityList(this.connection!!);
-                this.entities = objectList;
-                fs.writeFileSync(entityListFile, JSON.stringify(objectList), {
-                    mode: 0o666
-                });
-            } else {
-                const entityContent = fs.readFileSync(entityListFile, 'utf8');
-                this.entities = JSON.parse(entityContent);
-            }
+            orgInfo = new OrgInfo(AuthStatus.UNAUTHORIZED);
         }
 
-        return this.authStatus;
+        // Kick off the call to fetch entity list the user has access to.
+        if (orgInfo.status === AuthStatus.AUTHORIZED) {
+            // Fetches entity list once.
+            const entityListFile = orgInfo.getEntityFilePath();
+            const entityList = (
+                await orgInfo.connection!!.describeGlobal()
+            ).sobjects.map((sObj) => sObj.name);
+
+            this.entities = entityList;
+            fs.writeFileSync(entityListFile, JSON.stringify(entityList), {
+                mode: 0o666
+            });
+        }
+
+        this.defaultOrgInfo = orgInfo;
+        return orgInfo;
     }
 
-    // Retrieves the Connection which fetches ObjectInfo remotely.
+    // Retrieve the Connection which fetches ObjectInfo remotely.
     private static async getConnection(): Promise<Connection | undefined> {
-        if (
-            this.connection !== undefined &&
-            this.connection.getUsername() !== undefined
-        ) {
-            return this.connection;
-        }
         try {
             const username = await this.getDefaultUserName();
             if (username === undefined) {
@@ -165,46 +241,19 @@ export class OrgUtils {
                 authInfo: await AuthInfo.create({ username })
             });
             if (connect !== undefined && connect.getUsername() !== undefined) {
-                this.connection = connect;
                 return connect;
             }
             return undefined;
         } catch (error) {
-            this.connection = undefined;
             return undefined;
         }
-    }
-
-    private static async getEntityList(
-        connection: Connection
-    ): Promise<string[]> {
-        const globalResult = await connection.describeGlobal();
-        return globalResult.sobjects.map((sobjetResult) => sobjetResult.name);
-    }
-
-    // Retrieves objectInfo folder path, which is '<projectRoot>/.sf/orgName/objectInfos/'
-    private static objectInfoFolderPath(): string {
-        const projectPath = WorkspaceUtils.getWorkspaceDir();
-        if (this.orgName === undefined || this.orgName.length === 0) {
-            throw new Error('AuthError: No Org exists');
-        }
-        const objectInfoFolder = path.join(
-            projectPath,
-            this.sfFolder,
-            this.orgName,
-            OrgUtils.objectInfoFolder
-        );
-        if (!fs.existsSync(objectInfoFolder)) {
-            fs.mkdirSync(objectInfoFolder, { recursive: true });
-        }
-        return objectInfoFolder;
     }
 
     private static fetchObjectInfoFromDisk(
         objectApiName: string
     ): ObjectInfoRepresentation | undefined {
         const objectInfoJsonFile = path.join(
-            this.objectInfoFolderPath(),
+            this.defaultOrgInfo.getObjectInfoPath(),
             `${objectApiName}.json`
         );
         if (!fs.existsSync(objectInfoJsonFile)) {
@@ -218,14 +267,14 @@ export class OrgUtils {
     private static getObjectInfoFromCache(
         objectApiName: string
     ): ObjectInfoRepresentation | undefined {
-        // Checks mem cache
+        // Check mem cache
         let objectInfo = this.objectInfoInMemoCache.get(objectApiName);
 
         if (objectInfo !== undefined) {
             return objectInfo;
         }
 
-        // Checks disk cache
+        // Check disk cache
         objectInfo = this.fetchObjectInfoFromDisk(objectApiName);
         if (objectInfo !== undefined) {
             this.objectInfoInMemoCache.set(objectApiName, objectInfo);
@@ -234,59 +283,9 @@ export class OrgUtils {
         return undefined;
     }
 
-    // Acquires ObjectInfo data by first searching in memory, then on disk, and finally over the network.
-    public static async getObjectInfo(
-        objectApiName: string
-    ): Promise<ObjectInfoRepresentation | undefined> {
-        const connectStatus = await OrgUtils.checkAuthStatus();
-        if (connectStatus !== AuthStatus.AUTHORIZED) {
-            return undefined;
-        }
-
-        const objectInfo = this.getObjectInfoFromCache(objectApiName);
-        if (objectInfo !== undefined) {
-            return objectInfo;
-        }
-
-        // Network loading is going on
-        let objectInfoNetworkReponsePromise =
-            this.objectInfoPromises.get(objectApiName);
-        if (objectInfoNetworkReponsePromise === undefined) {
-            objectInfoNetworkReponsePromise = new Promise<
-                ObjectInfoRepresentation | undefined
-            >(async (resolve) => {
-                try {
-                    const connection = await OrgUtils.getConnection();
-                    if (
-                        connection !== undefined &&
-                        OrgUtils.entities.indexOf(objectApiName) >= 0
-                    ) {
-                        const objectInfo = (await connection.request(
-                            `${connection.baseUrl()}/ui-api/object-info/${objectApiName}`
-                        )) as ObjectInfoRepresentation;
-
-                        if (objectInfo !== undefined) {
-                            this.objectInfoResponseCallback(
-                                objectApiName,
-                                objectInfo
-                            );
-                        }
-                        return resolve(objectInfo);
-                    }
-                } catch (e) {
-                    return resolve(undefined);
-                }
-            }).finally(() => {
-                this.objectInfoPromises.delete(objectApiName);
-            });
-            this.objectInfoPromises.set(
-                objectApiName,
-                objectInfoNetworkReponsePromise
-            );
-        }
-        return objectInfoNetworkReponsePromise;
-    }
-
+    /**
+     * Callback for getObject info network call.  It puts the response in L1 and L2.
+     */
     private static objectInfoResponseCallback(
         objectApiName: string,
         objectInfo: ObjectInfoRepresentation
@@ -294,7 +293,7 @@ export class OrgUtils {
         this.objectInfoInMemoCache.set(objectApiName, objectInfo);
         const objectInfoStr = JSON.stringify(objectInfo);
         const objectInfoFile = path.join(
-            this.objectInfoFolderPath(),
+            this.defaultOrgInfo.getObjectInfoPath(),
             `${objectApiName}.json`
         );
         if (fs.existsSync(objectInfoFile)) {
@@ -302,26 +301,5 @@ export class OrgUtils {
         }
 
         fs.writeFileSync(objectInfoFile, objectInfoStr, { mode: 0o666 });
-    }
-
-    // Resets Org state to its initial state.
-    public static reset() {
-        this.authStatus = AuthStatus.UNKNOWN;
-        this.entities.splice(0, this.entities.length);
-        this.objectInfoInMemoCache.clear();
-        this.objectInfoPromises.clear();
-        this.connection = undefined;
-        if (this.orgName.length > 0) {
-            try {
-                fs.rmSync(this.objectInfoFolderPath(), {
-                    force: true,
-                    recursive: true,
-                    maxRetries: 3
-                });
-            } catch (e) {
-                console.log(e);
-            }
-            this.orgName = '';
-        }
     }
 }
