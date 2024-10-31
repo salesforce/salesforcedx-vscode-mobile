@@ -9,7 +9,6 @@ import {
     AuthInfo,
     ConfigAggregator,
     Connection,
-    Org,
     OrgConfigProperties,
     StateAggregator
 } from '@salesforce/core';
@@ -21,7 +20,6 @@ import { ObjectInfoRepresentation } from '../types';
 const SF_MOBILE_DIR = '.sfMobile';
 const ENTITY_LIST_FILE_NAME = 'entity_list.json';
 const OBJECT_INFO_FOLDER = 'objectInfos';
-
 
 enum AuthStatus {
     UNKNOWN,
@@ -40,7 +38,7 @@ class OrgState {
         this.orgName = orgName;
     }
 
-    // Retrieve objectInfo folder path, which is '<projectRoot>/.sfMobile/orgName'
+    // Get org caching root folder path, which is '<projectRoot>/.sfMobile/orgName'
     getOrgCachePath(): string {
         if (this.orgName === undefined) {
             throw Error('Not authorized to org');
@@ -51,7 +49,7 @@ class OrgState {
         );
     }
 
-    // Retrieve objectInfo folder path, which is '<projectRoot>/.sfMobile/orgName/objectInfos/'
+    // Get objectInfo folder path, which is '<projectRoot>/.sfMobile/orgName/objectInfos/'
     getObjectInfoPath(): string {
         const objectInfoPath = path.join(
             this.getOrgCachePath(),
@@ -63,14 +61,20 @@ class OrgState {
         return objectInfoPath;
     }
 
+    // Get the file path for entity list.
     getEntityFilePath(): string {
         return path.join(
             this.getObjectInfoPath(),
             ENTITY_LIST_FILE_NAME
-        )
+        );
     }
 }
 
+/**
+ * Utility class for Org
+ * - fetching data and cache it in L1 and L2 for authorized org
+ * - wipe out data when logout. 
+ */
 export class OrgUtils {
     private static currentOrgState = new OrgState(AuthStatus.UNAUTHORIZED);
 
@@ -83,6 +87,80 @@ export class OrgUtils {
         Promise<ObjectInfoRepresentation | undefined>
     >();
     private static entities: string[] = [];
+
+    // Acquire ObjectInfo data by first searching in memory, then on disk, and finally over the network.
+    public static async getObjectInfo(
+        objectApiName: string
+    ): Promise<ObjectInfoRepresentation | undefined> {
+        const orgState = await OrgUtils.refreshOrgState();
+        if (orgState.status !== AuthStatus.AUTHORIZED) {
+            return undefined;
+        }
+
+        const objectInfo = this.getObjectInfoFromCache(objectApiName);
+        if (objectInfo !== undefined) {
+            return objectInfo;
+        }
+
+        // Network loading is going on
+        let objectInfoNetworkResponsePromise =
+            this.objectInfoPromises.get(objectApiName);
+        if (objectInfoNetworkResponsePromise === undefined) {
+            objectInfoNetworkResponsePromise = new Promise<
+                ObjectInfoRepresentation | undefined
+            >(async (resolve) => {
+                try {
+                    const connection = await OrgUtils.getConnection();
+                    if (
+                        connection === undefined ||
+                        !OrgUtils.entities.includes(objectApiName)
+                    ) {
+                        return resolve(undefined);
+                    }
+                    const objectInfo = (await connection.request(
+                        `${connection.baseUrl()}/ui-api/object-info/${objectApiName}`
+                    )) as ObjectInfoRepresentation;
+
+                    if (objectInfo !== undefined) {
+                        this.objectInfoResponseCallback(
+                            objectApiName,
+                            objectInfo
+                        );
+                    }
+                    return resolve(objectInfo);
+                } catch (e) {
+                    console.log(
+                        `Failed to load entity list from server with error: ${e}`
+                    );
+                    return resolve(undefined); // Return undefined in case of an error
+                }
+            }).finally(() => {
+                this.objectInfoPromises.delete(objectApiName);
+            });
+            this.objectInfoPromises.set(
+                objectApiName,
+                objectInfoNetworkResponsePromise
+            );
+        }
+        return objectInfoNetworkResponsePromise;
+    }
+
+    // Resets Org state to its initial state.
+    public static reset() {
+        this.currentOrgState = new OrgState(AuthStatus.UNKNOWN);
+        this.entities.splice(0, this.entities.length);
+        this.objectInfoInMemoCache.clear();
+        this.objectInfoPromises.clear();
+        try {
+            fs.rmSync(SF_MOBILE_DIR, {
+                force: true,
+                recursive: true,
+                maxRetries: 3
+            });
+        } catch (e) {
+            console.log(e);
+        }
+    }
 
     // Get default organization's name.
     private static async getDefaultOrg(): Promise<string | undefined> {
@@ -97,20 +175,17 @@ export class OrgUtils {
 
     // Get default user name
     private static async getDefaultUserName(): Promise<string | undefined> {
-        try {
-            const orgName = await this.getDefaultOrg();
-            if (orgName === undefined) {
-                return undefined;
-            }
-            const aggregator = await StateAggregator.getInstance();
-
-            const userName = aggregator.aliases.getUsername(orgName);
-            if (userName) {
-                return Promise.resolve(userName);
-            }
-        } catch (error) {
+        const orgName = await this.getDefaultOrg();
+        if (orgName === undefined) {
             return undefined;
         }
+        
+        const aggregator = await StateAggregator.getInstance();
+        const userName = aggregator.aliases.getUsername(orgName);
+        if (userName) {
+            return userName;
+        }
+        return undefined;
     }
 
     // Refresh the org authentication state if needed and return the latest state. 
@@ -202,63 +277,6 @@ export class OrgUtils {
         return undefined;
     }
 
-    // Acquire ObjectInfo data by first searching in memory, then on disk, and finally over the network.
-    public static async getObjectInfo(
-        objectApiName: string
-    ): Promise<ObjectInfoRepresentation | undefined> {
-        const orgState = await OrgUtils.refreshOrgState();
-        if (orgState.status !== AuthStatus.AUTHORIZED) {
-            return undefined;
-        }
-
-        const objectInfo = this.getObjectInfoFromCache(objectApiName);
-        if (objectInfo !== undefined) {
-            return objectInfo;
-        }
-
-        // Network loading is going on
-        let objectInfoNetworkResponsePromise =
-            this.objectInfoPromises.get(objectApiName);
-        if (objectInfoNetworkResponsePromise === undefined) {
-            objectInfoNetworkResponsePromise = new Promise<
-                ObjectInfoRepresentation | undefined
-            >(async (resolve) => {
-                try {
-                    const connection = await OrgUtils.getConnection();
-                    if (
-                        connection === undefined ||
-                        !OrgUtils.entities.includes(objectApiName)
-                    ) {
-                        return resolve(undefined);
-                    }
-                    const objectInfo = (await connection.request(
-                        `${connection.baseUrl()}/ui-api/object-info/${objectApiName}`
-                    )) as ObjectInfoRepresentation;
-
-                    if (objectInfo !== undefined) {
-                        this.objectInfoResponseCallback(
-                            objectApiName,
-                            objectInfo
-                        );
-                    }
-                    return resolve(objectInfo);
-                } catch (e) {
-                    console.log(
-                        `Failed to load entity list from server with error: ${e}`
-                    );
-                    return resolve(undefined); // Return undefined in case of an error
-                }
-            }).finally(() => {
-                this.objectInfoPromises.delete(objectApiName);
-            });
-            this.objectInfoPromises.set(
-                objectApiName,
-                objectInfoNetworkResponsePromise
-            );
-        }
-        return objectInfoNetworkResponsePromise;
-    }
-
     /**
      * Callback for getObject info network call.  It puts the response in L1 and L2.
      */
@@ -277,22 +295,5 @@ export class OrgUtils {
         }
 
         fs.writeFileSync(objectInfoFile, objectInfoStr, { mode: 0o666 });
-    }
-
-    // Resets Org state to its initial state.
-    public static reset() {
-        this.currentOrgState = new OrgState(AuthStatus.UNKNOWN);
-        this.entities.splice(0, this.entities.length);
-        this.objectInfoInMemoCache.clear();
-        this.objectInfoPromises.clear();
-        try {
-            fs.rmSync(SF_MOBILE_DIR, {
-                force: true,
-                recursive: true,
-                maxRetries: 3
-            });
-        } catch (e) {
-            console.log(e);
-        }
     }
 }
