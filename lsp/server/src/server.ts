@@ -19,10 +19,10 @@ import {
     CodeActionKind
 } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { validateDocument } from './validateDocument';
 import { OrgUtils } from './utils/orgUtils';
 import { WorkspaceUtils } from './utils/workspaceUtils';
 import { getSettings } from './diagnostic/DiagnosticSettings';
+import { ValidatorManager } from './validatorManager';
 import { debounce } from './utils/commonUtils';
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -41,6 +41,9 @@ let diagnosticsSettingSection = '';
 
 // initialize default settings
 let settings = getSettings({});
+
+const validatorManager = ValidatorManager.createInstance();
+
 const documentCache: Map<string, TextDocument> = new Map();
 
 connection.onInitialize((params: InitializeParams) => {
@@ -172,7 +175,11 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validateDocument(settings, document, extensionTitle)
+            items: await validatorManager.validateDocument(
+                settings,
+                document,
+                extensionTitle
+            )
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk
