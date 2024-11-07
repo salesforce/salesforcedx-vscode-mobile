@@ -1,8 +1,7 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { BaseValidator } from './baseValidator';
-
-import { DiagnosticSection } from './baseValidator';
+import { BaseValidator, DiagnosticSection } from './baseValidator';
 import { HTMLDocument, getLanguageService } from 'vscode-html-languageservice';
+
 export class HTMLValidator extends BaseValidator<HTMLDocument> {
     gatherDiagnosticSections(
         textDocument: TextDocument

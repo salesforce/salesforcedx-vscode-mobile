@@ -38,7 +38,7 @@
     "extensionDependencies": [
         "salesforce.salesforcedx-vscode-core"
     ],
-    "main": "out/extension.js",
+    "main": "out/src/extension.js",
     "l10n": "./l10n",
     "contributes": {
         "menus": {
@@ -95,15 +95,16 @@
     "scripts": {
         "clean": "rimraf out ./lsp/server/out ./lsp/client/out",
         "compile": "rimraf ./lsp/server/tsconfig.tsbuildinfo ./lsp/client/tsconfig.tsbuildinfo && tsc -b ./ && npm run copy-resources",
-        "copy-resources": "cp -r './lsp/server/resources' './lsp/server/out/'",
+        "copy-resources": "cp -r './lsp/server/resources' './lsp/server/out/src/'",
         "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "test-coverage": "node ./out/test/runTest.js --coverage",
         "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
-        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
-        "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
+        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\""
+        ,
+        "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --external:mobile-lsp-server --external:mobile-lsp-client --minify --sourcemap",
         "vscode:prepublish": "npm run clean && npm run bundle:extension"
     },
     "devDependencies": {
@@ -126,7 +127,7 @@
         "nyc": "^17.1.0",
         "ovsx": "^0.10.0",
         "prettier": "^3.3.3",
-        "rimraf": "^6.0.1",
+        "rimraf": "^6.0.1", 
         "sinon": "^18.0.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.5.4"
@@ -136,8 +137,8 @@
         "@salesforce/lwc-dev-mobile-core": "^3.3.1",
         "@salesforce/sf-plugins-core": "^4.0.0",
         "@vscode/l10n": "^0.0.18",
-        "mobile-lsp-client": "workspaces:*",
-        "mobile-lsp-server": "workspaces:*",
+        "mobile-lsp-client": "file:./lsp/client",
+        "mobile-lsp-server": "file:./lsp/server",
         "vscode-html-languageservice": "^5.3.1",
         "yaml": "^2.6.0"
     }

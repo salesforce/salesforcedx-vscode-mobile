@@ -3,7 +3,8 @@
     "description": "Client for the Salesforce Mobile Language Server, enabling language support for mobile development in VSCode.",
     "license": "MIT",
     "version": "0.0.1",
-    "main": "out/extension.js",
+    "types": "out/src/extension.d.ts",
+    "main": "out/src/extension.js",
     "publisher": "salesforce",
     "engines": {
         "vscode": "1.77.0"

@@ -15,3 +15,26 @@ coverage/
 .github
 out/
 !out/extension.js
+
+# lsp/server/node_modules/*
+# **/node_modules/**
+# Exclude source files
+# packages/*/src
+# src
+# test
+
+# # Exclude build artifacts and configuration files
+# tsconfig*.json
+# *.tsbuildinfo
+
+# # Exclude node_modules except for production dependencies
+# node_modules/**
+# !node_modules/shared-module
+# !node_modules/package-a
+# !node_modules/package-b
+
+# # Exclude other unnecessary files
+# .vscode
+# .vscodeignore
+# .gitignore
+# README.md
