@@ -9,8 +9,11 @@
     ],
     "engines": {
         "vscode": "^1.77.0",
-        "node": ">=18"
+        "node": ">=20"
     },
+    "volta": {
+      "node": "20.18.0"
+    },    
     "categories": [
         "Other"
     ],
@@ -88,9 +91,6 @@
                 }
             }
         }
-    },
-    "volta": {
-        "node": "18.17.1"
     },
     "scripts": {
         "clean": "rimraf out ./lsp/server/out ./lsp/client/out",
