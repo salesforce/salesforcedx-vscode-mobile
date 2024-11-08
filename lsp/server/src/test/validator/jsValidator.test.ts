@@ -8,13 +8,18 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import * as assert from 'assert';
 import { suite, test } from 'mocha';
-import { validateJs } from '../validateJs';
+
+import { JSValidator } from '../../validator/jsValidator';
 import {
+    AdaptersLocalChangeNotAware,
     LOCAL_CHANGE_NOT_AWARE_MESSAGE,
     RULE_ID
-} from '../diagnostic/js/adapters-local-change-not-aware';
+} from '../../diagnostic/js/adapters-local-change-not-aware';
 
-suite('Diagnostics Test Suite - Server - Validate JS', () => {
+suite('Diagnostics Test Suite - Server - JS Validator', () => {
+    const jsValidator = new JSValidator();
+    jsValidator.addProducer(new AdaptersLocalChangeNotAware());
+
     const textDocument = TextDocument.create(
         'file://test.js',
         'javascript',
@@ -41,24 +46,38 @@ suite('Diagnostics Test Suite - Server - Validate JS', () => {
     );
 
     test('Validate local change not aware adapters', async () => {
-        const diagnostics = await validateJs({}, textDocument);
+        const jsSections = jsValidator.gatherDiagnosticSections(textDocument);
+        assert.equal(jsSections.length, 1);
+        const diagnostics = await jsValidator.validateData(
+            {},
+            jsSections[0].document,
+            jsSections[0].data
+        );
         assert.equal(diagnostics.length, 1);
         assert.equal(diagnostics[0].message, LOCAL_CHANGE_NOT_AWARE_MESSAGE);
     });
 
     test('No diagnostics return if individually suppressed', async () => {
-        const diagnostics = await validateJs(
+        const jsSections = jsValidator.gatherDiagnosticSections(textDocument);
+
+        const diagnostics = await jsValidator.validateData(
             { suppressByRuleId: new Set([RULE_ID]) },
-            textDocument
+            jsSections[0].document,
+            jsSections[0].data
         );
+
         assert.equal(diagnostics.length, 0);
     });
 
     test('No diagnostics return if all suppressed', async () => {
-        const diagnostics = await validateJs(
+        const jsSections = jsValidator.gatherDiagnosticSections(textDocument);
+
+        const diagnostics = await jsValidator.validateData(
             { suppressAll: true },
-            textDocument
+            jsSections[0].document,
+            jsSections[0].data
         );
+
         assert.equal(diagnostics.length, 0);
     });
 
@@ -71,8 +90,8 @@ suite('Diagnostics Test Suite - Server - Validate JS', () => {
              var var i = 100;
             `
         );
-        const diagnostics = await validateJs({}, textDocument);
+        const jsSections = jsValidator.gatherDiagnosticSections(textDocument);
 
-        assert.equal(diagnostics.length, 0);
+        assert.equal(jsSections.length, 0);
     });
 });
