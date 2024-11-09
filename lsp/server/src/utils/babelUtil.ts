@@ -6,7 +6,7 @@
  */
 
 import * as parser from '@babel/parser';
-import { Node } from '@babel/types';
+import type { Node } from '@babel/types';
 
 /**
  * parse the input javascript source code and return the corresponding babel node.

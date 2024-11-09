@@ -6,11 +6,15 @@
  */
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { validateHtml } from '../validateHtml';
 import { suite, test } from 'mocha';
+import { HTMLValidator } from '../../validator/htmlValidator';
 import * as assert from 'assert';
+import { MobileOfflineFriendly } from '../../diagnostic/html/mobileOfflineFriendly';
 
-suite('Diagnostics Test Suite - Server - Validate html', () => {
+suite('Diagnostics Test Suite - Server - HTML Validator', () => {
+    const htmlValidator: HTMLValidator = new HTMLValidator();
+    htmlValidator.addProducer(new MobileOfflineFriendly());
+
     test('Correct number of non-friendly mobile offline base components is determined', async () => {
         const textDocument = TextDocument.create(
             'file://test.html',
@@ -30,7 +34,15 @@ suite('Diagnostics Test Suite - Server - Validate html', () => {
             `
         );
 
-        const diagnostics = await validateHtml({}, textDocument);
+        const htmlSections =
+            htmlValidator.gatherDiagnosticSections(textDocument);
+        assert.equal(htmlSections.length, 1);
+
+        const diagnostics = await htmlValidator.validateData(
+            {},
+            htmlSections[0].document,
+            htmlSections[0].data
+        );
         assert.equal(diagnostics.length, 2);
     });
 
@@ -57,7 +69,15 @@ suite('Diagnostics Test Suite - Server - Validate html', () => {
             `
         );
 
-        const diagnostics = await validateHtml({}, textDocument);
+        const htmlSections =
+            htmlValidator.gatherDiagnosticSections(textDocument);
+        assert.equal(htmlSections.length, 1);
+
+        const diagnostics = await htmlValidator.validateData(
+            {},
+            htmlSections[0].document,
+            htmlSections[0].data
+        );
         assert.equal(diagnostics.length, 3);
     });
 });

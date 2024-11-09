@@ -6,15 +6,17 @@
  */
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { validateGraphql } from '../validateGraphql';
+import { GraphQLValidator } from '../../validator/gqlValidator';
+import { OversizedRecord } from '../../diagnostic/gql/over-sized-record';
+
 import * as assert from 'assert';
 import { suite, test, beforeEach, afterEach } from 'mocha';
 import * as sinon from 'sinon';
-import { OrgUtils } from '../utils/orgUtils';
-import Book__c from '../../testFixture/objectInfos/Book__c.json';
-import { ObjectInfoRepresentation } from '../types';
+import { OrgUtils } from '../../utils/orgUtils';
+import Book__c from '../../../testFixture/objectInfos/Book__c.json';
+import { ObjectInfoRepresentation } from '../../types';
 
-suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
+suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
     let sandbox: sinon.SinonSandbox;
     beforeEach(function () {
         sandbox = sinon.createSandbox();
@@ -54,7 +56,17 @@ suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql({}, textDocument);
+
+        const graphqlValidator = new GraphQLValidator();
+        graphqlValidator.addProducer(new OversizedRecord());
+        const sections =
+            graphqlValidator.gatherDiagnosticSections(textDocument);
+        assert.equal(sections.length, 1);
+        const diagnostics = await graphqlValidator.validateData(
+            {},
+            sections[0].document,
+            sections[0].data
+        );
 
         assert.equal(diagnostics.length, 2);
     });
@@ -74,8 +86,10 @@ suite('Diagnostics Test Suite - Server - Validate GraphQL', () => {
             };
             `
         );
-        const diagnostics = await validateGraphql({}, textDocument);
-
-        assert.equal(diagnostics.length, 0);
+        const graphqlValidator = new GraphQLValidator();
+        graphqlValidator.addProducer(new OversizedRecord());
+        const sections =
+            graphqlValidator.gatherDiagnosticSections(textDocument);
+        assert.equal(sections.length, 0);
     });
 });
