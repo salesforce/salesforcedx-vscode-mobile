@@ -90,7 +90,15 @@ export abstract class BaseValidator<SupportedType> {
         const diagnosticsArray = await Promise.all(
             activeProducers.map(async (producer) => {
                 try {
-                    return await producer.validateDocument(textDocument, data);
+                    const producerId = producer.getId();
+                    const diagnostics = await producer.validateDocument(
+                        textDocument,
+                        data
+                    );
+                    diagnostics.forEach((diagnostic) => {
+                        diagnostic.data = producerId;
+                    });
+                    return diagnostics;
                 } catch (e) {
                     console.log(
                         `Cannot diagnose document with rule ID ${producer.getId()}: ${(e as Error).message}`

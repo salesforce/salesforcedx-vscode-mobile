@@ -10,7 +10,7 @@ import * as assert from 'assert';
 import { suite, test } from 'mocha';
 
 import { ValidatorManager } from '../validatorManager';
-import { LOCAL_CHANGE_NOT_AWARE_MESSAGE } from '../diagnostic/js/adapters-local-change-not-aware';
+import { MESSAGE_FOR_GET_RELATED_LIST_RECORDS } from '../diagnostic/js/adapters-local-change-not-aware';
 
 suite('Diagnostics Test Suite - Server - ValidatorManager', () => {
     const validatorManager = ValidatorManager.createInstance();
@@ -42,10 +42,12 @@ suite('Diagnostics Test Suite - Server - ValidatorManager', () => {
     test('Validate JS file with local change not aware adapter', async () => {
         const diagnostics = await validatorManager.validateDocument(
             {},
-            textDocument,
-            'testExtension'
+            textDocument
         );
         assert.equal(diagnostics.length, 1);
-        assert.equal(diagnostics[0].message, LOCAL_CHANGE_NOT_AWARE_MESSAGE);
+        assert.equal(
+            diagnostics[0].message,
+            MESSAGE_FOR_GET_RELATED_LIST_RECORDS
+        );
     });
 });
