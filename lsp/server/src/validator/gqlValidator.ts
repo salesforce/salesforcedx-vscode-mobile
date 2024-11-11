@@ -1,9 +1,8 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { BaseValidator } from './baseValidator';
+import { BaseValidator, DiagnosticSection } from './baseValidator';
 import { parse, ASTNode } from 'graphql';
 import { gqlPluckFromCodeStringSync } from '@graphql-tools/graphql-tag-pluck';
 
-import { DiagnosticSection } from './baseValidator';
 export class GraphQLValidator extends BaseValidator<ASTNode> {
     getLanguageId(): string {
         return 'javascript';
