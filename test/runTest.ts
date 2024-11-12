@@ -38,15 +38,16 @@ async function main() {
         // support in the `engines` section of our package.
         const vscodeExecutablePath =
             await downloadAndUnzipVSCode(VSCODE_TEST_VERSION);
-        const [cliPath, ...args] =
+        const [cliPath, ...cliArgs] =
             resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 
         // Install the Salesforce Extensions, which is a pre-req for our
         // extension. Bail if there's an error.
+        const isWindows = process.platform === 'win32';
         const installExtensionDepsOuput = spawnSync(
-            cliPath,
-            [...args, '--install-extension', CORE_EXTENSION_ID],
-            { stdio: 'inherit', encoding: 'utf-8' }
+            isWindows ? `"${cliPath}"` : cliPath,
+            [...cliArgs, '--install-extension', CORE_EXTENSION_ID],
+            { stdio: 'inherit', encoding: 'utf-8', shell: isWindows }
         );
         if (installExtensionDepsOuput.error) {
             console.error(

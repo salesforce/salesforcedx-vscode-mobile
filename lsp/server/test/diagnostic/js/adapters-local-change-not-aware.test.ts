@@ -15,8 +15,8 @@ import {
     URL_FOR_GET_RELATED_LIST_RECORDS_EXTERNAL_DOC,
     MESSAGE_FOR_GET_RELATED_LIST_RECORDS,
     MESSAGE_FOR_GET_RELATED_LIST_COUNT
-} from '../../../diagnostic/js/adapters-local-change-not-aware';
-import { parseJs } from '../../../utils/babelUtil';
+} from '../../../src/diagnostic/js/adapters-local-change-not-aware';
+import { parseJs } from '../../../src/utils/babelUtil';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 suite(

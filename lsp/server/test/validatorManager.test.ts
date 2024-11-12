@@ -9,7 +9,7 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import * as assert from 'assert';
 import { suite, test } from 'mocha';
 
-import { ValidatorManager } from '../validatorManager';
+import { ValidatorManager } from '../src/validatorManager';
 import { MESSAGE_FOR_GET_RELATED_LIST_RECORDS } from '../src/diagnostic/js/adapters-local-change-not-aware';
 
 suite('Diagnostics Test Suite - Server - ValidatorManager', () => {
