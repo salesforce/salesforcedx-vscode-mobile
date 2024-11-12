@@ -53,9 +53,9 @@ export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
     ): Promise<Diagnostic[]> {
         const result: Diagnostic[] = [];
 
-        const nodesWithAdapter = this.findLocalChangeNotAwareAdapterNode(node);
+        const nodeInfoMap = this.findLocalChangeNotAwareAdapterNode(node);
 
-        for (let [node, info] of nodesWithAdapter) {
+        for (let [node, info] of nodeInfoMap) {
             const diagnostic: Diagnostic = {
                 severity: SEVERITY,
                 range: {
@@ -77,14 +77,16 @@ export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
     }
 
     /**
-     * Find a list of adapters which are not draft change aware. For example: getRelatedListRecords from below LWC. 
+     * Find a map of astNode to corresponding diagnostic info for adapters which are not draft change aware. 
+     * For example: getRelatedListRecords from below LWC. 
         export default class RelatedListRecords extends LightningElement {
             ...
             @wire(getRelatedListRecords, 
             ...
         }
      * @param astNode The AST root node for the LWC js file.
-     * @returns A map of node to adapter name which is not draft aware. 
+     * @returns A map where each key is an ASTNode representing an adapter that does not account for specific local changes,
+     * and each value is an Info object containing a message and, optionally, a link with additional context.
      */
     private findLocalChangeNotAwareAdapterNode(astNode: Node): Map<Node, Info> {
         const result = new Map<Node, Info>();
