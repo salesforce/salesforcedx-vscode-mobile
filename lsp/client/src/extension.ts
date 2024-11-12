@@ -24,11 +24,7 @@ export function activate(
 ) {
     // The server is implemented in node
     const serverModule = context.asAbsolutePath(
-        // Code deployed in a vsce package needs to access transpiled server.js in
-        // node_modules/mobile-lsp-server folder. Unfortunately, vsix packaged using 
-        // vsce doesn't know about anything about this folder because npm workspace
-        // uses symbolic link. So, using explicit path to server.js in node_modules.
-        path.join('node_modules/mobile-lsp-server', 'out', 'server.js')
+        path.join('lsp/server', 'out', 'server.js')
     );
 
     // If the extension is launched in debug mode then the debug server options are used

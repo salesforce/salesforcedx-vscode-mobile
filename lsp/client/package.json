@@ -4,11 +4,8 @@
     "license": "MIT",
     "version": "0.0.1",
     "main": "out/extension.js",
-    "publisher": "salesforce",
+    "publisher": "Salesforce",
     "engines": {
         "vscode": "1.77.0"
-    },
-    "dependencies": {
-        "vscode-languageclient": "^9.0.1"
     }
 }

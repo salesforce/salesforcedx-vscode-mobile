@@ -9,7 +9,7 @@ import * as path from 'path';
 import * as process from 'process';
 import * as sinon from 'sinon';
 import { WorkspaceUtils } from '../utils/workspaceUtils';
-import { TempProjectDirManager } from 'mobile-lsp-server';
+import { TempProjectDirManager } from '../../lsp/server';
 export { TempProjectDirManager };
 
 // Create a platform-agnostic absolute path to a non-existent folder.
