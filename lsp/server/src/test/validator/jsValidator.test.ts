@@ -12,7 +12,7 @@ import { suite, test } from 'mocha';
 import { JSValidator } from '../../validator/jsValidator';
 import {
     AdaptersLocalChangeNotAware,
-    LOCAL_CHANGE_NOT_AWARE_MESSAGE,
+    MESSAGE_FOR_GET_RELATED_LIST_RECORDS,
     RULE_ID
 } from '../../diagnostic/js/adapters-local-change-not-aware';
 
@@ -54,7 +54,11 @@ suite('Diagnostics Test Suite - Server - JS Validator', () => {
             jsSections[0].data
         );
         assert.equal(diagnostics.length, 1);
-        assert.equal(diagnostics[0].message, LOCAL_CHANGE_NOT_AWARE_MESSAGE);
+        assert.equal(
+            diagnostics[0].message,
+            MESSAGE_FOR_GET_RELATED_LIST_RECORDS
+        );
+        assert.equal(diagnostics[0].data, RULE_ID);
     });
 
     test('No diagnostics return if individually suppressed', async () => {

@@ -9,7 +9,10 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { suite, test } from 'mocha';
 import { HTMLValidator } from '../../validator/htmlValidator';
 import * as assert from 'assert';
-import { MobileOfflineFriendly } from '../../diagnostic/html/mobileOfflineFriendly';
+import {
+    MobileOfflineFriendly,
+    RULE_ID
+} from '../../diagnostic/html/mobileOfflineFriendly';
 
 suite('Diagnostics Test Suite - Server - HTML Validator', () => {
     const htmlValidator: HTMLValidator = new HTMLValidator();
@@ -44,6 +47,7 @@ suite('Diagnostics Test Suite - Server - HTML Validator', () => {
             htmlSections[0].data
         );
         assert.equal(diagnostics.length, 2);
+        assert.equal(diagnostics[0].data, RULE_ID);
     });
 
     test('Correct number of nested non-friendly mobile offline base components is determined', async () => {

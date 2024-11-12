@@ -7,7 +7,10 @@
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { GraphQLValidator } from '../../validator/gqlValidator';
-import { OversizedRecord } from '../../diagnostic/gql/over-sized-record';
+import {
+    OversizedRecord,
+    RULE_ID
+} from '../../diagnostic/gql/over-sized-record';
 
 import * as assert from 'assert';
 import { suite, test, beforeEach, afterEach } from 'mocha';
@@ -69,6 +72,7 @@ suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
         );
 
         assert.equal(diagnostics.length, 2);
+        assert.equal(diagnostics[0].data, RULE_ID);
     });
 
     test('Graphql with incorrect syntax produces no diagnostic', async () => {

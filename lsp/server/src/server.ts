@@ -35,7 +35,6 @@ let hasConfigurationCapability = false;
 let hasWorkspaceFolderCapability = false;
 export let hasDiagnosticRelatedInformationCapability = false;
 
-let extensionTitle = '';
 let updateDiagnosticsSettingCommand = '';
 let diagnosticsSettingSection = '';
 
@@ -51,7 +50,6 @@ connection.onInitialize((params: InitializeParams) => {
 
     // Sets workspace folder to WorkspaceUtils
     WorkspaceUtils.initWorkspaceFolders(workspaceFolders);
-    extensionTitle = params.initializationOptions?.extensionTitle;
     updateDiagnosticsSettingCommand =
         params.initializationOptions?.updateDiagnosticsSettingCommand;
     diagnosticsSettingSection =
@@ -175,11 +173,7 @@ connection.languages.diagnostics.on(async (params) => {
     if (document !== undefined) {
         return {
             kind: DocumentDiagnosticReportKind.Full,
-            items: await validatorManager.validateDocument(
-                settings,
-                document,
-                extensionTitle
-            )
+            items: await validatorManager.validateDocument(settings, document)
         } satisfies DocumentDiagnosticReport;
     } else {
         // We don't know the document. We can either try to read it from disk

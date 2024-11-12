@@ -38,13 +38,11 @@ export class ValidatorManager {
      * Validate a document by applying all relevant validators based on language.
      * @param setting The diagnostic settings.
      * @param document The document to validate.
-     * @param extensionName The name of the extension (sets diagnostic source).
      * @returns A promise resolving to an array of diagnostics.
      */
     async validateDocument(
         setting: DiagnosticSettings,
-        document: TextDocument,
-        extensionName: string
+        document: TextDocument
     ): Promise<Diagnostic[]> {
         const qualifiers = this.validators.filter(
             (validator) => validator.getLanguageId() === document.languageId
@@ -61,10 +59,7 @@ export class ValidatorManager {
                 return [];
             })
         );
-        const results = diagnosticArray.flat();
-        results.forEach((diagnostic) => (diagnostic.source = extensionName));
-
-        return results;
+        return diagnosticArray.flat();
     }
 
     /**
