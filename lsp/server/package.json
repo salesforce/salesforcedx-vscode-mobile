@@ -6,7 +6,8 @@
     "engines": {
         "node": "*"
     },
-    "main": "out/index.js",
+    "types": "out/src/index.d.ts",
+    "main": "out/src/index.js",
     "publisher": "salesforce",
     "dependencies": {
         "@babel/traverse": "^7.25.9",

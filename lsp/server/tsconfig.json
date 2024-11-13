@@ -9,10 +9,9 @@
         "sourceMap": true,
         "strict": true,
         "outDir": "out",
-        "rootDir": "src",
+        "rootDir": ".",
         "composite": true
     },
-
-    "include": ["src"],
+    "include": ["src", "test", "testFixture/**/*.json"],
     "exclude": ["node_modules"]
 }

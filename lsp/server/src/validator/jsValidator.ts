@@ -1,8 +1,7 @@
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { BaseValidator } from './baseValidator';
+import { BaseValidator, DiagnosticSection } from './baseValidator';
 import type { Node } from '@babel/types';
 import { parseJs } from '../utils/babelUtil';
-import { DiagnosticSection } from './baseValidator';
 
 export class JSValidator extends BaseValidator<Node> {
     gatherDiagnosticSections(

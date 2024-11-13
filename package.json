@@ -38,7 +38,7 @@
     "extensionDependencies": [
         "salesforce.salesforcedx-vscode-core"
     ],
-    "main": "out/extension.js",
+    "main": "out/src/extension.js",
     "l10n": "./l10n",
     "contributes": {
         "menus": {
@@ -95,7 +95,7 @@
     "scripts": {
         "clean": "rimraf out ./lsp/server/out ./lsp/client/out",
         "compile": "rimraf ./lsp/server/tsconfig.tsbuildinfo ./lsp/client/tsconfig.tsbuildinfo && tsc -b ./ && npm run copy-resources",
-        "copy-resources": "cp -r './lsp/server/resources' './lsp/server/out/'",
+        "copy-resources": "cp -r './lsp/server/resources' './lsp/server/out/src/'",
         "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
