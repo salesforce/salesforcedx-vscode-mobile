@@ -28,7 +28,7 @@ export async function run(): Promise<void> {
         nyc = new NYC({
             ...baseConfig,
             cwd: path.join(__dirname, '..', '..', '..'),
-            reporter: ['text-summary', 'html', 'text', 'lcov'],
+            reporter: ['text-summary', 'html', 'text', 'lcov', 'json'],
             all: true,
             silent: false,
             instrument: true,
