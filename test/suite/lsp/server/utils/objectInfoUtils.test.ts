@@ -10,7 +10,7 @@ import { suite, test, beforeEach, afterEach } from 'mocha';
 import { ObjectInfoUtils } from '../../../../../src/lsp/server/utils/objectInfoUtils';
 
 import {
-    setupTempWorkspaceDirectoryStub,
+    setupServerWorkspaceDirectoryStub,
     TempProjectDirManager,
     stubCreateAuth,
     stubCreateConnection,
@@ -89,7 +89,7 @@ suite('ObjectInfoUtils Test Suite - Server', () => {
         const tempWorkSpaceDirManager =
             await TempProjectDirManager.createTempProjectDir();
 
-        setupTempWorkspaceDirectoryStub(tempWorkSpaceDirManager, sandbox);
+        setupServerWorkspaceDirectoryStub(tempWorkSpaceDirManager, sandbox);
         let objectInfo: ObjectInfoRepresentation | undefined;
 
         try {

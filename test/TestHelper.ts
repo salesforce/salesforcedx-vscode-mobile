@@ -20,6 +20,7 @@ import {
     Connection,
     AuthInfo
 } from '@salesforce/core';
+import { ServerWorkspaceUtils } from '../src/lsp/server/utils/serverWorkspaceUtils';
 
 const testOrgConfig = {
     key: 'target-org',
@@ -92,6 +93,15 @@ export function setupTempWorkspaceDirectoryStub(
     sandbox?: sinon.SinonSandbox
 ): sinon.SinonStub<[], string> {
     const getWorkspaceDirStub = (sandbox ?? sinon).stub(WorkspaceUtils, 'getWorkspaceDir');
+    getWorkspaceDirStub.returns(projectDirManager.projectDir);
+    return getWorkspaceDirStub;
+}
+
+export function setupServerWorkspaceDirectoryStub(
+    projectDirManager: TempProjectDirManager,
+    sandbox?: sinon.SinonSandbox
+): sinon.SinonStub<[], string> {
+    const getWorkspaceDirStub = (sandbox ?? sinon).stub(ServerWorkspaceUtils, 'getWorkspaceDir');
     getWorkspaceDirStub.returns(projectDirManager.projectDir);
     return getWorkspaceDirStub;
 }
