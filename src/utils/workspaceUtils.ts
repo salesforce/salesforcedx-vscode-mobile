@@ -16,7 +16,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export class WorkspaceUtils {
-
     static readonly DEFAULT_APP_PATH = path.join(
         'force-app',
         'main',
