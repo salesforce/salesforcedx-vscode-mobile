@@ -34,14 +34,10 @@ export async function run(): Promise<void> {
             instrument: true,
             hookRequire: true,
             include: [
-                'out/**/*.js',
-                'lsp/client/out/**/*.js',
-                'lsp/server/out/**/*.js'
+                'out/**/*.js'
             ],
             exclude: [
-                'out/test/**',
-                'lsp/client/out/test/**',
-                'lsp/server/out/test/**'
+                'out/test/**'
             ]
         });
         await nyc.wrap();
@@ -56,17 +52,9 @@ export async function run(): Promise<void> {
     });
 
     const testsRoot = path.resolve(__dirname, '..');
-    const testsLSPClient = path.resolve(
-        __dirname,
-        '../../../lsp/client/out/test'
-    );
-    const testsLSPServer = path.resolve(
-        __dirname,
-        '../../../lsp/server/out/test'
-    );
 
     return new Promise((c, e) => {
-        const testDirs = [testsRoot, testsLSPClient, testsLSPServer];
+        const testDirs = [testsRoot];
         Promise.all(
             testDirs.map(
                 (dir) =>

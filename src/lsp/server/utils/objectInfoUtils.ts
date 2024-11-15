@@ -15,7 +15,7 @@ import {
 import * as fs from 'fs';
 import * as path from 'path';
 import { ObjectInfoRepresentation } from '../types';
-import { ServerWorkspaceUtils } from './serverWorkspaceUtils';
+import { ServerWorkspace } from './serverWorkspace';
 
 const SF_MOBILE_DIR = '.sfMobile';
 const ENTITY_LIST_FILE_NAME = 'entity_list.json';
@@ -44,7 +44,7 @@ class OrgInfo {
             throw Error('Not authorized to org');
         }
         return path.join(
-            path.join(ServerWorkspaceUtils.getWorkspaceDir(), SF_MOBILE_DIR),
+            path.join(ServerWorkspace.getWorkspaceDir(), SF_MOBILE_DIR),
             this.orgName
         );
     }

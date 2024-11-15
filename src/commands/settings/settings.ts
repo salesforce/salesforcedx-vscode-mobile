@@ -6,7 +6,6 @@
  */
 
 import * as vscode from 'vscode';
-//import { getExtensionName } from '../../utils/workspaceUtils';
 
 const SETTING_KEY_SUPPRESS_ALL = 'suppressAll';
 const SETTING_KEY_SUPPRESS_BY_RULE_ID = 'suppressByRuleId';

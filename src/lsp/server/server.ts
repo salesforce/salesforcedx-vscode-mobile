@@ -23,7 +23,7 @@ import { ObjectInfoUtils } from './utils/objectInfoUtils';
 import { getSettings } from './diagnostics/DiagnosticSettings';
 import { ValidatorManager } from './validatorManager';
 import { debounce } from './utils/commonUtils';
-import { ServerWorkspaceUtils } from './utils/serverWorkspaceUtils';
+import { ServerWorkspace } from './utils/serverWorkspace';
 
 // Create a connection for the server, using Node's IPC as a transport.
 const connection = createConnection(ProposedFeatures.all);
@@ -49,7 +49,7 @@ connection.onInitialize((params: InitializeParams) => {
     const workspaceFolders = params.workspaceFolders;
 
     // Sets workspace folder to WorkspaceUtils
-    ServerWorkspaceUtils.initWorkspaceFolders(workspaceFolders);
+    ServerWorkspace.initWorkspaceFolders(workspaceFolders);
 
     updateDiagnosticsSettingCommand =
         params.initializationOptions?.updateDiagnosticsSettingCommand;

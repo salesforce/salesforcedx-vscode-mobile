@@ -147,7 +147,6 @@ function getBaseComponentsAttributes(): Record<string, string[]> {
         '..',
         'src',
         'resources',
-        'yaml',
         'component-experiences.yaml'
     );
 

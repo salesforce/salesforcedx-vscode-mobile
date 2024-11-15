@@ -7,7 +7,7 @@
 
 import { WorkspaceFolder } from 'vscode-languageserver';
 
-export class ServerWorkspaceUtils {
+export class ServerWorkspace {
     private static workspaceFolders: WorkspaceFolder[] | null;
 
     /**
