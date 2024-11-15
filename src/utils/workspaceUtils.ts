@@ -5,7 +5,7 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
-import { ExtensionContext, workspace } from 'vscode';
+import { workspace } from 'vscode';
 import { access } from 'fs/promises';
 import {
     PACKAGE_JSON,
@@ -16,6 +16,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export class WorkspaceUtils {
+
     static readonly DEFAULT_APP_PATH = path.join(
         'force-app',
         'main',
@@ -135,8 +136,4 @@ export class NoStaticResourcesDirError extends Error {
         this.name = this.constructor.name;
         Object.setPrototypeOf(this, NoStaticResourcesDirError.prototype);
     }
-}
-
-export function getExtensionName(context: ExtensionContext): string {
-    return `${context.extension.packageJSON.name}`;
 }
