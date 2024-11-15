@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/github/salesforce/salesforcedx-vscode-mobile/branch/main/graph/badge.svg?token=PDZHP80RNO)](https://codecov.io/github/salesforce/salesforcedx-vscode-mobile)
+
 # Salesforce Mobile Extensions for Visual Studio Code
 
 This Visual Studio Code extension provides tools to help developers create their Salesforce Mobile experiences in the VSCode development environment.
