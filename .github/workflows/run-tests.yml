@@ -24,6 +24,7 @@ jobs:
             - name: Upload coverage to codecov
               uses: codecov/codecov-action@v3
               with:
+                  token: ${{ secrets.CODECOV_TOKEN }}
                   files: coverage/*.json
                   flags: lsp,extension
     run-tests-win:
