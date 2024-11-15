@@ -22,10 +22,10 @@ export class LiveKomaciAnalyzeCommand {
         if ((uris && uris?.length > 1) || Array.isArray(sourceUri)) {
             telemetryService.sendException(
                 commandName + '.invalid_analysis_input',
-                vscode.l10n.t('(TODO) This command runs on a single component.')
+                vscode.l10n.t('Choose a single component to analyze.')
             );
             return await window.showErrorMessage(
-                vscode.l10n.t('(TODO) This command runs on a single component.')
+                vscode.l10n.t('Choose a single component to analyze.')
             );
         }
         const sourceUriInput = sourceUri
