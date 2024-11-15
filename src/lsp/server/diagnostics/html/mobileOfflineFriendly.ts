@@ -136,8 +136,6 @@ function getKeysWithoutSpecificValue(
 }
 
 function getBaseComponentsAttributes(): Record<string, string[]> {
-    console.log(__dirname);
-    console.error(__dirname);
     const yamlPath = path.join(
         __dirname,
         '..',
