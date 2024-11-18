@@ -92,7 +92,7 @@
     "scripts": {
         "clean": "rimraf ./out",
         "compile": "rimraf ./out/tsconfig.tsbuildinfo && tsc -b ./ && npm run copy-yaml",
-        "copy-yaml": "cp -r './resources/yaml' './out/src/resources'",
+        "copy-yaml": "mkdir -p './out/src/resources' && cp './resources/component-experiences.yaml' './out/src/resources/component-experiences.yaml'",
         "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
@@ -123,6 +123,7 @@
         "@vscode/l10n-dev": "^0.0.35",
         "@vscode/test-electron": "^2.4.1",
         "@vscode/vsce": "^2.31.1",
+        "esbuild": "^0.23.0",
         "eslint": "^8.52.0",
         "glob": "^8.1.0",
         "graphql": "^16.9.0",
