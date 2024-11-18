@@ -3,7 +3,7 @@
     "displayName": "%extension.displayName%",
     "description": "%extension.description%",
     "version": "0.3.0",
-    "publisher": "Salesforce",
+    "publisher": "salesforce",
     "engines": {
         "vscode": "^1.77.0",
         "node": ">=20"
