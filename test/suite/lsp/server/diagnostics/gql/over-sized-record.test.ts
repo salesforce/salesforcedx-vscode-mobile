@@ -17,7 +17,7 @@ import {
     OVER_SIZED_FIELD_MESSAGE,
     OVER_SIZED_RECORD_MESSAGE
 } from '../../../../../../src/lsp/server/diagnostics/gql/over-sized-record';
-import { ObjectInfoUtils } from '../../../../../../src/lsp/server/utils/objectInfoUtils';
+import { OrgUtils } from '../../../../../../src/lsp/server/utils/orgUtils';
 
 import { ObjectInfoRepresentation } from '../../../../../../src/lsp/server/types';
 
@@ -28,13 +28,19 @@ suite(
         let oversizedRecordProducer = new OversizedRecord();
 
         const cwd = process.cwd();
+        console.log('----------------------');
+        console.error('----------------------');
+        console.log(cwd);
+        console.error(cwd);
+        console.log('----------------------');
+        console.error('----------------------');
         const testFixturePath = path.resolve(cwd, 'test/suite/lsp/server/testFixture/objectInfos/Book__c.json');
         const book = JSON.parse(readFileSync(testFixturePath, 'utf-8'));
 
         beforeEach(function () {
             sandbox = sinon.createSandbox();
             sandbox
-                .stub(ObjectInfoUtils, 'getObjectInfo')
+                .stub(OrgUtils, 'getObjectInfo')
                 .resolves(book as unknown as ObjectInfoRepresentation);
         });
 

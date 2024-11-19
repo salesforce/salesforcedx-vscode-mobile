@@ -13,7 +13,7 @@ import * as assert from 'assert';
 import * as sinon from 'sinon';
 
 import { parse } from 'graphql';
-import { ObjectInfoUtils } from '../../../../../src/lsp/server/utils/objectInfoUtils';
+import { OrgUtils } from '../../../../../src/lsp/server/utils/orgUtils';
 import { generateEntityTree, OperationNode, Relation } from '../../../../../src/lsp/server/utils/gqlUtils';
 
 import { ObjectInfoRepresentation } from '../../../../../src/lsp/server/types';
@@ -31,7 +31,7 @@ suite('GraphQL Utils Test Suite - Server', () => {
         const account = JSON.parse(readFileSync('test/suite/lsp/server/testFixture/objectInfos/Account.json', 'utf-8'));
         const user = JSON.parse(readFileSync('test/suite/lsp/server/testFixture/objectInfos/User.json', 'utf-8'));
         const contact = JSON.parse(readFileSync('test/suite/lsp/server/testFixture/objectInfos/Contact.json', 'utf-8'));
-        const getObjectInfoStub = sandbox.stub(ObjectInfoUtils, 'getObjectInfo');
+        const getObjectInfoStub = sandbox.stub(OrgUtils, 'getObjectInfo');
         getObjectInfoStub
             .onCall(0)
             .resolves(account as unknown as ObjectInfoRepresentation);

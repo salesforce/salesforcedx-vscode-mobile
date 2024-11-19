@@ -15,7 +15,7 @@ import {
     resolveEntityNameFromMetadata,
     getFieldSize
 } from '../../utils/gqlUtils';
-import { ObjectInfoUtils } from '../../utils/objectInfoUtils';
+import { OrgUtils } from '../../utils/orgUtils';
 import type { RootNode, EntityNode } from '../../utils/gqlUtils';
 
 const MAX_ALLOWED_SIZE = 32768;
@@ -98,7 +98,7 @@ async function generateDiagnostic(
     overSizedDiagnostic: OverSizedDiagnostics
 ) {
     if (entityNode.name) {
-        const objectInfo = await ObjectInfoUtils.getObjectInfo(entityNode.name);
+        const objectInfo = await OrgUtils.getObjectInfo(entityNode.name);
         if (objectInfo === undefined) {
             return;
         }

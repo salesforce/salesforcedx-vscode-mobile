@@ -75,11 +75,11 @@ class OrgInfo {
 }
 
 /**
- * Utility class for managing ObjectInfo
+ * Utility class for managing Org
  * - fetching data and cache it in L1 and L2 for authorized org
  * - wipe out data when logout.
  */
-export class ObjectInfoUtils {
+export class OrgUtils {
     private static defaultOrgInfo = new OrgInfo(AuthStatus.UNAUTHORIZED);
 
     private static objectInfoInMemoCache = new Map<
@@ -96,7 +96,7 @@ export class ObjectInfoUtils {
     public static async getObjectInfo(
         objectApiName: string
     ): Promise<ObjectInfoRepresentation | undefined> {
-        const orgInfo = await ObjectInfoUtils.refreshOrgInfo();
+        const orgInfo = await OrgUtils.refreshOrgInfo();
         if (orgInfo.status !== AuthStatus.AUTHORIZED) {
             return undefined;
         }
@@ -114,10 +114,10 @@ export class ObjectInfoUtils {
                 ObjectInfoRepresentation | undefined
             >(async (resolve) => {
                 try {
-                    const connection = await ObjectInfoUtils.getConnection();
+                    const connection = await OrgUtils.getConnection();
                     if (
                         connection === undefined ||
-                        !ObjectInfoUtils.entities.includes(objectApiName)
+                        !OrgUtils.entities.includes(objectApiName)
                     ) {
                         return resolve(undefined);
                     }

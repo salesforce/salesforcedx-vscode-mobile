@@ -19,7 +19,7 @@ import {
     CodeActionKind
 } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { ObjectInfoUtils } from './utils/objectInfoUtils';
+import { OrgUtils } from './utils/orgUtils';
 import { getSettings } from './diagnostics/DiagnosticSettings';
 import { ValidatorManager } from './validatorManager';
 import { debounce } from './utils/commonUtils';
@@ -187,10 +187,10 @@ connection.languages.diagnostics.on(async (params) => {
 });
 
 // When server establishes, reset org state.
-ObjectInfoUtils.reset();
+OrgUtils.reset();
 
 function onAuthOrgChanged() {
-    ObjectInfoUtils.reset();
+    OrgUtils.reset();
     connection.languages.diagnostics.refresh();
 }
 

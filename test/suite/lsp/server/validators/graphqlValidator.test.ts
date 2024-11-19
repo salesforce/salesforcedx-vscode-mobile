@@ -15,7 +15,7 @@ import {
 import * as assert from 'assert';
 import { suite, test, beforeEach, afterEach } from 'mocha';
 import * as sinon from 'sinon';
-import { ObjectInfoUtils } from '../../../../../src/lsp/server/utils/objectInfoUtils';
+import { OrgUtils } from '../../../../../src/lsp/server/utils/orgUtils';
 import { readFileSync } from 'fs';
 import { ObjectInfoRepresentation } from  '../../../../../src/lsp/server/types';
 
@@ -25,7 +25,7 @@ suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
     beforeEach(function () {
         sandbox = sinon.createSandbox();
         sandbox
-            .stub(ObjectInfoUtils, 'getObjectInfo')
+            .stub(OrgUtils, 'getObjectInfo')
             .resolves(book as unknown as ObjectInfoRepresentation);
     });
 

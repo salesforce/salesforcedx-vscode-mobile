@@ -7,7 +7,7 @@
 import * as assert from 'assert';
 import * as sinon from 'sinon';
 import { suite, test, beforeEach, afterEach } from 'mocha';
-import { ObjectInfoUtils } from '../../../../../src/lsp/server/utils/objectInfoUtils';
+import { OrgUtils } from '../../../../../src/lsp/server/utils/orgUtils';
 
 import {
     setupServerWorkspaceDirectoryStub,
@@ -19,14 +19,14 @@ import {
 } from '../../../../TestHelper';
 import { ObjectInfoRepresentation } from '../../../../../src/lsp/server/types';
 
-suite('ObjectInfoUtils Test Suite - Server', () => {
+suite('OrgUtils Test Suite - Server', () => {
     let sandbox: sinon.SinonSandbox;
 
     beforeEach(function () {
         sandbox = sinon.createSandbox();
     });
     afterEach(function () {
-        ObjectInfoUtils.reset();
+        OrgUtils.reset();
         sandbox.restore();
     });
 
@@ -35,7 +35,7 @@ suite('ObjectInfoUtils Test Suite - Server', () => {
 
     test('ObjectInfo is undefined if no org exists', async () => {
         createConfigStub = stubCreateConfig(sandbox, false);
-        const objectInfo = await ObjectInfoUtils.getObjectInfo('Account');
+        const objectInfo = await OrgUtils.getObjectInfo('Account');
         assert.strictEqual(
             objectInfo,
             undefined,
@@ -47,7 +47,7 @@ suite('ObjectInfoUtils Test Suite - Server', () => {
         createConfigStub = stubCreateConfig(sandbox, true);
         getInstanceStateStub = stubGetInstanceState(sandbox, false);
 
-        const objectInfo = await ObjectInfoUtils.getObjectInfo('Account');
+        const objectInfo = await OrgUtils.getObjectInfo('Account');
         assert.strictEqual(
             objectInfo,
             undefined,
@@ -68,7 +68,7 @@ suite('ObjectInfoUtils Test Suite - Server', () => {
 
         stubCreateAuth(sandbox);
 
-        const objectInfo = await ObjectInfoUtils.getObjectInfo('Account');
+        const objectInfo = await OrgUtils.getObjectInfo('Account');
         assert.strictEqual(
             objectInfo,
             undefined,
@@ -93,7 +93,7 @@ suite('ObjectInfoUtils Test Suite - Server', () => {
         let objectInfo: ObjectInfoRepresentation | undefined;
 
         try {
-            objectInfo = await ObjectInfoUtils.getObjectInfo('Account');
+            objectInfo = await OrgUtils.getObjectInfo('Account');
             assert.ok(objectInfo, 'object Info is fetched from web');
             assert.strictEqual(
                 requestStub.callCount,
@@ -111,7 +111,7 @@ suite('ObjectInfoUtils Test Suite - Server', () => {
                 'field data type should be correct'
             );
 
-            objectInfo = await ObjectInfoUtils.getObjectInfo('Account');
+            objectInfo = await OrgUtils.getObjectInfo('Account');
             assert.ok(objectInfo, 'object Info is fetched from cache');
             assert.strictEqual(
                 objectInfo.apiName,
