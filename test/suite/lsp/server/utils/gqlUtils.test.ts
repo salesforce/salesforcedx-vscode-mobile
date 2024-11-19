@@ -7,7 +7,9 @@
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { suite, test, beforeEach, afterEach } from 'mocha';
-import { readFileSync } from 'fs';
+import * as Account from '../testFixture/objectInfos/Account.json';
+import * as User from '../testFixture/objectInfos/User.json';
+import * as Contact from '../testFixture/objectInfos/Contact.json';
 
 import * as assert from 'assert';
 import * as sinon from 'sinon';
@@ -28,19 +30,16 @@ suite('GraphQL Utils Test Suite - Server', () => {
     });
 
     test('Entity tree with relationship is generated for ObjectInfo retrieval', async () => {
-        const account = JSON.parse(readFileSync('test/suite/lsp/server/testFixture/objectInfos/Account.json', 'utf-8'));
-        const user = JSON.parse(readFileSync('test/suite/lsp/server/testFixture/objectInfos/User.json', 'utf-8'));
-        const contact = JSON.parse(readFileSync('test/suite/lsp/server/testFixture/objectInfos/Contact.json', 'utf-8'));
         const getObjectInfoStub = sandbox.stub(OrgUtils, 'getObjectInfo');
         getObjectInfoStub
             .onCall(0)
-            .resolves(account as unknown as ObjectInfoRepresentation);
+            .resolves(Account as unknown as ObjectInfoRepresentation);
         getObjectInfoStub
             .onCall(1)
-            .resolves(user as unknown as ObjectInfoRepresentation);
+            .resolves(User as unknown as ObjectInfoRepresentation);
         getObjectInfoStub
             .onCall(2)
-            .resolves(contact as unknown as ObjectInfoRepresentation);
+            .resolves(Contact as unknown as ObjectInfoRepresentation);
 
         const textDocument = TextDocument.create(
             '',

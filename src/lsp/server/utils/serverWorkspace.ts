@@ -18,7 +18,9 @@ export class ServerWorkspace {
         workspaceFolders: WorkspaceFolder[] | null | undefined
     ) {
         if (workspaceFolders === undefined) {
-            throw new Error('LSP client requires workspace folder.');
+            throw new Error(
+                'A valid workspace folder needs to be set for Salesforce Mobile Language Server to function.'
+            );
         }
         this.workspaceFolders = workspaceFolders;
     }

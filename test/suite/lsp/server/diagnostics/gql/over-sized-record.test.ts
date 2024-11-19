@@ -7,10 +7,9 @@
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { suite, test, beforeEach, afterEach } from 'mocha';
-import { readFileSync } from 'fs';
+import * as Book__c from '../../testFixture/objectInfos/Book__c.json';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-import * as path from 'path';
 import { parse } from 'graphql';
 import {
     OversizedRecord,
@@ -24,24 +23,14 @@ import { ObjectInfoRepresentation } from '../../../../../../src/lsp/server/types
 suite(
     'GraphQL Diagnostics Test Suite - Server - Oversized GraphQL Field',
     () => {
-        let sandbox: sinon.SinonSandbox;
         let oversizedRecordProducer = new OversizedRecord();
 
-        const cwd = process.cwd();
-        console.log('----------------------');
-        console.error('----------------------');
-        console.log(cwd);
-        console.error(cwd);
-        console.log('----------------------');
-        console.error('----------------------');
-        const testFixturePath = path.resolve(cwd, 'test/suite/lsp/server/testFixture/objectInfos/Book__c.json');
-        const book = JSON.parse(readFileSync(testFixturePath, 'utf-8'));
-
+        let sandbox: sinon.SinonSandbox;
         beforeEach(function () {
             sandbox = sinon.createSandbox();
             sandbox
                 .stub(OrgUtils, 'getObjectInfo')
-                .resolves(book as unknown as ObjectInfoRepresentation);
+                .resolves(Book__c as unknown as ObjectInfoRepresentation);
         });
 
         afterEach(function () {

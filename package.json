@@ -92,7 +92,9 @@
     "scripts": {
         "clean": "rimraf ./out",
         "compile": "rimraf ./out/tsconfig.tsbuildinfo && tsc -b ./ && npm run copy-yaml",
-        "copy-yaml": "mkdir -p './out/src/resources' && cp './resources/component-experiences.yaml' './out/src/resources/component-experiences.yaml'",
+        "copy-yaml-win": "mkdir out\\src\\resources && copy resources\\component-experiences.yaml out\\src\\resources",
+        "copy-yaml-unix": "mkdir -p ./out/src/resources && cp ./resources/component-experiences.yaml ./out/src/resources",
+        "copy-yaml": "npm run copy-yaml-win || npm run copy-yaml-unix",
         "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",

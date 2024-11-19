@@ -13,7 +13,7 @@ import * as process from 'process';
 import * as sinon from 'sinon';
 import { WorkspaceUtils } from '../src/utils/workspaceUtils';
 
-import { readFileSync } from 'fs';
+import * as Account from './suite/lsp/server/testFixture/objectInfos/Account.json';
 import {
     ConfigAggregator,
     StateAggregator,
@@ -143,8 +143,7 @@ export function stubCreateConnection(
     sandbox: sinon.SinonSandbox,
     requestable: boolean
 ) {
-    const account = JSON.parse(readFileSync('test/suite/lsp/server/testFixture/objectInfos/Account.json', 'utf-8'));
-    const mockRequest = sandbox.stub().resolves(account);
+    const mockRequest = sandbox.stub().resolves(Account);
     const mockConnection = requestable
         ? {
               getUsername: sandbox.stub().returns('tester'),

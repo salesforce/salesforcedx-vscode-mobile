@@ -16,17 +16,16 @@ import * as assert from 'assert';
 import { suite, test, beforeEach, afterEach } from 'mocha';
 import * as sinon from 'sinon';
 import { OrgUtils } from '../../../../../src/lsp/server/utils/orgUtils';
-import { readFileSync } from 'fs';
+import * as Book__c from '../testFixture/objectInfos/Book__c.json';
 import { ObjectInfoRepresentation } from  '../../../../../src/lsp/server/types';
 
 suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
-    const book = JSON.parse(readFileSync('test/suite/lsp/server/testFixture/objectInfos/Book__c.json', 'utf-8'));
     let sandbox: sinon.SinonSandbox;
     beforeEach(function () {
         sandbox = sinon.createSandbox();
         sandbox
             .stub(OrgUtils, 'getObjectInfo')
-            .resolves(book as unknown as ObjectInfoRepresentation);
+            .resolves(Book__c as unknown as ObjectInfoRepresentation);
     });
 
     afterEach(function () {
