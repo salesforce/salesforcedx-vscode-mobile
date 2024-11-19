@@ -10,7 +10,7 @@ import { suite, test, beforeEach, afterEach } from 'mocha';
 import { readFileSync } from 'fs';
 import * as assert from 'assert';
 import * as sinon from 'sinon';
-
+import * as path from 'path';
 import { parse } from 'graphql';
 import {
     OversizedRecord,
@@ -26,7 +26,10 @@ suite(
     () => {
         let sandbox: sinon.SinonSandbox;
         let oversizedRecordProducer = new OversizedRecord();
-        const book = JSON.parse(readFileSync('test/suite/lsp/server/testFixture/objectInfos/Book__c.json', 'utf-8'));
+
+        const cwd = process.cwd();
+        const testFixturePath = path.resolve(cwd, 'test/suite/lsp/server/testFixture/objectInfos/Book__c.json');
+        const book = JSON.parse(readFileSync(testFixturePath, 'utf-8'));
 
         beforeEach(function () {
             sandbox = sinon.createSandbox();
