@@ -6,16 +6,12 @@
         "lib": ["es2020"],
         "sourceMap": true,
         "rootDir": ".",
+        "resolveJsonModule": true,
         "strict": true /* enable all strict type-checking options */
         /* Additional Checks */
         // "noImplicitReturns": true, /* Report error when not all code paths in function return a value. */
         // "noFallthroughCasesInSwitch": true, /* Report errors for fallthrough cases in switch statement. */
         // "noUnusedParameters": true,  /* Report errors on unused parameters. */
     },
-
-    "include": ["src", "test"],
-    "references": [
-        { "path": "./lsp/client" }, 
-        { "path": "./lsp/server" }
-    ]
+    "include": ["src", "test", "test/suite/lsp/server/testFixture/**/*.json"]
 }

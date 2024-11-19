@@ -6,7 +6,6 @@
  */
 
 import * as vscode from 'vscode';
-import { getExtensionName } from '../../utils/workspaceUtils';
 
 const SETTING_KEY_SUPPRESS_ALL = 'suppressAll';
 const SETTING_KEY_SUPPRESS_BY_RULE_ID = 'suppressByRuleId';
@@ -14,7 +13,7 @@ const SETTING_KEY_SUPPRESS_BY_RULE_ID = 'suppressByRuleId';
 export function getUpdateDiagnosticsSettingCommand(
     context: vscode.ExtensionContext
 ): string {
-    return `${getExtensionName(context)}.updateDiagnosticsSetting`;
+    return `${context.extension.packageJSON.name}.updateDiagnosticsSetting`;
 }
 
 export const SECTION_DIAGNOSTICS = `mobileDiagnostics`;

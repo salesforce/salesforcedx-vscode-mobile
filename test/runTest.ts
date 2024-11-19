@@ -63,7 +63,7 @@ async function main() {
             console.error(installNonZeroError);
             throw new Error(installNonZeroError);
         }
-
+        
         // All clear! Should be able to run the tests.
         await runTests({
             extensionDevelopmentPath,

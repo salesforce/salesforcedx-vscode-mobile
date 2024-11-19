@@ -13,7 +13,8 @@ import * as configureLintingToolsCommand from './commands/lint/configureLintingT
 import * as settingsCommand from './commands/settings/settings';
 import { CoreExtensionService } from './services/CoreExtensionService';
 import { WorkspaceUtils } from './utils/workspaceUtils';
-import * as lspClient from 'mobile-lsp-client';
+import * as lspClient from './lsp/client/client';
+
 import {
     SECTION_DIAGNOSTICS,
     getUpdateDiagnosticsSettingCommand

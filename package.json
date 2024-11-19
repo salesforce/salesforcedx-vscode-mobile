@@ -4,9 +4,6 @@
     "description": "%extension.description%",
     "version": "0.3.0",
     "publisher": "salesforce",
-    "workspaces": [
-        "lsp/*"
-    ],
     "engines": {
         "vscode": "^1.77.0",
         "node": ">=20"
@@ -93,20 +90,27 @@
         }
     },
     "scripts": {
-        "clean": "rimraf out ./lsp/server/out ./lsp/client/out",
-        "compile": "rimraf ./lsp/server/tsconfig.tsbuildinfo ./lsp/client/tsconfig.tsbuildinfo && tsc -b ./ && npm run copy-resources",
-        "copy-resources": "cp -r './lsp/server/resources' './lsp/server/out/src/'",
+        "clean": "rimraf ./out",
+        "compile": "rimraf ./out/tsconfig.tsbuildinfo && tsc -b ./ && npm run copy-yaml",
+        "copy-yaml-win": "mkdir out\\src\\resources && copy resources\\component-experiences.yaml out\\src\\resources",
+        "copy-yaml-unix": "mkdir -p ./out/src/resources && cp ./resources/component-experiences.yaml ./out/src/resources",
+        "copy-yaml": "npm run copy-yaml-win || npm run copy-yaml-unix",
         "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "test-coverage": "node ./out/test/runTest.js --coverage",
-        "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
-        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
+        "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
+        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
         "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
-        "vscode:prepublish": "npm run clean && npm run bundle:extension"
+        "vscode:prepublish": "npm run clean && npm run compile && npm run bundle:extension"
     },
     "devDependencies": {
+        "@babel/cli": "^7.25.9",
+        "@babel/core": "^7.26.0",
+        "@babel/preset-env": "^7.26.0",
+        "@types/babel__traverse": "7.20.6",
+        "@types/babel-core": "6.25.10",
         "@istanbuljs/nyc-config-typescript": "^1.0.2",
         "@types/cli-progress": "^3.11.6",
         "@types/glob": "^8.1.0",
@@ -115,13 +119,16 @@
         "@types/node": "^22.8.6",
         "@types/sinon": "^17.0.3",
         "@types/vscode": "1.77.0",
+        "@types/yaml": "^1.9.7",
         "@typescript-eslint/eslint-plugin": "^8.12.2",
         "@typescript-eslint/parser": "^8.12.2",
         "@vscode/l10n-dev": "^0.0.35",
         "@vscode/test-electron": "^2.4.1",
         "@vscode/vsce": "^2.31.1",
+        "esbuild": "^0.23.0",
         "eslint": "^8.52.0",
         "glob": "^8.1.0",
+        "graphql": "^16.9.0",
         "mocha": "^10.8.2",
         "nyc": "^17.1.0",
         "ovsx": "^0.10.0",
@@ -132,13 +139,18 @@
         "typescript": "^5.5.4"
     },
     "dependencies": {
+        "@babel/traverse": "^7.25.9",
+        "@graphql-tools/graphql-tag-pluck": "^8.3.3",
+        "@graphql-tools/utils": "^10.5.4",
         "@salesforce/core": "^5.3.12",
         "@salesforce/lwc-dev-mobile-core": "^3.3.1",
         "@salesforce/sf-plugins-core": "^4.0.0",
         "@vscode/l10n": "^0.0.18",
-        "mobile-lsp-client": "workspaces:*",
-        "mobile-lsp-server": "workspaces:*",
+        "graphql-tag": "^2.12.6",
+        "vscode-languageclient": "^8.1.0",
         "vscode-html-languageservice": "^5.3.1",
+        "vscode-languageserver": "^9.0.1",
+        "vscode-languageserver-textdocument": "^1.0.11",
         "yaml": "^2.6.0"
     }
 }
