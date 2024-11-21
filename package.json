@@ -63,7 +63,7 @@
             "properties": {
                 "mobileOfflineLinting.eslint-plugin-lwc-mobile": {
                     "type": "string",
-                    "default": "^1.0.0",
+                    "default": "^1.1.0",
                     "description": "%extension.commands.salesforce-mobile-offline.lwc-mobile.version%"
                 },
                 "mobileOfflineLinting.eslint-plugin-lwc-graph-analyzer": {
