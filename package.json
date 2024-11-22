@@ -2,7 +2,7 @@
     "name": "salesforcedx-vscode-mobile",
     "displayName": "%extension.displayName%",
     "description": "%extension.description%",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "publisher": "salesforce",
     "engines": {
         "vscode": "^1.77.0",
@@ -63,7 +63,7 @@
             "properties": {
                 "mobileOfflineLinting.eslint-plugin-lwc-mobile": {
                     "type": "string",
-                    "default": "^1.0.0",
+                    "default": "^1.1.0",
                     "description": "%extension.commands.salesforce-mobile-offline.lwc-mobile.version%"
                 },
                 "mobileOfflineLinting.eslint-plugin-lwc-graph-analyzer": {
