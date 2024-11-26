@@ -47,6 +47,10 @@ export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
         return RULE_ID;
     }
 
+    getDocUrl(): string | undefined {
+        return undefined;
+    }
+
     validateDocument(
         textDocument: TextDocument,
         node: Node

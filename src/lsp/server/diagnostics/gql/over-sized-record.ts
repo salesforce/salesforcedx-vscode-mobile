@@ -59,6 +59,10 @@ export class OversizedRecord implements DiagnosticProducer<ASTNode> {
     getId(): string {
         return RULE_ID;
     }
+
+    getDocUrl(): string | undefined {
+        return undefined;
+    }
 }
 
 export interface OverSizedDiagnostics {

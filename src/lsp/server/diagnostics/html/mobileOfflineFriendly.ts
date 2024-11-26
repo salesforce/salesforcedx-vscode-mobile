@@ -22,6 +22,10 @@ export class MobileOfflineFriendly implements DiagnosticProducer<HTMLDocument> {
         return RULE_ID;
     }
 
+    getDocUrl(): string | undefined {
+        return undefined;
+    }
+
     async validateDocument(
         textDocument: TextDocument,
         data: HTMLDocument

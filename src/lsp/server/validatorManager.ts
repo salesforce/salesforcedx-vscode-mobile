@@ -22,7 +22,14 @@ export class ValidatorManager {
     // Store all available validators
     private validators: BaseValidator<SupportedType>[] = [];
 
-    private constructor() {}
+    private source: string;
+
+    /**
+     * @param source the diagnostic source.
+     */
+    private constructor(source: string) {
+        this.source = source;
+    }
 
     /**
      * Adds a validator to the manager’s collection.
@@ -99,8 +106,11 @@ export class ValidatorManager {
                 return [];
             })
         );
-
-        return sectionDiagnostics.flat();
+        const result = sectionDiagnostics.flat();
+        result.forEach((diagnostic) => {
+            diagnostic.source = this.source;
+        });
+        return result;
     }
 
     /**
@@ -135,8 +145,8 @@ export class ValidatorManager {
      * with relevant diagnostic producers.
      * @returns ValidatorManager instance
      */
-    public static createInstance(): ValidatorManager {
-        const validatorManager = new ValidatorManager();
+    public static createInstance(source: string): ValidatorManager {
+        const validatorManager = new ValidatorManager(source);
         // Populate GraphQLValidator
         const gqlValidator = new GraphQLValidator();
         gqlValidator.addProducer(new OversizedRecord());

@@ -15,6 +15,11 @@ export interface DiagnosticProducer<T> {
     getId(): string;
 
     /**
+     * Get the external doc url about the diagnostic produced by this producer.
+     */
+    getDocUrl(): string | undefined;
+
+    /**
      * Validate the parsed text document as astNode and return a list of diagnostics.
      * @param textDocument the language server text document.
      * @param data usually parsed document body.
