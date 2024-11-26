@@ -20,8 +20,9 @@ export const SECTION_DIAGNOSTICS = `mobileDiagnostics`;
 
 export function registerCommand(context: vscode.ExtensionContext) {
     const command = getUpdateDiagnosticsSettingCommand(context);
-    context.subscriptions.push(
-        vscode.commands.registerCommand(command, async (diagnosticSetting) => {
+    const disposable = vscode.commands.registerCommand(
+        command,
+        async (diagnosticSetting) => {
             const config =
                 vscode.workspace.getConfiguration(SECTION_DIAGNOSTICS);
             const { suppressAll, suppressByRuleId } = diagnosticSetting;
@@ -45,6 +46,7 @@ export function registerCommand(context: vscode.ExtensionContext) {
                     vscode.ConfigurationTarget.Workspace
                 );
             }
-        })
+        }
     );
+    context.subscriptions.push(disposable);
 }

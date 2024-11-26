@@ -250,7 +250,11 @@ export class ConfigureLintingToolsCommand {
 }
 
 export function registerCommand(context: ExtensionContext) {
-    commands.registerCommand(configureLintingToolsCommand, async () => {
-        await ConfigureLintingToolsCommand.configure();
-    });
+    const disposable = commands.registerCommand(
+        configureLintingToolsCommand,
+        async () => {
+            await ConfigureLintingToolsCommand.configure();
+        }
+    );
+    context.subscriptions.push(disposable);
 }
