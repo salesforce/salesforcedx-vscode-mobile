@@ -18,11 +18,12 @@ import {
 } from '../../../../../../src/lsp/server/diagnostics/js/adapters-local-change-not-aware';
 import { parseJs } from '../../../../../../src/lsp/server/utils/babelUtil';
 import { TextDocument } from 'vscode-languageserver-textdocument';
+import { repository } from '../../../../../../package.json';
 
 suite(
     'JS Diagnostics Test Suite - Server - Adapter Local Change Not Aware',
     () => {
-        const rule = new AdaptersLocalChangeNotAware();
+        const rule = new AdaptersLocalChangeNotAware(repository.url);
 
         afterEach(function () {
             sinon.restore();

@@ -7,6 +7,7 @@
 
 import * as path from 'path';
 import { workspace, ExtensionContext } from 'vscode';
+import { version, repository } from '../../../package.json';
 
 import {
     LanguageClient,
@@ -25,6 +26,8 @@ export function activate(
     // Get extension name
     const extensionTitle =
         context.extension.packageJSON.contributes.configuration.title;
+
+    const diagnosticBaseRootUrl = `${repository.url}/blob/v${version}/src/docs`;
 
     // The server is implemented in node
     const serverModule = context.asAbsolutePath(
@@ -59,7 +62,8 @@ export function activate(
         initializationOptions: {
             updateDiagnosticsSettingCommand,
             diagnosticsSettingSection,
-            extensionTitle
+            extensionTitle,
+            diagnosticBaseRootUrl
         }
     };
 

@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2024, salesforce.com, inc.
  * All rights reserved.
@@ -15,10 +16,11 @@ import {
     MESSAGE_FOR_GET_RELATED_LIST_RECORDS,
     RULE_ID
 } from '../../../../../src/lsp/server/diagnostics/js/adapters-local-change-not-aware';
+import { repository } from '../../../../../package.json';
 
 suite('Diagnostics Test Suite - Server - JS Validator', () => {
     const jsValidator = new JSValidator();
-    jsValidator.addProducer(new AdaptersLocalChangeNotAware());
+    jsValidator.addProducer(new AdaptersLocalChangeNotAware(repository.url));
 
     const textDocument = TextDocument.create(
         'file://test.js',

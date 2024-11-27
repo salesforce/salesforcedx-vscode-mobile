@@ -17,13 +17,17 @@ const baseComponentsAttributes = { values: getBaseComponentsAttributes() };
 
 export const RULE_ID = 'mobile-offline-friendly';
 
-export class MobileOfflineFriendly implements DiagnosticProducer<HTMLDocument> {
+export class MobileOfflineFriendly extends DiagnosticProducer<HTMLDocument> {
+    constructor(baseDocUrl: string) {
+        super(baseDocUrl);
+    }
+
     getId(): string {
         return RULE_ID;
     }
 
-    getDocUrl(): string | undefined {
-        return undefined;
+    hasDocumentation(): boolean {
+        return false;
     }
 
     async validateDocument(

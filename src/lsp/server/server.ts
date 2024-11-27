@@ -38,6 +38,7 @@ export let hasDiagnosticRelatedInformationCapability = false;
 let updateDiagnosticsSettingCommand = '';
 let diagnosticsSettingSection = '';
 let extensionTitle = '';
+let diagnosticBaseRootUrl = '';
 
 // initialize default settings
 let settings = getSettings({});
@@ -52,6 +53,7 @@ connection.onInitialize((params: InitializeParams) => {
     // Sets workspace folder to WorkspaceUtils
     ServerWorkspace.initWorkspaceFolders(workspaceFolders);
     extensionTitle = params.initializationOptions?.extensionTitle;
+    diagnosticBaseRootUrl = params.initializationOptions?.diagnosticBaseRootUrl;
 
     updateDiagnosticsSettingCommand =
         params.initializationOptions?.updateDiagnosticsSettingCommand;
@@ -173,7 +175,10 @@ documents.onDidClose((e) => {
 
 connection.languages.diagnostics.on(async (params) => {
     if (validatorManager === undefined) {
-        validatorManager = ValidatorManager.createInstance(extensionTitle);
+        validatorManager = ValidatorManager.createInstance(
+            extensionTitle,
+            diagnosticBaseRootUrl
+        );
     }
     const document = documents.get(params.textDocument.uri);
     if (document !== undefined) {

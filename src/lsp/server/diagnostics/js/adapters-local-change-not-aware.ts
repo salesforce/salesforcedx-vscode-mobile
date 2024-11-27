@@ -42,13 +42,13 @@ export const RULE_ID = 'adapters-local-change-not-aware';
 /**
  * Produce diagnostics for adapter which works offline but doesn't handle local change.
  */
-export class AdaptersLocalChangeNotAware implements DiagnosticProducer<Node> {
-    getId(): string {
-        return RULE_ID;
+export class AdaptersLocalChangeNotAware extends DiagnosticProducer<Node> {
+    constructor(baseDocUrl: string) {
+        super(baseDocUrl);
     }
 
-    getDocUrl(): string | undefined {
-        return undefined;
+    getId(): string {
+        return RULE_ID;
     }
 
     validateDocument(
