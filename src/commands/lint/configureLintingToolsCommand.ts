@@ -10,9 +10,19 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import { JSON_INDENTATION_SPACES } from '../../utils/constants';
+import { CoreExtensionService } from '../../services/CoreExtensionService';
 
-const configureLintingToolsCommand =
-    'salesforcedx-vscode-offline-app.configureLintingTools';
+const commandName =
+    'salesforcedx-vscode-offline-app.configure-linting-tools';
+
+enum MetricEvents {
+    LWC_FOLDER_DOES_NOT_EXIST = "lwc-folder-does-not-exist",
+    PACKAGE_JSON_DOES_NOT_EXIST = "package-json-does-not-exist",
+    ERROR_UPDATING_PACKAGE_JSON = "error_updating_package_json",
+
+
+    
+}
 
 const config = workspace.getConfiguration();
 
@@ -66,85 +76,107 @@ enum MessageType {
 
 export class ConfigureLintingToolsCommand {
     static async configure(): Promise<boolean> {
+        const telemetryService = CoreExtensionService.getTelemetryService();
+        
         try {
             if (!WorkspaceUtils.lwcFolderExists()) {
-                await this.showMessage(
-                    'The "force-app/main/default/lwc" folder does not exist in your project. This folder is required to create a configuration file for ESLint.'
-                );
-                return Promise.resolve(false);
+                const eventName = `${commandName}.${MetricEvents.LWC_FOLDER_DOES_NOT_EXIST}`;
+                const message = l10n.t(eventName);
+
+                await this.showMessage(message);
+                telemetryService.sendException(eventName, message);
+
+                return false;
             }
 
             if (!WorkspaceUtils.packageJsonExists()) {
-                await this.showMessage(
-                    'Your project does not contain a "package.json" specification. You must have a package specification to configure these ESLint packages and their dependencies in your project.'
-                );
-                return Promise.resolve(false);
+                const eventName = `${commandName}.${MetricEvents.PACKAGE_JSON_DOES_NOT_EXIST}`;
+                const message = l10n.t(eventName);
+
+                await this.showMessage(message);
+                telemetryService.sendException(eventName,message);
+
+                return false;
             }
 
             // Ask user to add eslint plugin
             const result = await this.showMessage(
-                'Do you want to add Salesforce code linting guidance for Mobile and Offline capabilities? These tools will identify code patterns that cause problems in Mobile and Offline use cases.',
+                l10n.t(`${commandName}.add-linting-guidance`),
                 MessageType.InformationYesNo
             );
 
             if (!result || result.title === l10n.t('No')) {
-                return Promise.resolve(false);
+                return false;
             } else {
                 let modifiedDevDependencies = false;
                 try {
                     modifiedDevDependencies = this.updateDevDependencies();
                 } catch (error) {
-                    await this.showMessage(
-                        `Error updating package.json: ${error}`
-                    );
-                    return Promise.resolve(false);
+                    const eventName = `${commandName}.${MetricEvents.ERROR_UPDATING_PACKAGE_JSON}`;
+                    const message = l10n.t(eventName, error as Error)
+
+                    await this.showMessage(message);
+                    telemetryService.sendException(eventName,message);
+                    
+                    return false;
                 }
 
                 let modifiedEslintrc = false;
                 try {
                     modifiedEslintrc = this.updateEslintrc();
                 } catch (error) {
-                    await this.showMessage(
-                        `Error updating .eslintrc.json: ${error}`
+                    const message = l10n.t("extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.error-updating-eslintrc-json", error as Error);
+                    await this.showMessage(message);
+                    telemetryService.sendException(
+                        commandName + '.error-updating-eslintrc-json',
+                        message
                     );
-                    return Promise.resolve(false);
+                    return false;
                 }
 
                 if (modifiedDevDependencies) {
                     this.showMessage(
-                        `Updated package.json to include offline linting packages and dependencies.`,
+                        l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.updated-package-json'),
                         MessageType.InformationOk
                     );
                 }
 
                 if (modifiedEslintrc) {
                     this.showMessage(
-                        `Updated .eslintrc.json to include recommended linting rules.`,
+                        l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.updated-eslintrc-json'),
                         MessageType.InformationOk
                     );
                 }
 
                 if (modifiedDevDependencies || modifiedEslintrc) {
                     this.showMessage(
-                        `In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, "npm install" or "yarn install".`,
+                        l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.run-install-command'),
                         MessageType.InformationOk
                     );
                 }
 
                 if (!modifiedDevDependencies && !modifiedEslintrc) {
+                    const message = l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.already-configured');
                     this.showMessage(
-                        `All offline linting packages and dependencies are already configured in your project. No update has been made to package.json.`,
+                        message,
                         MessageType.InformationOk
                     );
+                    // telemetryService.sendCommandEvent(
+                    //     commandName + '.success-message',
+                    //     message
+                    // );
                 }
 
-                return Promise.resolve(true);
+                return true;
             }
         } catch (error) {
-            await this.showMessage(
-                `There was an error trying to update either the offline linting dependencies or linting configuration: ${error}`
+            const message = l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.general-error-message', error as Error);
+            await this.showMessage(message);
+            telemetryService.sendException(
+                commandName + '.general-error-message',
+                message
             );
-            return Promise.resolve(false);
+            return false;
         }
     }
 
