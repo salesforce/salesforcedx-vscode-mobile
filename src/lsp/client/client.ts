@@ -60,7 +60,7 @@ export function activate(
 
     // Create the language client and start the client.
     client = new LanguageClient(
-        'Salesforce Mobile Language Server',
+        'salesforceMobileLanguageServer',
         'Salesforce Mobile Language Server',
         serverOptions,
         clientOptions

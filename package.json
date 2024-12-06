@@ -2,7 +2,7 @@
     "name": "salesforcedx-vscode-mobile",
     "displayName": "%extension.displayName%",
     "description": "%extension.description%",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "publisher": "salesforce",
     "engines": {
         "vscode": "^1.77.0",
@@ -63,7 +63,7 @@
             "properties": {
                 "mobileOfflineLinting.eslint-plugin-lwc-mobile": {
                     "type": "string",
-                    "default": "^1.0.0",
+                    "default": "^1.1.0",
                     "description": "%extension.commands.salesforce-mobile-offline.lwc-mobile.version%"
                 },
                 "mobileOfflineLinting.eslint-plugin-lwc-graph-analyzer": {
@@ -92,9 +92,7 @@
     "scripts": {
         "clean": "rimraf ./out",
         "compile": "rimraf ./out/tsconfig.tsbuildinfo && tsc -b ./ && npm run copy-yaml",
-        "copy-yaml-win": "mkdir out\\src\\resources && copy resources\\component-experiences.yaml out\\src\\resources",
-        "copy-yaml-unix": "mkdir -p ./out/src/resources && cp ./resources/component-experiences.yaml ./out/src/resources",
-        "copy-yaml": "npm run copy-yaml-win || npm run copy-yaml-unix",
+        "copy-yaml": "node scripts/copyResources.js",
         "watch": "tsc -watch -b ./",
         "pretest": "npm run compile && npm run lint",
         "lint": "eslint src --ext ts",
@@ -102,7 +100,7 @@
         "test-coverage": "node ./out/test/runTest.js --coverage",
         "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
         "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
-        "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
+        "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out/src --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
         "vscode:prepublish": "npm run clean && npm run compile && npm run bundle:extension"
     },
     "devDependencies": {
