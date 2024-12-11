@@ -10,6 +10,7 @@
 import * as vscode from 'vscode';
 import * as onboardingWizard from './commands/wizard/onboardingWizard';
 import * as configureLintingToolsCommand from './commands/lint/configureLintingToolsCommand';
+import * as liveKomaciAnalyze from './commands/toolingHub/liveKomaciAnalyze';
 import * as settingsCommand from './commands/settings/settings';
 import { CoreExtensionService } from './services/CoreExtensionService';
 import { WorkspaceUtils } from './utils/workspaceUtils';
@@ -23,7 +24,7 @@ import {
 export function activate(context: vscode.ExtensionContext) {
     // We need to do this first in case any other services need access to those provided by the core extension
     try {
-        CoreExtensionService.loadDependencies();
+        CoreExtensionService.loadDependencies(context);
     } catch (err) {
         console.error(err);
         vscode.window.showErrorMessage(
@@ -46,6 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
     settingsCommand.registerCommand(context);
 
     configureLintingToolsCommand.registerCommand(context);
+
+    liveKomaciAnalyze.registerCommand(context);
 
     const command = getUpdateDiagnosticsSettingCommand(context);
 
