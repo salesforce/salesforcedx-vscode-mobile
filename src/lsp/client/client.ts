@@ -27,7 +27,7 @@ export function activate(
     const extensionTitle =
         context.extension.packageJSON.contributes.configuration.title;
 
-    const diagnosticBaseRootUrl = `${repository.url}/blob/v${version}/src/docs`;
+    const diagnosticBaseRootUrl = `${repository.url}/blob/v${version}/src/lsp/docs`;
 
     // The server is implemented in node
     const serverModule = context.asAbsolutePath(
