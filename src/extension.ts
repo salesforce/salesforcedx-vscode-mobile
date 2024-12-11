@@ -49,7 +49,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const command = getUpdateDiagnosticsSettingCommand(context);
 
-    lspClient.activate(context, command, SECTION_DIAGNOSTICS);
+    // Enable LSP only if opened workspace is a sfdx project.
+    if (WorkspaceUtils.isSfdxProjectOpened()) {
+        lspClient.activate(context, command, SECTION_DIAGNOSTICS);
+    }
 }
 
 // This method is called when your extension is deactivated
