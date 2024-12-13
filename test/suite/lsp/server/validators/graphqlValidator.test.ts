@@ -18,6 +18,7 @@ import * as sinon from 'sinon';
 import { OrgUtils } from '../../../../../src/lsp/server/utils/orgUtils';
 import * as Book__c from '../testFixture/objectInfos/Book__c.json';
 import { ObjectInfoRepresentation } from  '../../../../../src/lsp/server/types';
+import { repository } from '../../../../../package.json';
 
 suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
     let sandbox: sinon.SinonSandbox;
@@ -61,7 +62,7 @@ suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
         );
 
         const graphqlValidator = new GraphQLValidator();
-        graphqlValidator.addProducer(new OversizedRecord());
+        graphqlValidator.addProducer(new OversizedRecord(repository.url));
         const sections =
             graphqlValidator.gatherDiagnosticSections(textDocument);
         assert.equal(sections.length, 1);
@@ -91,7 +92,7 @@ suite('Diagnostics Test Suite - Server - GraphQL Validator', () => {
             `
         );
         const graphqlValidator = new GraphQLValidator();
-        graphqlValidator.addProducer(new OversizedRecord());
+        graphqlValidator.addProducer(new OversizedRecord(repository.url));
         const sections =
             graphqlValidator.gatherDiagnosticSections(textDocument);
         assert.equal(sections.length, 0);

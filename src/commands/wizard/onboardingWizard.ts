@@ -56,7 +56,7 @@ export function onActivate(context: vscode.ExtensionContext) {
 }
 
 export function registerCommand(context: vscode.ExtensionContext) {
-    vscode.commands.registerCommand(
+    const disposable = vscode.commands.registerCommand(
         wizardCommand,
         async (fromPostProjectConfiguration: boolean = false) => {
             if (fromPostProjectConfiguration) {
@@ -93,4 +93,5 @@ export function registerCommand(context: vscode.ExtensionContext) {
             }
         }
     );
+    context.subscriptions.push(disposable);
 }

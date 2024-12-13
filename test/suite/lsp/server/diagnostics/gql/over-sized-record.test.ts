@@ -19,11 +19,12 @@ import {
 import { OrgUtils } from '../../../../../../src/lsp/server/utils/orgUtils';
 
 import { ObjectInfoRepresentation } from '../../../../../../src/lsp/server/types';
+import { repository } from '../../../../../../package.json';
 
 suite(
     'GraphQL Diagnostics Test Suite - Server - Oversized GraphQL Field',
     () => {
-        let oversizedRecordProducer = new OversizedRecord();
+        let oversizedRecordProducer = new OversizedRecord(repository.url);
 
         let sandbox: sinon.SinonSandbox;
         beforeEach(function () {

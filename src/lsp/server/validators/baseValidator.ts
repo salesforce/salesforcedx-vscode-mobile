@@ -91,12 +91,20 @@ export abstract class BaseValidator<SupportedType> {
             activeProducers.map(async (producer) => {
                 try {
                     const producerId = producer.getId();
+                    const docUrl = producer.getDocUrl();
                     const diagnostics = await producer.validateDocument(
                         textDocument,
                         data
                     );
                     diagnostics.forEach((diagnostic) => {
                         diagnostic.data = producerId;
+                        // Show id as link label and docUrl as link href
+                        diagnostic.code = producerId;
+                        if (docUrl !== undefined) {
+                            diagnostic.codeDescription = {
+                                href: docUrl
+                            };
+                        }
                     });
                     return diagnostics;
                 } catch (e) {

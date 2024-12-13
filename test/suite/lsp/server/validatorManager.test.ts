@@ -9,10 +9,13 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import * as assert from 'assert';
 import { suite, test } from 'mocha';
 import { ValidatorManager } from  '../../../../src/lsp/server/validatorManager';
-import { MESSAGE_FOR_GET_RELATED_LIST_RECORDS } from '../../../../src/lsp/server/diagnostics/js/adapters-local-change-not-aware';
+import { MESSAGE_FOR_GET_RELATED_LIST_RECORDS, RULE_ID as LOCAL_CHANGE_NOT_AWARE_ADAPTERS } from '../../../../src/lsp/server/diagnostics/js/adapters-local-change-not-aware';
+import { repository } from '../../../../package.json';
 
 suite('Diagnostics Test Suite - Server - ValidatorManager', () => {
-    const validatorManager = ValidatorManager.createInstance();
+    const source = 'sample extension title';
+    const baseDocUrl = `${repository.url}/blob/main/src/docs`;
+    const validatorManager = ValidatorManager.createInstance(source, baseDocUrl);
     const textDocument = TextDocument.create(
         'file://test.js',
         'javascript',
@@ -44,9 +47,16 @@ suite('Diagnostics Test Suite - Server - ValidatorManager', () => {
             textDocument
         );
         assert.equal(diagnostics.length, 1);
+        const diagnostic = diagnostics[0];
         assert.equal(
-            diagnostics[0].message,
+            diagnostic.message,
             MESSAGE_FOR_GET_RELATED_LIST_RECORDS
+        );
+        assert.equal(diagnostic.source, source);
+        assert.equal(diagnostic.code, LOCAL_CHANGE_NOT_AWARE_ADAPTERS);
+        assert.equal(
+            diagnostic.codeDescription?.href, 
+            'https://github.com/salesforce/salesforcedx-vscode-mobile/blob/main/src/docs/adapters-local-change-not-aware.md'
         );
     });
 });
