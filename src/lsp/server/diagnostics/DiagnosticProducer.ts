@@ -9,7 +9,7 @@ import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 export abstract class DiagnosticProducer<T> {
-    baseDocUrl: string;
+    private baseDocUrl: string;
 
     constructor(baseDocUrl: string) {
         this.baseDocUrl = baseDocUrl;
