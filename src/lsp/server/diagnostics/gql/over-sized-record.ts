@@ -28,7 +28,11 @@ export const OVER_SIZED_RECORD_MESSAGE =
 const SEVERITY = DiagnosticSeverity.Information;
 
 export const RULE_ID = 'over-sized-record';
-export class OversizedRecord implements DiagnosticProducer<ASTNode> {
+export class OversizedRecord extends DiagnosticProducer<ASTNode> {
+    constructor(baseDocUrl: string) {
+        super(baseDocUrl);
+    }
+
     async validateDocument(
         textDocument: TextDocument,
         rootNode: ASTNode

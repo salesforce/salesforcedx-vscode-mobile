@@ -8,11 +8,33 @@
 import { Diagnostic } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
-export interface DiagnosticProducer<T> {
+export abstract class DiagnosticProducer<T> {
+    private baseDocUrl: string;
+
+    constructor(baseDocUrl: string) {
+        this.baseDocUrl = baseDocUrl;
+    }
+
     /**
      * Get the Id for the diagnostic producer.
      */
-    getId(): string;
+    abstract getId(): string;
+
+    /**
+     * Flag to validator if this producer has documentation md file, default to have doc.
+     */
+    hasDocumentation(): boolean {
+        return true;
+    }
+
+    /**
+     * Get the doc url about the diagnostic produced by this producer.
+     */
+    getDocUrl(): string | undefined {
+        return this.hasDocumentation()
+            ? `${this.baseDocUrl}/${this.getId()}.md`
+            : undefined;
+    }
 
     /**
      * Validate the parsed text document as astNode and return a list of diagnostics.
@@ -20,7 +42,7 @@ export interface DiagnosticProducer<T> {
      * @param data usually parsed document body.
      * @returns An array of diagnostics found within ast node.
      */
-    validateDocument(
+    abstract validateDocument(
         textDocument: TextDocument,
         data: T
     ): Promise<Diagnostic[]>;

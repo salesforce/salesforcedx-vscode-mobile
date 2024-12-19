@@ -22,7 +22,15 @@ export class ValidatorManager {
     // Store all available validators
     private validators: BaseValidator<SupportedType>[] = [];
 
-    private constructor() {}
+    // The source value for diagnostic.
+    private source: string;
+
+    /**
+     * @param source The diagnostic source.
+     */
+    private constructor(source: string) {
+        this.source = source;
+    }
 
     /**
      * Adds a validator to the manager’s collection.
@@ -99,8 +107,11 @@ export class ValidatorManager {
                 return [];
             })
         );
-
-        return sectionDiagnostics.flat();
+        const result = sectionDiagnostics.flat();
+        result.forEach((diagnostic) => {
+            diagnostic.source = this.source;
+        });
+        return result;
     }
 
     /**
@@ -135,19 +146,22 @@ export class ValidatorManager {
      * with relevant diagnostic producers.
      * @returns ValidatorManager instance
      */
-    public static createInstance(): ValidatorManager {
-        const validatorManager = new ValidatorManager();
+    public static createInstance(
+        source: string,
+        baseDocUrl: string
+    ): ValidatorManager {
+        const validatorManager = new ValidatorManager(source);
         // Populate GraphQLValidator
         const gqlValidator = new GraphQLValidator();
-        gqlValidator.addProducer(new OversizedRecord());
+        gqlValidator.addProducer(new OversizedRecord(baseDocUrl));
         validatorManager.addValidator(gqlValidator);
 
         const jsValidator = new JSValidator();
-        jsValidator.addProducer(new AdaptersLocalChangeNotAware());
+        jsValidator.addProducer(new AdaptersLocalChangeNotAware(baseDocUrl));
         validatorManager.addValidator(jsValidator);
 
         const htmlValidator = new HTMLValidator();
-        htmlValidator.addProducer(new MobileOfflineFriendly());
+        htmlValidator.addProducer(new MobileOfflineFriendly(baseDocUrl));
         validatorManager.addValidator(htmlValidator);
 
         return validatorManager;

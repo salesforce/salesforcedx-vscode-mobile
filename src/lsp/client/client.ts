@@ -7,6 +7,7 @@
 
 import * as path from 'path';
 import { workspace, ExtensionContext } from 'vscode';
+import { version, repository } from '../../../package.json';
 
 import {
     LanguageClient,
@@ -22,6 +23,12 @@ export function activate(
     updateDiagnosticsSettingCommand: string,
     diagnosticsSettingSection: string
 ) {
+    // Get extension name
+    const extensionTitle =
+        context.extension.packageJSON.contributes.configuration.title;
+
+    const diagnosticBaseRootUrl = `${repository.url}/blob/v${version}/src/lsp/docs`;
+
     // The server is implemented in node
     const serverModule = context.asAbsolutePath(
         path.join('out', 'src', 'lsp', 'server', 'server.js')
@@ -54,7 +61,9 @@ export function activate(
         },
         initializationOptions: {
             updateDiagnosticsSettingCommand,
-            diagnosticsSettingSection
+            diagnosticsSettingSection,
+            extensionTitle,
+            diagnosticBaseRootUrl
         }
     };
 

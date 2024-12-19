@@ -13,10 +13,11 @@ import {
     MobileOfflineFriendly,
     RULE_ID
 } from '../../../../../src/lsp/server/diagnostics/html/mobileOfflineFriendly';
+import { repository } from '../../../../../package.json';
 
 suite('Diagnostics Test Suite - Server - HTML Validator', () => {
     const htmlValidator: HTMLValidator = new HTMLValidator();
-    htmlValidator.addProducer(new MobileOfflineFriendly());
+    htmlValidator.addProducer(new MobileOfflineFriendly(repository.url));
 
     test('Correct number of non-friendly mobile offline base components is determined', async () => {
         const textDocument = TextDocument.create(
