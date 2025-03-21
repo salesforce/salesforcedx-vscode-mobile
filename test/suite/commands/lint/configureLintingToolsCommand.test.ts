@@ -58,7 +58,7 @@ suite('Configure Linting Tools Command Test Suite', () => {
         assert.equal(result, false);
         // Assert telemetry
         assert.equal(sendExceptionStub.callCount, 1);
-        assert.equal(sendCommandEventStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Configure linting cancelled because package.json does not exist', async () => {
@@ -73,7 +73,7 @@ suite('Configure Linting Tools Command Test Suite', () => {
         assert.equal(result, false);
         // Assert telemetry
         assert.equal(sendExceptionStub.callCount, 1);
-        assert.equal(sendCommandEventStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Configure linting cancelled by the user', async () => {
@@ -90,8 +90,8 @@ suite('Configure Linting Tools Command Test Suite', () => {
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, false);
         // Assert telemetry
-        assert.equal(sendExceptionStub.callCount, 1);
-        assert.equal(sendCommandEventStub.callCount, 0);
+        assert.equal(sendExceptionStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Configure linting cancelled because updating pacakge.json failed', async () => {
@@ -114,7 +114,7 @@ suite('Configure Linting Tools Command Test Suite', () => {
         assert.equal(result, false);
         // Assert telemetry
         assert.equal(sendExceptionStub.callCount, 1);
-        assert.equal(sendCommandEventStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Configure linting cancelled because updating .eslintrc.json failed', async () => {
@@ -140,7 +140,7 @@ suite('Configure Linting Tools Command Test Suite', () => {
         assert.equal(result, false);
         // Assert telemetry
         assert.equal(sendExceptionStub.callCount, 1);
-        assert.equal(sendCommandEventStub.callCount, 0);        
+        assert.equal(sendCommandEventStub.callCount, 1);        
     });
 
     test('Configure linting did not update package.json because plugin was already included in the dev dependency', async () => {
@@ -165,8 +165,8 @@ suite('Configure Linting Tools Command Test Suite', () => {
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, true);
         // Assert telemetry
-        assert.equal(sendExceptionStub.callCount, 1);
-        assert.equal(sendCommandEventStub.callCount, 0);            
+        assert.equal(sendExceptionStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 2);            
     });
 
     test('Configure linting updated package.json successfully', async () => {
@@ -204,8 +204,8 @@ suite('Configure Linting Tools Command Test Suite', () => {
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, true);
         // Assert telemetry
-        assert.equal(sendExceptionStub.callCount, 1);
-        assert.equal(sendCommandEventStub.callCount, 0);   
+        assert.equal(sendExceptionStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 3);   
 
         const content = WorkspaceUtils.getPackageJson();
         const updatedPackageJson = {

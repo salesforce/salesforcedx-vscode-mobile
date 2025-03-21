@@ -12,16 +12,18 @@ import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import { JSON_INDENTATION_SPACES } from '../../utils/constants';
 import { CoreExtensionService } from '../../services/CoreExtensionService';
 
-const commandName =
-    'salesforcedx-vscode-offline-app.configure-linting-tools';
+const commandName = 'salesforcedx-vscode-offline-app.configure-linting-tools';
 
 enum MetricEvents {
-    LWC_FOLDER_DOES_NOT_EXIST = "lwc-folder-does-not-exist",
-    PACKAGE_JSON_DOES_NOT_EXIST = "package-json-does-not-exist",
-    ERROR_UPDATING_PACKAGE_JSON = "error_updating_package_json",
-
-
-    
+    CONFIGURE_LINTING_TOOLS_COMMAND_STARTED = 'configure-linting-tools-command-started',
+    UPDATED_PACKAGE_JSON = 'updated-package-json',
+    UPDATED_ESLINTRC_JSON = 'updated-eslintrc-json',
+    ALREADY_CONFIGURED = 'already-configured',
+    LWC_FOLDER_DOES_NOT_EXIST = 'lwc-folder-does-not-exist',
+    PACKAGE_JSON_DOES_NOT_EXIST = 'package-json-does-not-exist',
+    ERROR_UPDATING_PACKAGE_JSON = 'error-updating-package-json',
+    ERROR_UPDATING_ESLINTRC_JSON = 'error-updating-eslintrc-json',
+    GENERAL_ERROR = 'general-error'
 }
 
 const config = workspace.getConfiguration();
@@ -78,23 +80,26 @@ export class ConfigureLintingToolsCommand {
     static async configure(): Promise<boolean> {
         const telemetryService = CoreExtensionService.getTelemetryService();
         
+        // Send marker to record that the command got executed.
+        telemetryService.sendCommandEvent(commandName, process.hrtime(), { "metricEvents": MetricEvents.CONFIGURE_LINTING_TOOLS_COMMAND_STARTED });
+
         try {
             if (!WorkspaceUtils.lwcFolderExists()) {
-                const eventName = `${commandName}.${MetricEvents.LWC_FOLDER_DOES_NOT_EXIST}`;
-                const message = l10n.t(eventName);
+                const event = `${commandName}.${MetricEvents.LWC_FOLDER_DOES_NOT_EXIST}`;
+                const message = l10n.t(event);
 
                 await this.showMessage(message);
-                telemetryService.sendException(eventName, message);
+                telemetryService.sendException(event, message);
 
                 return false;
             }
 
             if (!WorkspaceUtils.packageJsonExists()) {
-                const eventName = `${commandName}.${MetricEvents.PACKAGE_JSON_DOES_NOT_EXIST}`;
-                const message = l10n.t(eventName);
+                const event = `${commandName}.${MetricEvents.PACKAGE_JSON_DOES_NOT_EXIST}`;
+                const message = l10n.t(event);
 
                 await this.showMessage(message);
-                telemetryService.sendException(eventName,message);
+                telemetryService.sendException(event, message);
 
                 return false;
             }
@@ -112,12 +117,12 @@ export class ConfigureLintingToolsCommand {
                 try {
                     modifiedDevDependencies = this.updateDevDependencies();
                 } catch (error) {
-                    const eventName = `${commandName}.${MetricEvents.ERROR_UPDATING_PACKAGE_JSON}`;
-                    const message = l10n.t(eventName, error as Error)
+                    const event = `${commandName}.${MetricEvents.ERROR_UPDATING_PACKAGE_JSON}`;
+                    const message = l10n.t(event, error as Error);
 
                     await this.showMessage(message);
-                    telemetryService.sendException(eventName,message);
-                    
+                    telemetryService.sendException(event, message);
+
                     return false;
                 }
 
@@ -125,57 +130,53 @@ export class ConfigureLintingToolsCommand {
                 try {
                     modifiedEslintrc = this.updateEslintrc();
                 } catch (error) {
-                    const message = l10n.t("extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.error-updating-eslintrc-json", error as Error);
+                    const event = `${commandName}.${MetricEvents.ERROR_UPDATING_ESLINTRC_JSON}`;
+                    const message = l10n.t(event, error as Error);
+
                     await this.showMessage(message);
-                    telemetryService.sendException(
-                        commandName + '.error-updating-eslintrc-json',
-                        message
-                    );
+                    telemetryService.sendException(event, message);
+
                     return false;
                 }
 
                 if (modifiedDevDependencies) {
+                    telemetryService.sendCommandEvent(commandName, process.hrtime(), { "metricEvents": MetricEvents.UPDATED_PACKAGE_JSON });
                     this.showMessage(
-                        l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.updated-package-json'),
+                        l10n.t(`${commandName}.${MetricEvents.UPDATED_PACKAGE_JSON}`),
                         MessageType.InformationOk
                     );
                 }
 
                 if (modifiedEslintrc) {
+                    telemetryService.sendCommandEvent(commandName, process.hrtime(), { "metricEvents": MetricEvents.UPDATED_ESLINTRC_JSON });
                     this.showMessage(
-                        l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.updated-eslintrc-json'),
+                        l10n.t(`${commandName}.${MetricEvents.UPDATED_ESLINTRC_JSON}`),
                         MessageType.InformationOk
                     );
                 }
 
                 if (modifiedDevDependencies || modifiedEslintrc) {
                     this.showMessage(
-                        l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.run-install-command'),
+                        l10n.t(`${commandName}.run-install-command`),
                         MessageType.InformationOk
                     );
                 }
 
                 if (!modifiedDevDependencies && !modifiedEslintrc) {
-                    const message = l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.already-configured');
-                    this.showMessage(
-                        message,
-                        MessageType.InformationOk
-                    );
-                    // telemetryService.sendCommandEvent(
-                    //     commandName + '.success-message',
-                    //     message
-                    // );
+                    telemetryService.sendCommandEvent(commandName, process.hrtime(), { "metricEvents": MetricEvents.ALREADY_CONFIGURED });
+                    const message = l10n.t(`${commandName}.${MetricEvents.ALREADY_CONFIGURED}`);
+                    this.showMessage(message, MessageType.InformationOk);
                 }
 
                 return true;
             }
         } catch (error) {
-            const message = l10n.t('extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.general-error-message', error as Error);
+            const event = `${commandName}.${MetricEvents.GENERAL_ERROR}`;
+            const message = l10n.t(event, error as Error);
+
             await this.showMessage(message);
-            telemetryService.sendException(
-                commandName + '.general-error-message',
-                message
-            );
+            telemetryService.sendException(event, message);
+
             return false;
         }
     }
@@ -283,7 +284,7 @@ export class ConfigureLintingToolsCommand {
 
 export function registerCommand(context: ExtensionContext) {
     const disposable = commands.registerCommand(
-        configureLintingToolsCommand,
+        commandName,
         async () => {
             await ConfigureLintingToolsCommand.configure();
         }

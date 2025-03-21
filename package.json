@@ -35,7 +35,7 @@
     "extensionDependencies": [
         "salesforce.salesforcedx-vscode-core"
     ],
-    "main": "out/src/extension.js",
+    "main": "out/extension.js",
     "l10n": "./l10n",
     "contributes": {
         "menus": {
@@ -118,10 +118,10 @@
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "test-coverage": "node ./out/test/runTest.js --coverage",
-        "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
-        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\"",
-        "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out/src --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
-        "vscode:prepublish": "npm run clean && npm run compile && npm run bundle:extension"
+        "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
+        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
+        "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --external:mobile-lsp-client --external:mobile-lsp-server --minify --sourcemap",
+        "vscode:prepublish": "npm run clean && npm run bundle:extension"
     },
     "devDependencies": {
         "@babel/cli": "^7.25.9",

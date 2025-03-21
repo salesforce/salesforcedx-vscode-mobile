@@ -19,5 +19,5 @@
     "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.updated-eslintrc-json": "Updated .eslintrc.json to include recommended linting rules.",
     "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.run-install-command": "In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, \"npm install\" or \"yarn install\".",
     "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.already-configured": "All offline linting packages and dependencies are already configured in your project. No update has been made to package.json.",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.general-error-message": "There was an error trying to update either the offline linting dependencies or linting configuration: {0}",    
+    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.general-error": "There was an error trying to update either the offline linting dependencies or linting configuration: {0}",    
 }
