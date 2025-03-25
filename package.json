@@ -35,30 +35,14 @@
     "extensionDependencies": [
         "salesforce.salesforcedx-vscode-core"
     ],
-    "main": "out/extension.js",
+    "main": "out/src/extension.js",
     "l10n": "./l10n",
     "contributes": {
         "menus": {
-            "editor/context": [
-                {
-                  "command": "salesforcedx-vscode-offline-app.live-komaci-analysis",
-                  "when": "sf:project_opened && resourceLangId != 'forcesourcemanifest' && sf:has_target_org && resourcePath =~ /lwc/ && resource =~ /.\\.(js|ts||css|html)?$/"
-                }
-              ],
-              "explorer/context": [
-                {
-                  "command": "salesforcedx-vscode-offline-app.live-komaci-analysis",
-                  "when": "sf:project_opened && resourceLangId != 'forcesourcemanifest' && sf:has_target_org && resourcePath =~ /lwc/ && resource =~ /.\\.(js|ts||css|html)?$/"
-                }
-              ],
             "commandPalette": [
                 {
                     "command": "salesforcedx-vscode-offline-app.configure-linting-tools",
                     "when": "sfdx_project_opened"
-                },
-                {
-                    "command": "salesforcedx-vscode-offline-app.live-komaci-analysis",
-                    "when": "sf:project_opened && resourceLangId != 'forcesourcemanifest' && sf:has_target_org && resourcePath =~ /lwc/ && resource =~ /.\\.(js|ts||css|html)?$/"
                 }
             ]
         },
@@ -72,10 +56,6 @@
                 "command": "salesforcedx-vscode-offline-app.configure-linting-tools",
                 "title": "%extension.commands.config-linting-tools.title%",
                 "category": "%extension.commands.salesforce-mobile-offline.category%"
-            },
-            {
-                "command": "salesforcedx-vscode-offline-app.live-komaci-analysis",
-                "title": "%extension.commands.salesforce-mobile-offline.tooling-hub.live-komaci-analysis%"
             }
         ],
         "configuration": {
@@ -118,10 +98,10 @@
         "lint": "eslint src --ext ts",
         "test": "node ./out/test/runTest.js",
         "test-coverage": "node ./out/test/runTest.js --coverage",
-        "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
+        "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"src/lsp/server/**/*.{ts, js}\" \"src/lsp/client/**/*.{ts, js}\"",
         "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
-        "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --external:mobile-lsp-client --external:mobile-lsp-server --minify --sourcemap",
-        "vscode:prepublish": "npm run clean && npm run bundle:extension"
+        "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out/src --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
+        "vscode:prepublish": "npm run clean && npm run compile && npm run bundle:extension"
     },
     "devDependencies": {
         "@babel/cli": "^7.25.9",

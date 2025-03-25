@@ -79,14 +79,17 @@ enum MessageType {
 export class ConfigureLintingToolsCommand {
     static async configure(): Promise<boolean> {
         const telemetryService = CoreExtensionService.getTelemetryService();
-        
+
         // Send marker to record that the command got executed.
-        telemetryService.sendCommandEvent(commandName, process.hrtime(), { "metricEvents": MetricEvents.CONFIGURE_LINTING_TOOLS_COMMAND_STARTED });
+        telemetryService.sendCommandEvent(commandName, process.hrtime(), {
+            metricEvents: MetricEvents.CONFIGURE_LINTING_TOOLS_COMMAND_STARTED
+        });
 
         try {
             if (!WorkspaceUtils.lwcFolderExists()) {
                 const event = `${commandName}.${MetricEvents.LWC_FOLDER_DOES_NOT_EXIST}`;
-                const message = l10n.t(event);
+                const message =
+                    'The "force-app/main/default/lwc" folder does not exist in your project. This folder is required to create a configuration file for ESLint.';
 
                 await this.showMessage(message);
                 telemetryService.sendException(event, message);
@@ -96,7 +99,8 @@ export class ConfigureLintingToolsCommand {
 
             if (!WorkspaceUtils.packageJsonExists()) {
                 const event = `${commandName}.${MetricEvents.PACKAGE_JSON_DOES_NOT_EXIST}`;
-                const message = l10n.t(event);
+                const message =
+                    'Your project does not contain a "package.json" specification. You must have a package specification to configure these ESLint packages and their dependencies in your project.';
 
                 await this.showMessage(message);
                 telemetryService.sendException(event, message);
@@ -106,7 +110,7 @@ export class ConfigureLintingToolsCommand {
 
             // Ask user to add eslint plugin
             const result = await this.showMessage(
-                l10n.t(`${commandName}.add-linting-guidance`),
+                'Do you want to add Salesforce code linting guidance for Mobile and Offline capabilities? These tools will identify code patterns that cause problems in Mobile and Offline use cases.',
                 MessageType.InformationYesNo
             );
 
@@ -118,7 +122,7 @@ export class ConfigureLintingToolsCommand {
                     modifiedDevDependencies = this.updateDevDependencies();
                 } catch (error) {
                     const event = `${commandName}.${MetricEvents.ERROR_UPDATING_PACKAGE_JSON}`;
-                    const message = l10n.t(event, error as Error);
+                    const message = `Error updating package.json: ${error}`;
 
                     await this.showMessage(message);
                     telemetryService.sendException(event, message);
@@ -131,7 +135,7 @@ export class ConfigureLintingToolsCommand {
                     modifiedEslintrc = this.updateEslintrc();
                 } catch (error) {
                     const event = `${commandName}.${MetricEvents.ERROR_UPDATING_ESLINTRC_JSON}`;
-                    const message = l10n.t(event, error as Error);
+                    const message = `Error updating .eslintrc.json: ${error}`;
 
                     await this.showMessage(message);
                     telemetryService.sendException(event, message);
@@ -140,39 +144,53 @@ export class ConfigureLintingToolsCommand {
                 }
 
                 if (modifiedDevDependencies) {
-                    telemetryService.sendCommandEvent(commandName, process.hrtime(), { "metricEvents": MetricEvents.UPDATED_PACKAGE_JSON });
+                    telemetryService.sendCommandEvent(
+                        commandName,
+                        process.hrtime(),
+                        { metricEvents: MetricEvents.UPDATED_PACKAGE_JSON }
+                    );
                     this.showMessage(
-                        l10n.t(`${commandName}.${MetricEvents.UPDATED_PACKAGE_JSON}`),
+                        `Updated package.json to include offline linting packages and dependencies.`,
                         MessageType.InformationOk
                     );
                 }
 
                 if (modifiedEslintrc) {
-                    telemetryService.sendCommandEvent(commandName, process.hrtime(), { "metricEvents": MetricEvents.UPDATED_ESLINTRC_JSON });
+                    telemetryService.sendCommandEvent(
+                        commandName,
+                        process.hrtime(),
+                        { metricEvents: MetricEvents.UPDATED_ESLINTRC_JSON }
+                    );
                     this.showMessage(
-                        l10n.t(`${commandName}.${MetricEvents.UPDATED_ESLINTRC_JSON}`),
+                        `Updated .eslintrc.json to include recommended linting rules.`,
                         MessageType.InformationOk
                     );
                 }
 
                 if (modifiedDevDependencies || modifiedEslintrc) {
                     this.showMessage(
-                        l10n.t(`${commandName}.run-install-command`),
+                        `In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, "npm install" or "yarn install".`,
                         MessageType.InformationOk
                     );
                 }
 
                 if (!modifiedDevDependencies && !modifiedEslintrc) {
-                    telemetryService.sendCommandEvent(commandName, process.hrtime(), { "metricEvents": MetricEvents.ALREADY_CONFIGURED });
-                    const message = l10n.t(`${commandName}.${MetricEvents.ALREADY_CONFIGURED}`);
-                    this.showMessage(message, MessageType.InformationOk);
+                    telemetryService.sendCommandEvent(
+                        commandName,
+                        process.hrtime(),
+                        { metricEvents: MetricEvents.ALREADY_CONFIGURED }
+                    );
+                    this.showMessage(
+                        `All offline linting packages and dependencies are already configured in your project. No update has been made to package.json.`,
+                        MessageType.InformationOk
+                    );
                 }
 
                 return true;
             }
         } catch (error) {
             const event = `${commandName}.${MetricEvents.GENERAL_ERROR}`;
-            const message = l10n.t(event, error as Error);
+            const message = `There was an error trying to update either the offline linting dependencies or linting configuration: ${error}`;
 
             await this.showMessage(message);
             telemetryService.sendException(event, message);
@@ -283,11 +301,8 @@ export class ConfigureLintingToolsCommand {
 }
 
 export function registerCommand(context: ExtensionContext) {
-    const disposable = commands.registerCommand(
-        commandName,
-        async () => {
-            await ConfigureLintingToolsCommand.configure();
-        }
-    );
+    const disposable = commands.registerCommand(commandName, async () => {
+        await ConfigureLintingToolsCommand.configure();
+    });
     context.subscriptions.push(disposable);
 }

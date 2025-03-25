@@ -8,15 +8,5 @@
     "extension.commands.salesforce-mobile-offline.eslint.version": "Version of ESLint to include in devDependencies",
     "salesforce.mobile.extensions": "Salesforce Mobile Extensions",
     "extension.displayName": "Salesforce Mobile Extensions for Visual Studio Code",
-    "extension.description": "Tools to help developers create their Salesforce Mobile experiences in a VSCode development environment.",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.lwc-folder-does-not-exist": "The \"force-app/main/default/lwc\" folder does not exist in your project. This folder is required to create a configuration file for ESLint.",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.package-json-does-not-exist": "Your project does not contain a \"package.json\" specification. You must have a package specification to configure these ESLint packages and their dependencies in your project.",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.add-linting-guidance": "Do you want to add Salesforce code linting guidance for Mobile and Offline capabilities? These tools will identify code patterns that cause problems in Mobile and Offline use cases.",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.error-updating-package-json": "Error updating package.json: {0}",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.error-updating-eslintrc-json": "Error updating .eslintrc.json: {0}",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.updated-package-json": "Updated package.json to include offline linting packages and dependencies.",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.updated-eslintrc-json": "Updated .eslintrc.json to include recommended linting rules.",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.run-install-command": "In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, \"npm install\" or \"yarn install\".",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.already-configured": "All offline linting packages and dependencies are already configured in your project. No update has been made to package.json.",
-    "extension.commands.salesforcedx-vscode-offline-app.configure-linting-tools.general-error": "There was an error trying to update either the offline linting dependencies or linting configuration: {0}"
+    "extension.description": "Tools to help developers create their Salesforce Mobile experiences in a VSCode development environment."
 }
