@@ -17,32 +17,71 @@ import {
     TempProjectDirManager,
     setupTempWorkspaceDirectoryStub
 } from '../../../TestHelper';
+import { Connection } from '@salesforce/core';
+import { CoreExtensionService } from '../../../../src/services';
 
 suite('Configure Linting Tools Command Test Suite', () => {
+    
+    function stubTelemetryService(
+        sendExceptionStub: any,
+        sendCommandEventStub: any
+    ) {
+        const getTelemetryServiceInstance = {
+            extensionName: 'mockExtensionName',
+            isTelemetryEnabled: sinon.stub(),
+            getInstance: sinon.stub(),
+            getReporters: sinon.stub(),
+            initializeService: sinon.stub(),
+            sendExtensionActivationEvent: sinon.stub(),
+            sendExtensionDeactivationEvent: sinon.stub(),
+            sendCommandEvent: sendCommandEventStub,
+            sendException: sendExceptionStub,
+            dispose: sinon.stub()
+        };
+        sinon
+            .stub(CoreExtensionService, 'getTelemetryService')
+            .returns(getTelemetryServiceInstance);
+    }
+
     afterEach(function () {
         sinon.restore();
     });
 
     test('Configure linting cancelled because LWC folder does not exist', async () => {
         sinon.stub(WorkspaceUtils, 'lwcFolderExists').returns(false);
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         const showErrorMessageStub = sinon.stub(window, 'showErrorMessage');
         showErrorMessageStub.onCall(0).resolves({ title: 'OK' });
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, false);
+        // Assert telemetry
+        assert.equal(sendExceptionStub.callCount, 1);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Configure linting cancelled because package.json does not exist', async () => {
         sinon.stub(WorkspaceUtils, 'lwcFolderExists').returns(true);
         sinon.stub(WorkspaceUtils, 'packageJsonExists').returns(false);
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         const showErrorMessageStub = sinon.stub(window, 'showErrorMessage');
         showErrorMessageStub.onCall(0).resolves({ title: 'OK' });
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, false);
+        // Assert telemetry
+        assert.equal(sendExceptionStub.callCount, 1);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Configure linting cancelled by the user', async () => {
         sinon.stub(WorkspaceUtils, 'lwcFolderExists').returns(true);
         sinon.stub(WorkspaceUtils, 'packageJsonExists').returns(true);
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         const showInformationMessageStub = sinon.stub(
             window,
             'showInformationMessage'
@@ -50,11 +89,17 @@ suite('Configure Linting Tools Command Test Suite', () => {
         showInformationMessageStub.onCall(0).resolves({ title: 'No' });
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, false);
+        // Assert telemetry
+        assert.equal(sendExceptionStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Configure linting cancelled because updating pacakge.json failed', async () => {
         sinon.stub(WorkspaceUtils, 'lwcFolderExists').returns(true);
         sinon.stub(WorkspaceUtils, 'packageJsonExists').returns(true);
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         const showInformationMessageStub = sinon.stub(
             window,
             'showInformationMessage'
@@ -67,11 +112,17 @@ suite('Configure Linting Tools Command Test Suite', () => {
         showErrorMessageStub.onCall(0).resolves({ title: 'OK' });
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, false);
+        // Assert telemetry
+        assert.equal(sendExceptionStub.callCount, 1);
+        assert.equal(sendCommandEventStub.callCount, 1);
     });
 
     test('Configure linting cancelled because updating .eslintrc.json failed', async () => {
         sinon.stub(WorkspaceUtils, 'lwcFolderExists').returns(true);
         sinon.stub(WorkspaceUtils, 'packageJsonExists').returns(true);
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         const showInformationMessageStub = sinon.stub(
             window,
             'showInformationMessage'
@@ -87,11 +138,17 @@ suite('Configure Linting Tools Command Test Suite', () => {
         showErrorMessageStub.onCall(0).resolves({ title: 'OK' });
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, false);
+        // Assert telemetry
+        assert.equal(sendExceptionStub.callCount, 1);
+        assert.equal(sendCommandEventStub.callCount, 1);        
     });
 
     test('Configure linting did not update package.json because plugin was already included in the dev dependency', async () => {
         sinon.stub(WorkspaceUtils, 'lwcFolderExists').returns(true);
         sinon.stub(WorkspaceUtils, 'packageJsonExists').returns(true);
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         let showInformationMessageStub = sinon.stub(
             window,
             'showInformationMessage'
@@ -107,6 +164,9 @@ suite('Configure Linting Tools Command Test Suite', () => {
         showInformationMessageStub.onCall(0).resolves({ title: 'OK' });
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, true);
+        // Assert telemetry
+        assert.equal(sendExceptionStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 2);            
     });
 
     test('Configure linting updated package.json successfully', async () => {
@@ -119,7 +179,9 @@ suite('Configure Linting Tools Command Test Suite', () => {
         );
         const packageJson = { devDependencies: { lwc: '1.2.3' } };
         WorkspaceUtils.setPackageJson(packageJson);
-
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
         sinon.stub(WorkspaceUtils, 'lwcFolderExists').returns(true);
         let showInformationMessageStub = sinon.stub(
             window,
@@ -141,6 +203,9 @@ suite('Configure Linting Tools Command Test Suite', () => {
 
         const result = await ConfigureLintingToolsCommand.configure();
         assert.equal(result, true);
+        // Assert telemetry
+        assert.equal(sendExceptionStub.callCount, 0);
+        assert.equal(sendCommandEventStub.callCount, 3);   
 
         const content = WorkspaceUtils.getPackageJson();
         const updatedPackageJson = {

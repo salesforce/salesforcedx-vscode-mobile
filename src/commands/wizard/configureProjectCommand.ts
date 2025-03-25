@@ -9,6 +9,8 @@ import { Uri, WebviewPanel, commands, l10n, window } from 'vscode';
 import * as process from 'process';
 import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
+import { wizardCommand } from './onboardingWizard';
+import { CoreExtensionService } from '../../services/CoreExtensionService';
 
 export type ProjectManagementChoiceAction = (panel?: WebviewPanel) => void;
 
@@ -162,6 +164,11 @@ export class ConfigureProjectCommand {
     }
 
     async configureProject(): Promise<string | undefined> {
+        const telemetryService = CoreExtensionService.getTelemetryService();
+
+        // Send marker to record that the command got executed.
+        telemetryService.sendCommandEvent(wizardCommand, process.hrtime());
+
         return new Promise((resolve) => {
             this.projectConfigurationProcessor.getProjectManagementChoice(
                 async (panel) => {
