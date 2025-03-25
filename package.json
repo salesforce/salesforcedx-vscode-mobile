@@ -99,7 +99,7 @@
         "test": "node ./out/test/runTest.js",
         "test-coverage": "node ./out/test/runTest.js --coverage",
         "prettier:write": "prettier --write \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"src/lsp/server/**/*.{ts, js}\" \"src/lsp/client/**/*.{ts, js}\"",
-        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"lsp/server/src/**/*.{ts, js}\" \"lsp/client/src/**/*.{ts, js}\"",
+        "prettier:verify": "prettier --list-different \"src/**/*.{ts, js}\" \"resources/instructions/**/*.html\" \"src/lsp/server/**/*.{ts, js}\" \"src/lsp/client/**/*.{ts, js}\"",
         "bundle:extension": "esbuild ./src/extension.ts --bundle --outdir=out/src --format=cjs --target=es2020 --platform=node --external:vscode --external:@salesforce/core --external:@oclif/core --external:@salesforce/lwc-dev-mobile-core --minify --sourcemap",
         "vscode:prepublish": "npm run clean && npm run compile && npm run bundle:extension"
     },
