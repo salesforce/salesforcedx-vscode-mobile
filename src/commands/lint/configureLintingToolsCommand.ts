@@ -10,9 +10,21 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import { JSON_INDENTATION_SPACES } from '../../utils/constants';
+import { CoreExtensionService } from '../../services/CoreExtensionService';
 
-const configureLintingToolsCommand =
-    'salesforcedx-vscode-offline-app.configureLintingTools';
+const commandName = 'salesforcedx-vscode-offline-app.configure-linting-tools';
+
+enum MetricEvents {
+    CONFIGURE_LINTING_TOOLS_COMMAND_STARTED = 'configure-linting-tools-command-started',
+    UPDATED_PACKAGE_JSON = 'updated-package-json',
+    UPDATED_ESLINTRC_JSON = 'updated-eslintrc-json',
+    ALREADY_CONFIGURED = 'already-configured',
+    LWC_FOLDER_DOES_NOT_EXIST = 'lwc-folder-does-not-exist',
+    PACKAGE_JSON_DOES_NOT_EXIST = 'package-json-does-not-exist',
+    ERROR_UPDATING_PACKAGE_JSON = 'error-updating-package-json',
+    ERROR_UPDATING_ESLINTRC_JSON = 'error-updating-eslintrc-json',
+    GENERAL_ERROR = 'general-error'
+}
 
 const config = workspace.getConfiguration();
 
@@ -66,19 +78,34 @@ enum MessageType {
 
 export class ConfigureLintingToolsCommand {
     static async configure(): Promise<boolean> {
+        const telemetryService = CoreExtensionService.getTelemetryService();
+
+        // Send marker to record that the command got executed.
+        telemetryService.sendCommandEvent(commandName, process.hrtime(), {
+            metricEvents: MetricEvents.CONFIGURE_LINTING_TOOLS_COMMAND_STARTED
+        });
+
         try {
             if (!WorkspaceUtils.lwcFolderExists()) {
-                await this.showMessage(
-                    'The "force-app/main/default/lwc" folder does not exist in your project. This folder is required to create a configuration file for ESLint.'
-                );
-                return Promise.resolve(false);
+                const event = `${commandName}.${MetricEvents.LWC_FOLDER_DOES_NOT_EXIST}`;
+                const message =
+                    'The "force-app/main/default/lwc" folder does not exist in your project. This folder is required to create a configuration file for ESLint.';
+
+                await this.showMessage(message);
+                telemetryService.sendException(event, message);
+
+                return false;
             }
 
             if (!WorkspaceUtils.packageJsonExists()) {
-                await this.showMessage(
-                    'Your project does not contain a "package.json" specification. You must have a package specification to configure these ESLint packages and their dependencies in your project.'
-                );
-                return Promise.resolve(false);
+                const event = `${commandName}.${MetricEvents.PACKAGE_JSON_DOES_NOT_EXIST}`;
+                const message =
+                    'Your project does not contain a "package.json" specification. You must have a package specification to configure these ESLint packages and their dependencies in your project.';
+
+                await this.showMessage(message);
+                telemetryService.sendException(event, message);
+
+                return false;
             }
 
             // Ask user to add eslint plugin
@@ -88,29 +115,40 @@ export class ConfigureLintingToolsCommand {
             );
 
             if (!result || result.title === l10n.t('No')) {
-                return Promise.resolve(false);
+                return false;
             } else {
                 let modifiedDevDependencies = false;
                 try {
                     modifiedDevDependencies = this.updateDevDependencies();
                 } catch (error) {
-                    await this.showMessage(
-                        `Error updating package.json: ${error}`
-                    );
-                    return Promise.resolve(false);
+                    const event = `${commandName}.${MetricEvents.ERROR_UPDATING_PACKAGE_JSON}`;
+                    const message = `Error updating package.json: ${error}`;
+
+                    await this.showMessage(message);
+                    telemetryService.sendException(event, message);
+
+                    return false;
                 }
 
                 let modifiedEslintrc = false;
                 try {
                     modifiedEslintrc = this.updateEslintrc();
                 } catch (error) {
-                    await this.showMessage(
-                        `Error updating .eslintrc.json: ${error}`
-                    );
-                    return Promise.resolve(false);
+                    const event = `${commandName}.${MetricEvents.ERROR_UPDATING_ESLINTRC_JSON}`;
+                    const message = `Error updating .eslintrc.json: ${error}`;
+
+                    await this.showMessage(message);
+                    telemetryService.sendException(event, message);
+
+                    return false;
                 }
 
                 if (modifiedDevDependencies) {
+                    telemetryService.sendCommandEvent(
+                        commandName,
+                        process.hrtime(),
+                        { metricEvents: MetricEvents.UPDATED_PACKAGE_JSON }
+                    );
                     this.showMessage(
                         `Updated package.json to include offline linting packages and dependencies.`,
                         MessageType.InformationOk
@@ -118,6 +156,11 @@ export class ConfigureLintingToolsCommand {
                 }
 
                 if (modifiedEslintrc) {
+                    telemetryService.sendCommandEvent(
+                        commandName,
+                        process.hrtime(),
+                        { metricEvents: MetricEvents.UPDATED_ESLINTRC_JSON }
+                    );
                     this.showMessage(
                         `Updated .eslintrc.json to include recommended linting rules.`,
                         MessageType.InformationOk
@@ -132,19 +175,27 @@ export class ConfigureLintingToolsCommand {
                 }
 
                 if (!modifiedDevDependencies && !modifiedEslintrc) {
+                    telemetryService.sendCommandEvent(
+                        commandName,
+                        process.hrtime(),
+                        { metricEvents: MetricEvents.ALREADY_CONFIGURED }
+                    );
                     this.showMessage(
                         `All offline linting packages and dependencies are already configured in your project. No update has been made to package.json.`,
                         MessageType.InformationOk
                     );
                 }
 
-                return Promise.resolve(true);
+                return true;
             }
         } catch (error) {
-            await this.showMessage(
-                `There was an error trying to update either the offline linting dependencies or linting configuration: ${error}`
-            );
-            return Promise.resolve(false);
+            const event = `${commandName}.${MetricEvents.GENERAL_ERROR}`;
+            const message = `There was an error trying to update either the offline linting dependencies or linting configuration: ${error}`;
+
+            await this.showMessage(message);
+            telemetryService.sendException(event, message);
+
+            return false;
         }
     }
 
@@ -250,11 +301,8 @@ export class ConfigureLintingToolsCommand {
 }
 
 export function registerCommand(context: ExtensionContext) {
-    const disposable = commands.registerCommand(
-        configureLintingToolsCommand,
-        async () => {
-            await ConfigureLintingToolsCommand.configure();
-        }
-    );
+    const disposable = commands.registerCommand(commandName, async () => {
+        await ConfigureLintingToolsCommand.configure();
+    });
     context.subscriptions.push(disposable);
 }

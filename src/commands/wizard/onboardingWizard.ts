@@ -14,7 +14,7 @@ import { AuthorizeCommand } from './authorizeCommand';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { LwcGenerationCommand } from './lwcGenerationCommand';
 
-const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
+export const wizardCommand = 'salesforcedx-vscode-offline-app.onboardingWizard';
 const onboardingWizardStateKey =
     'salesforcedx-vscode-offline-app.onboardingWizard.projectCreationState';
 
