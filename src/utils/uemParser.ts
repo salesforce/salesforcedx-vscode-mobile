@@ -5,8 +5,10 @@
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
 
+import { AnyJson } from '@salesforce/ts-types';
+
 export class UEMParser {
-    public static findSObjects(json: Object): Array<string> {
+    public static findSObjects(json: AnyJson): Array<string> {
         const sObjects = UEMParser.findObjectsWithKey(json, 'objectApiName');
 
         return sObjects;
