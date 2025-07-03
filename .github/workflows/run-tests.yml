@@ -9,8 +9,8 @@ jobs:
                 node: [20, 22]
         name: Tests with code coverage on Ubuntu with Node ${{ matrix.node }}
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node }}
             - run: |
@@ -22,7 +22,7 @@ jobs:
               shell: bash
             - run: killall Xvfb || true
             - name: Upload coverage to codecov
-              uses: codecov/codecov-action@v3
+              uses: codecov/codecov-action@v4
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
                   files: coverage/*.json
@@ -34,8 +34,8 @@ jobs:
                 node: [20, 22]
         name: Tests with code coverage on Windows with Node ${{ matrix.node }}
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node }}
             - run: |

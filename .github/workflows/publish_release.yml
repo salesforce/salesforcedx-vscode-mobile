@@ -13,10 +13,10 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Install Node.js
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: '20.x'
 
@@ -25,7 +25,7 @@ jobs:
 
             - name: Validate tag name
               id: validate_tag_name
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       let tagNameValue = "${{ github.event.inputs.release-tag-name }}";
@@ -49,7 +49,7 @@ jobs:
 
             - name: Get package name for tag
               id: get_package_name
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       const packageName = require('./package.json').name;
@@ -61,7 +61,7 @@ jobs:
 
             - name: Get release and associated VSIX asset
               id: get_release_and_asset
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       const releaseTagName = ${{ steps.validate_tag_name.outputs.result }};
@@ -88,7 +88,7 @@ jobs:
 
             - name: Download asset
               id: download_asset
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       const assetUrl = ${{ steps.get_release_and_asset.outputs.result }};
