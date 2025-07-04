@@ -10,7 +10,6 @@
 import * as Mocha from 'mocha';
 import * as path from 'path';
 import * as glob from 'glob';
-
 // @ts-ignore
 import * as baseConfig from '@istanbuljs/nyc-config-typescript';
 
@@ -53,65 +52,50 @@ export async function run(): Promise<void> {
 
     const testsRoot = path.resolve(__dirname, '..');
 
-    return new Promise((c, e) => {
+    return new Promise(async (c, e) => {
         const testDirs = [testsRoot];
-        Promise.all(
-            testDirs.map(
-                (dir) =>
-                    new Promise<FilePath[]>((resolveGlob, rejectGlob) => {
-                        glob(
-                            '**/**.test.js',
-                            { cwd: dir },
-                            async (err, files) => {
-                                if (err) {
-                                    return rejectGlob(err);
-                                }
-                                resolveGlob(
-                                    //Converts file name into FilePath
-                                    files.map((fileName) => {
-                                        return { directory: dir, fileName };
-                                    })
-                                );
-                            }
-                        );
-                    })
-            )
-        )
-            .then((testPathsArray) => {
-                const allTests = testPathsArray.flat();
-                allTests.forEach((testPath) => {
-                    mocha.addFile(
-                        path.resolve(testPath.directory, testPath.fileName)
-                    );
-                });
-                try {
-                    // Run the mocha test
-                    mocha.run(async (failures) => {
-                        if (failures > 0) {
-                            e(new Error(`${failures} tests failed.`));
-                        } else {
-                            if (process.env['CODE_COVERAGE'] === '1') {
-                                await nyc.writeCoverageFile();
-
-                                // nyc text report is output to process.stdout and using plain console.log
-                                // will not output to terminal. Overriding process.stdout to pipe the output
-                                // to console.log.
-                                console.log(
-                                    await pipeNycReport(nyc.report.bind(nyc))
-                                );
-                            }
-                            c();
-                        }
+        try {
+            const testPathsArray = await Promise.all(
+                testDirs.map(async (dir) => {
+                    const files: string[] = await glob.glob('**/**.test.js', { cwd: dir });
+                    return files.map((fileName: string) => {
+                        return { directory: dir, fileName };
                     });
-                } catch (err) {
-                    console.error(err);
-                    e(err);
-                }
-            })
-            .catch((err) => {
+                })
+            );
+            const allTests = testPathsArray.flat();
+            allTests.forEach((testPath) => {
+                mocha.addFile(
+                    path.resolve(testPath.directory, testPath.fileName)
+                );
+            });
+            try {
+                // Run the mocha test
+                mocha.run(async (failures) => {
+                    if (failures > 0) {
+                        e(new Error(`${failures} tests failed.`));
+                    } else {
+                        if (process.env['CODE_COVERAGE'] === '1') {
+                            await nyc.writeCoverageFile();
+
+                            // nyc text report is output to process.stdout and using plain console.log
+                            // will not output to terminal. Overriding process.stdout to pipe the output
+                            // to console.log.
+                            console.log(
+                                await pipeNycReport(nyc.report.bind(nyc))
+                            );
+                        }
+                        c();
+                    }
+                });
+            } catch (err) {
                 console.error(err);
                 e(err);
-            });
+            }
+        } catch (err) {
+            console.error(err);
+            e(err);
+        }
     });
 }
 
