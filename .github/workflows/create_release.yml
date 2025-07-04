@@ -9,10 +9,10 @@ jobs:
 
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
 
             - name: Install Node.js
-              uses: actions/setup-node@v3
+              uses: actions/setup-node@v4
               with:
                   node-version: '20.x'
 
@@ -24,7 +24,7 @@ jobs:
 
             - name: Create release
               id: create_release
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       const packageVersion = require('./package.json').version;
@@ -38,7 +38,7 @@ jobs:
                       return response.data.id;
 
             - name: Attach VSIX package to release
-              uses: actions/github-script@v6
+              uses: actions/github-script@v7
               with:
                   script: |
                       const fs = require('fs');
