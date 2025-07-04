@@ -9,8 +9,8 @@
         "node": ">=20"
     },
     "volta": {
-      "node": "20.18.0"
-    },    
+        "node": "20.18.0"
+    },
     "categories": [
         "Other"
     ],
@@ -107,11 +107,10 @@
         "@babel/cli": "^7.27.2",
         "@babel/core": "^7.26.0",
         "@babel/preset-env": "^7.27.2",
+        "@istanbuljs/nyc-config-typescript": "^1.0.2",
         "@types/babel__traverse": "7.20.7",
         "@types/babel-core": "6.25.10",
-        "@istanbuljs/nyc-config-typescript": "^1.0.2",
         "@types/cli-progress": "^3.11.6",
-        "@types/glob": "^8.1.0",
         "@types/inquirer": "^9.0.8",
         "@types/mocha": "^10.0.9",
         "@types/node": "^22.8.6",
@@ -125,8 +124,9 @@
         "@vscode/vsce": "^3.5.0",
         "esbuild": "^0.25.5",
         "eslint": "^8.52.0",
-        "glob": "^8.1.0",
+        "glob": "^11.0.3",
         "graphql": "^16.11.0",
+        "minimatch": "^10.0.3",
         "mocha": "^10.8.2",
         "nyc": "^17.1.0",
         "ovsx": "^0.10.4",
@@ -145,8 +145,8 @@
         "@salesforce/sf-plugins-core": "^12.2.2",
         "@vscode/l10n": "^0.0.18",
         "graphql-tag": "^2.12.6",
-        "vscode-languageclient": "^9.0.1",
         "vscode-html-languageservice": "^5.5.0",
+        "vscode-languageclient": "^9.0.1",
         "vscode-languageserver": "^9.0.1",
         "vscode-languageserver-textdocument": "^1.0.11",
         "yaml": "^2.8.0"
