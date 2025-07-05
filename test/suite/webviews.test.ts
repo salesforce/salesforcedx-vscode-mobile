@@ -17,6 +17,7 @@ import {
     WebviewProcessor
 } from '../../src/webviews/processor';
 import { TempProjectDirManager } from '../TestHelper';
+import mock from 'mock-fs';
 
 suite('Webview Test Suite', () => {
     const extensionUri = Uri.parse('file:///tmp/testdir');
@@ -25,14 +26,17 @@ suite('Webview Test Suite', () => {
 
     afterEach(function () {
         sinon.restore();
+        mock.restore();
     });
 
     test('Locale-specific file is returned if it exists', async () => {
         const languageStub = sinon.stub(env, 'language');
         languageStub.value('es');
 
-        const fsExistStub = sinon.stub(fs, 'existsSync');
-        fsExistStub.returns(true);
+        // Simulate that the locale-specific file exists at the extension URI path
+        mock({
+            '/tmp/testdir/test.es.html': ''
+        });
 
         const processor = new WebviewProcessor(extensionUri);
         const path = processor.getLocaleContentPath('test.html');
@@ -44,8 +48,10 @@ suite('Webview Test Suite', () => {
         const languageStub = sinon.stub(env, 'language');
         languageStub.value('es');
 
-        const fsExistStub = sinon.stub(fs, 'existsSync');
-        fsExistStub.returns(false);
+        // Simulate that the locale-specific file does NOT exist
+        mock({
+            // no 'test.es.html' file
+        });
 
         const processor = new WebviewProcessor(extensionUri);
         const path = processor.getLocaleContentPath('test.html');

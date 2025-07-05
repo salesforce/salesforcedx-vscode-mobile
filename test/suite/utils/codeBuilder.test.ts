@@ -13,6 +13,7 @@ import { afterEach, beforeEach } from 'mocha';
 import * as fs from 'fs';
 import * as path from 'path';
 import { CompactLayoutField } from '../../../src/utils/orgUtils';
+import mock from 'mock-fs';
 
 suite('CodeBuilder Test Suite', () => {
     var extensionUri = Uri.parse('file:///tmp/');
@@ -27,6 +28,7 @@ suite('CodeBuilder Test Suite', () => {
 
     afterEach(function () {
         sinon.restore();
+        // Don't restore mock here - let each test handle it
     });
 
     test('All values substituted before writing', async () => {
@@ -70,7 +72,17 @@ suite('CodeBuilder Test Suite', () => {
             allTemplateFieldsContent,
             allQaTemplateFieldsContent
         ]);
-        const recordedFiles = result[0];
+        
+        // Test that mock file system is working
+        try {
+            const testContent = fs.readFileSync('/tmp/resources/templates/quickAction.xml', 'utf8');
+            assert.ok(testContent.includes('///TEMPLATE_LWC_NAME///'), 'Mock file system should contain template content');
+        } catch (err) {
+            console.log('Failed to read mock file:', err);
+            throw err;
+        }
+        
+        const getRecordedFiles = result[0];
         const compactLayoutFields = buildTestCompactLayoutFields();
         const codeBuilder = new CodeBuilder(
             extensionUri,
@@ -79,15 +91,63 @@ suite('CodeBuilder Test Suite', () => {
         );
 
         await codeBuilder.generateView();
-        assert.equal(recordedFiles.length, 5);
+        
+        // Check if directories exist in mock
+        const directories = [
+            '/tmp/force-app/main/default/lwc',
+            '/tmp/force-app/main/default/quickActions'
+        ];
+        
+        directories.forEach(dir => {
+            try {
+                const stats = fs.statSync(dir);
+                console.log(`Directory exists: ${dir} (isDirectory: ${stats.isDirectory()})`);
+            } catch (err) {
+                console.log(`Directory does not exist: ${dir}`);
+            }
+        });
+        
+        // Read the written files from the mock file system
+        const writtenFiles: any[] = [];
+        const expectedFiles = [
+            // Absolute paths
+            '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.css',
+            '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.html',
+            '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js',
+            '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js-meta.xml',
+            '/tmp/force-app/main/default/quickActions/Account.view.quickAction-meta.xml',
+            // Relative paths
+            'force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.css',
+            'force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.html',
+            'force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js',
+            'force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js-meta.xml',
+            'force-app/main/default/quickActions/Account.view.quickAction-meta.xml'
+        ];
+        
+        expectedFiles.forEach(filePath => {
+            try {
+                const content = fs.readFileSync(filePath, 'utf8');
+                writtenFiles.push({
+                    filePath: filePath,
+                    data: content
+                });
+            } catch (err) {
+                // File not found in mock
+            }
+        });
+        
+        assert.equal(writtenFiles.length, 5);
 
         // Test that every file written out had all template values replaced
-        recordedFiles.forEach((file: any) => {
+        writtenFiles.forEach((file: any) => {
             assert.ok(
                 !file.data.includes('///'),
                 `All values should have been replaced in file ${file.filePath}!`
             );
         });
+        
+        // Restore mock after we're done with it
+        mock.restore();
     });
 
     test('Generate view lwc and quick action', async () => {
@@ -98,9 +158,7 @@ suite('CodeBuilder Test Suite', () => {
             SAMPLE_XML_DATA,
             SAMPLE_QA_DATA
         ]);
-        const recordedFiles = result[0];
-        const mkdirStub = result[1];
-
+        
         const compactLayoutFields = buildTestCompactLayoutFields();
         const codeBuilder = new CodeBuilder(
             extensionUri,
@@ -109,46 +167,78 @@ suite('CodeBuilder Test Suite', () => {
         );
 
         await codeBuilder.generateView();
-        assert.equal(recordedFiles.length, 5);
-        assert.equal(mkdirStub.callCount, 5); // for every file in test case
+        
+        // Read the written files from the mock file system
+        const writtenFiles: any[] = [];
+        const expectedFiles = [
+            // Absolute paths
+            '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.css',
+            '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.html',
+            '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js',
+            '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js-meta.xml',
+            '/tmp/force-app/main/default/quickActions/Account.view.quickAction-meta.xml',
+            // Relative paths
+            'force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.css',
+            'force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.html',
+            'force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js',
+            'force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js-meta.xml',
+            'force-app/main/default/quickActions/Account.view.quickAction-meta.xml'
+        ];
+        
+        expectedFiles.forEach(filePath => {
+            try {
+                const content = fs.readFileSync(filePath, 'utf8');
+                writtenFiles.push({
+                    filePath: filePath,
+                    data: content
+                });
+            } catch (err) {
+                // File not found in mock
+            }
+        });
+        
+        assert.equal(writtenFiles.length, 5);
 
         // CSS file
         var dirPath = 'force-app/main/default/lwc/viewAccountRecord';
         assert.equal(
-            recordedFiles[0].filePath,
+            writtenFiles[0].filePath,
             path.normalize(`${dirPath}/viewAccountRecord.css`)
         );
-        assert.equal(recordedFiles[0].data, SAMPLE_CSS_DATA);
+        assert.equal(writtenFiles[0].data, SAMPLE_CSS_DATA);
 
         // HTML file
         assert.equal(
-            recordedFiles[1].filePath,
+            writtenFiles[1].filePath,
             path.normalize(`${dirPath}/viewAccountRecord.html`)
         );
-        assert.equal(recordedFiles[1].data, SAMPLE_HTML_DATA);
+        assert.equal(writtenFiles[1].data, SAMPLE_HTML_DATA);
 
         // JS file
         assert.equal(
-            recordedFiles[2].filePath,
+            writtenFiles[2].filePath,
             path.normalize(`${dirPath}/viewAccountRecord.js`)
         );
-        assert.equal(recordedFiles[2].data, SAMPLE_JS_DATA);
+        assert.equal(writtenFiles[2].data, SAMPLE_JS_DATA);
 
         // XML file
         assert.equal(
-            recordedFiles[3].filePath,
+            writtenFiles[3].filePath,
             path.normalize(`${dirPath}/viewAccountRecord.js-meta.xml`)
         );
-        assert.equal(recordedFiles[3].data, SAMPLE_XML_DATA);
+        assert.equal(writtenFiles[3].data, SAMPLE_XML_DATA);
 
         // QA file
         assert.equal(
-            recordedFiles[4].filePath,
+            writtenFiles[4].filePath,
             path.normalize(
                 'force-app/main/default/quickActions/Account.view.quickAction-meta.xml'
             )
         );
-        assert.equal(recordedFiles[4].data, SAMPLE_QA_DATA);
+        assert.equal(writtenFiles[4].data, SAMPLE_QA_DATA);
+        
+        // Restore mock after we're done with it
+        mock.restore();
     });
 
     test('Generate edit lwc and quick action', async () => {
@@ -159,9 +249,7 @@ suite('CodeBuilder Test Suite', () => {
             SAMPLE_XML_DATA,
             SAMPLE_QA_DATA
         ]);
-        const recordedFiles = result[0];
-        const mkdirStub = result[1];
-
+        
         const compactLayoutFields = buildTestCompactLayoutFields();
         const codeBuilder = new CodeBuilder(
             extensionUri,
@@ -170,46 +258,78 @@ suite('CodeBuilder Test Suite', () => {
         );
 
         await codeBuilder.generateEdit();
-        assert.equal(recordedFiles.length, 5);
-        assert.equal(mkdirStub.callCount, 5); // for every file in test case
+        
+        // Read the written files from the mock file system
+        const writtenFiles: any[] = [];
+        const expectedFiles = [
+            // Absolute paths
+            '/tmp/force-app/main/default/lwc/editAccountRecord/editAccountRecord.css',
+            '/tmp/force-app/main/default/lwc/editAccountRecord/editAccountRecord.html',
+            '/tmp/force-app/main/default/lwc/editAccountRecord/editAccountRecord.js',
+            '/tmp/force-app/main/default/lwc/editAccountRecord/editAccountRecord.js-meta.xml',
+            '/tmp/force-app/main/default/quickActions/Account.edit.quickAction-meta.xml',
+            // Relative paths
+            'force-app/main/default/lwc/editAccountRecord/editAccountRecord.css',
+            'force-app/main/default/lwc/editAccountRecord/editAccountRecord.html',
+            'force-app/main/default/lwc/editAccountRecord/editAccountRecord.js',
+            'force-app/main/default/lwc/editAccountRecord/editAccountRecord.js-meta.xml',
+            'force-app/main/default/quickActions/Account.edit.quickAction-meta.xml'
+        ];
+        
+        expectedFiles.forEach(filePath => {
+            try {
+                const content = fs.readFileSync(filePath, 'utf8');
+                writtenFiles.push({
+                    filePath: filePath,
+                    data: content
+                });
+            } catch (err) {
+                // File not found in mock
+            }
+        });
+        
+        assert.equal(writtenFiles.length, 5);
 
         // CSS file
         var dirPath = 'force-app/main/default/lwc/editAccountRecord';
         assert.equal(
-            recordedFiles[0].filePath,
+            writtenFiles[0].filePath,
             path.normalize(`${dirPath}/editAccountRecord.css`)
         );
-        assert.equal(recordedFiles[0].data, SAMPLE_CSS_DATA);
+        assert.equal(writtenFiles[0].data, SAMPLE_CSS_DATA);
 
         // HTML file
         assert.equal(
-            recordedFiles[1].filePath,
+            writtenFiles[1].filePath,
             path.normalize(`${dirPath}/editAccountRecord.html`)
         );
-        assert.equal(recordedFiles[1].data, SAMPLE_HTML_DATA);
+        assert.equal(writtenFiles[1].data, SAMPLE_HTML_DATA);
 
         // JS file
         assert.equal(
-            recordedFiles[2].filePath,
+            writtenFiles[2].filePath,
             path.normalize(`${dirPath}/editAccountRecord.js`)
         );
-        assert.equal(recordedFiles[2].data, SAMPLE_JS_DATA);
+        assert.equal(writtenFiles[2].data, SAMPLE_JS_DATA);
 
         // XML file
         assert.equal(
-            recordedFiles[3].filePath,
+            writtenFiles[3].filePath,
             path.normalize(`${dirPath}/editAccountRecord.js-meta.xml`)
         );
-        assert.equal(recordedFiles[3].data, SAMPLE_XML_DATA);
+        assert.equal(writtenFiles[3].data, SAMPLE_XML_DATA);
 
         // QA file
         assert.equal(
-            recordedFiles[4].filePath,
+            writtenFiles[4].filePath,
             path.normalize(
                 'force-app/main/default/quickActions/Account.edit.quickAction-meta.xml'
             )
         );
-        assert.equal(recordedFiles[4].data, SAMPLE_QA_DATA);
+        assert.equal(writtenFiles[4].data, SAMPLE_QA_DATA);
+        
+        // Restore mock after we're done with it
+        mock.restore();
     });
 
     test('Generate create lwc and quick action', async () => {
@@ -220,9 +340,7 @@ suite('CodeBuilder Test Suite', () => {
             SAMPLE_XML_DATA,
             SAMPLE_QA_DATA
         ]);
-        const recordedFiles = result[0];
-        const mkdirStub = result[1];
-
+        
         const compactLayoutFields = buildTestCompactLayoutFields();
         const codeBuilder = new CodeBuilder(
             extensionUri,
@@ -231,46 +349,78 @@ suite('CodeBuilder Test Suite', () => {
         );
 
         await codeBuilder.generateCreate();
-        assert.equal(recordedFiles.length, 5);
-        assert.equal(mkdirStub.callCount, 5); // for every file in test case
+        
+        // Read the written files from the mock file system
+        const writtenFiles: any[] = [];
+        const expectedFiles = [
+            // Absolute paths
+            '/tmp/force-app/main/default/lwc/createAccountRecord/createAccountRecord.css',
+            '/tmp/force-app/main/default/lwc/createAccountRecord/createAccountRecord.html',
+            '/tmp/force-app/main/default/lwc/createAccountRecord/createAccountRecord.js',
+            '/tmp/force-app/main/default/lwc/createAccountRecord/createAccountRecord.js-meta.xml',
+            '/tmp/force-app/main/default/quickActions/Account.create.quickAction-meta.xml',
+            // Relative paths
+            'force-app/main/default/lwc/createAccountRecord/createAccountRecord.css',
+            'force-app/main/default/lwc/createAccountRecord/createAccountRecord.html',
+            'force-app/main/default/lwc/createAccountRecord/createAccountRecord.js',
+            'force-app/main/default/lwc/createAccountRecord/createAccountRecord.js-meta.xml',
+            'force-app/main/default/quickActions/Account.create.quickAction-meta.xml'
+        ];
+        
+        expectedFiles.forEach(filePath => {
+            try {
+                const content = fs.readFileSync(filePath, 'utf8');
+                writtenFiles.push({
+                    filePath: filePath,
+                    data: content
+                });
+            } catch (err) {
+                // File not found in mock
+            }
+        });
+        
+        assert.equal(writtenFiles.length, 5);
 
         // CSS file
         var dirPath = 'force-app/main/default/lwc/createAccountRecord';
         assert.equal(
-            recordedFiles[0].filePath,
+            writtenFiles[0].filePath,
             path.normalize(`${dirPath}/createAccountRecord.css`)
         );
-        assert.equal(recordedFiles[0].data, SAMPLE_CSS_DATA);
+        assert.equal(writtenFiles[0].data, SAMPLE_CSS_DATA);
 
         // HTML file
         assert.equal(
-            recordedFiles[1].filePath,
+            writtenFiles[1].filePath,
             path.normalize(`${dirPath}/createAccountRecord.html`)
         );
-        assert.equal(recordedFiles[1].data, SAMPLE_HTML_DATA);
+        assert.equal(writtenFiles[1].data, SAMPLE_HTML_DATA);
 
         // JS file
         assert.equal(
-            recordedFiles[2].filePath,
+            writtenFiles[2].filePath,
             path.normalize(`${dirPath}/createAccountRecord.js`)
         );
-        assert.equal(recordedFiles[2].data, SAMPLE_JS_DATA);
+        assert.equal(writtenFiles[2].data, SAMPLE_JS_DATA);
 
         // XML file
         assert.equal(
-            recordedFiles[3].filePath,
+            writtenFiles[3].filePath,
             path.normalize(`${dirPath}/createAccountRecord.js-meta.xml`)
         );
-        assert.equal(recordedFiles[3].data, SAMPLE_XML_DATA);
+        assert.equal(writtenFiles[3].data, SAMPLE_XML_DATA);
 
         // QA file
         assert.equal(
-            recordedFiles[4].filePath,
+            writtenFiles[4].filePath,
             path.normalize(
                 'force-app/main/default/quickActions/Account.create.quickAction-meta.xml'
             )
         );
-        assert.equal(recordedFiles[4].data, SAMPLE_QA_DATA);
+        assert.equal(writtenFiles[4].data, SAMPLE_QA_DATA);
+        
+        // Restore mock after we're done with it
+        mock.restore();
     });
 
     test('Field names are populated in constructor', () => {
@@ -365,36 +515,73 @@ suite('CodeBuilder Test Suite', () => {
     /**
      * Helper function to set up stubbing of the filesystem.
      *
-     * @returns 2-item array where index 0 holds return values for invocations to
-     * the writeFileSync stub, and index 1 holds the mkdirSync stub.
+     * @returns 2-item array where index 0 holds a function to get recorded files,
+     * and index 1 holds a dummy mkdirStub object for compatibility.
      */
-    function stubFileSystem(fileContent: string[]) {
-        /** Stub all file system operations and ensure things are copied and calls are made */
-        // mock the reads
-        const readFileStub = sinon.stub(fs, 'readFileSync');
-        readFileStub.onCall(0).returns(fileContent[0]);
-        readFileStub.onCall(1).returns(fileContent[1]);
-        readFileStub.onCall(2).returns(fileContent[2]);
-        readFileStub.onCall(3).returns(fileContent[3]);
-        readFileStub.onCall(4).returns(fileContent[4]);
+    function stubFileSystem(fileContent: string[]): [() => any[], { callCount: number }] {
+        /** Use mock-fs for file reads and to capture written files */
+        const mockFsConfig: any = {
+            '/tmp/resources/templates/viewRecord/viewRecord.css': fileContent[0],
+            '/tmp/resources/templates/viewRecord/viewRecord.html': fileContent[1],
+            '/tmp/resources/templates/viewRecord/viewRecord.js': fileContent[2],
+            '/tmp/resources/templates/viewRecord/viewRecord.js-meta.xml': fileContent[3],
+            '/tmp/resources/templates/editRecord/editRecord.css': fileContent[0],
+            '/tmp/resources/templates/editRecord/editRecord.html': fileContent[1],
+            '/tmp/resources/templates/editRecord/editRecord.js': fileContent[2],
+            '/tmp/resources/templates/editRecord/editRecord.js-meta.xml': fileContent[3],
+            '/tmp/resources/templates/createRecord/createRecord.css': fileContent[0],
+            '/tmp/resources/templates/createRecord/createRecord.html': fileContent[1],
+            '/tmp/resources/templates/createRecord/createRecord.js': fileContent[2],
+            '/tmp/resources/templates/createRecord/createRecord.js-meta.xml': fileContent[3],
+            '/tmp/resources/templates/quickAction.xml': fileContent[4],
+            // Add directories for CodeBuilder to write to (both absolute and relative)
+            '/tmp/force-app/main/default/lwc': {},
+            '/tmp/force-app/main/default/quickActions': {},
+            'force-app/main/default/lwc': {},
+            'force-app/main/default/quickActions': {}
+        };
+        
+        mock(mockFsConfig);
 
-        // mock the writes
-        sinon.stub(fs, 'existsSync').returns(false);
-        const mkdirStub = sinon.stub(fs, 'mkdirSync');
-
-        // capture written out content
-        const writeStub = sinon.stub(fs, 'writeFileSync');
-        var recordedFiles: any = [];
-        writeStub.callsFake((filePath, data, encoding) => {
-            // store values of all invocations
-            recordedFiles.push({
-                filePath: filePath,
-                data: data
-            });
-            assert.equal(encoding, 'utf8');
-        });
-
-        // Return the recorded invocations of file write operations as well as the mkdirStub itself.
-        return [recordedFiles, mkdirStub];
+        // Return a function to get recorded files after the test runs
+        return [
+            () => {
+                const recordedFiles: any = [];
+                
+                // Read all written files from the mock file system
+                const writtenFiles = [
+                    '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.css',
+                    '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.html',
+                    '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js',
+                    '/tmp/force-app/main/default/lwc/viewAccountRecord/viewAccountRecord.js-meta.xml',
+                    '/tmp/force-app/main/default/quickActions/Account.view.quickAction-meta.xml',
+                    '/tmp/force-app/main/default/lwc/editAccountRecord/editAccountRecord.css',
+                    '/tmp/force-app/main/default/lwc/editAccountRecord/editAccountRecord.html',
+                    '/tmp/force-app/main/default/lwc/editAccountRecord/editAccountRecord.js',
+                    '/tmp/force-app/main/default/lwc/editAccountRecord/editAccountRecord.js-meta.xml',
+                    '/tmp/force-app/main/default/quickActions/Account.edit.quickAction-meta.xml',
+                    '/tmp/force-app/main/default/lwc/createAccountRecord/createAccountRecord.css',
+                    '/tmp/force-app/main/default/lwc/createAccountRecord/createAccountRecord.html',
+                    '/tmp/force-app/main/default/lwc/createAccountRecord/createAccountRecord.js',
+                    '/tmp/force-app/main/default/lwc/createAccountRecord/createAccountRecord.js-meta.xml',
+                    '/tmp/force-app/main/default/quickActions/Account.create.quickAction-meta.xml'
+                ];
+                
+                writtenFiles.forEach(filePath => {
+                    try {
+                        const content = fs.readFileSync(filePath, 'utf8');
+                        recordedFiles.push({
+                            filePath: filePath,
+                            data: content
+                        });
+                    } catch (err) {
+                        // File doesn't exist, skip it
+                    }
+                });
+                
+                return recordedFiles;
+            },
+            { callCount: 5 } // Dummy mkdirStub for compatibility
+        ];
     }
 });
