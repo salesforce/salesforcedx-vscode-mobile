@@ -6,7 +6,6 @@
  */
 
 import { ProgressLocation, Uri, window, l10n } from 'vscode';
-import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 
 export class BriefcaseCommand {
@@ -28,6 +27,8 @@ export class BriefcaseCommand {
                 title: l10n.t('Launching Briefcase Builder...')
             },
             async (_progress, _token) => {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                const { CommonUtils } = await import('@salesforce/lwc-dev-mobile-core');
                 await CommonUtils.executeCommandAsync(
                     BriefcaseCommand.OPEN_ORG_BRIEFCASE_PAGE_CMD
                 );

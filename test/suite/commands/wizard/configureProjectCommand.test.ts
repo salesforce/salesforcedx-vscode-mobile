@@ -10,9 +10,8 @@ import { writeFile } from 'fs/promises';
 import { afterEach, beforeEach } from 'mocha';
 import * as path from 'path';
 import * as process from 'process';
-import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import * as sinon from 'sinon';
-import { l10n, Uri, window } from 'vscode';
+import { Uri, l10n, window } from 'vscode';
 import {
     ConfigureProjectCommand,
     DefaultProjectConfigurationProcessor,
@@ -23,7 +22,10 @@ import {
     createPlatformAbsolutePath
 } from '../../../TestHelper';
 
-suite('Configure Project Command Test Suite', () => {
+suite('Configure Project Command Test Suite', async () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { CommonUtils } = await import('@salesforce/lwc-dev-mobile-core');
+
     beforeEach(function () {});
 
     afterEach(function () {
@@ -60,6 +62,7 @@ suite('Configure Project Command Test Suite', () => {
     });
 
     test('Open Project: No git installed is an error', async () => {
+
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
         const projectFolder =
@@ -113,6 +116,7 @@ suite('Configure Project Command Test Suite', () => {
     });
 
     test('Open Project: Project is not the Starter Kit git repo', async () => {
+
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
         const projectFolder =
@@ -173,6 +177,7 @@ suite('Configure Project Command Test Suite', () => {
     });
 
     test('Open Project: Valid Starter Kit project', async () => {
+
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
         const projectFolder =

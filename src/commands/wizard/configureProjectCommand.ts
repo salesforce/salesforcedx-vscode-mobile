@@ -7,7 +7,6 @@
 
 import { Uri, WebviewPanel, commands, l10n, window } from 'vscode';
 import * as process from 'process';
-import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { wizardCommand } from './onboardingWizard';
 import { CoreExtensionService } from '../../services/CoreExtensionService';
@@ -268,6 +267,9 @@ export class ConfigureProjectCommand {
                         )
                     );
                 }
+
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                const { CommonUtils } = await import('@salesforce/lwc-dev-mobile-core');
 
                 // Is git installed?
                 try {

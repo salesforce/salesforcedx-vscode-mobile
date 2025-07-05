@@ -10,7 +10,6 @@ import { access } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { UEMParser } from '../../utils/uemParser';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
-import { CommonUtils } from '@salesforce/lwc-dev-mobile-core';
 import { OrgUtils } from '../../utils/orgUtils';
 import * as fs from 'fs';
 import { CodeBuilder } from '../../utils/codeBuilder';
@@ -114,8 +113,10 @@ export class LwcGenerationCommand {
 
             try {
                 await access(landingPagePath);
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                const { CommonUtils } = await import('@salesforce/lwc-dev-mobile-core');
                 const uem = CommonUtils.loadJsonFromFile(landingPagePath);
-                getSObjectsStatus.sobjects = UEMParser.findSObjects(uem);
+                getSObjectsStatus.sobjects = UEMParser.findSObjects(uem as any);
                 resolve(getSObjectsStatus);
             } catch (err) {
                 console.warn(

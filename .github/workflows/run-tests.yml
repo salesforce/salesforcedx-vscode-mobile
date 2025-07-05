@@ -9,12 +9,13 @@ jobs:
                 node: [20, 22]
         name: Tests with code coverage on Ubuntu with Node ${{ matrix.node }}
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node }}
             - run: |
                   npm install
+                  npm install --global @salesforce/cli
                   npm run compile
                   # runtTests() which downloads/installs/launches VSCode requires a screen.
                   # Using xvfb-run to attach a virtual screen for CI running on Ubuntu.
@@ -22,7 +23,7 @@ jobs:
               shell: bash
             - run: killall Xvfb || true
             - name: Upload coverage to codecov
-              uses: codecov/codecov-action@v3
+              uses: codecov/codecov-action@v4
               with:
                   token: ${{ secrets.CODECOV_TOKEN }}
                   files: coverage/*.json
@@ -34,13 +35,14 @@ jobs:
                 node: [20, 22]
         name: Tests with code coverage on Windows with Node ${{ matrix.node }}
         steps:
-            - uses: actions/checkout@v3
-            - uses: actions/setup-node@v3
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
               with:
                   node-version: ${{ matrix.node }}
             - run: |
                   # On Windows there no need for a screen for runTests() to run successfully.
                   npm install
                   npm run compile
+                  npm install --global @salesforce/cli
                   npm run test-coverage
             - run: taskkill /IM Xvfb.exe /F || true

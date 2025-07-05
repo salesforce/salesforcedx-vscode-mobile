@@ -10,10 +10,12 @@ import * as sinon from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
 import { BriefcaseCommand } from '../../../../src/commands/wizard/briefcaseCommand';
 import { Uri, l10n, window, Progress, CancellationToken } from 'vscode';
-import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
 import { InstructionsWebviewProvider } from '../../../../src/webviews/instructions';
 
-suite('Briefcase Command Test Suite', () => {
+suite('Briefcase Command Test Suite', async () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { CommonUtils } = await import('@salesforce/lwc-dev-mobile-core');
+
     beforeEach(function () {});
 
     afterEach(function () {
