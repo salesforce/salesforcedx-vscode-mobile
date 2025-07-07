@@ -10,29 +10,18 @@ import * as sinon from 'sinon';
 import * as fs from 'fs';
 import * as path from 'path';
 import { afterEach, beforeEach } from 'mocha';
+import {
+    LwcGenerationCommand,
+    SObjectQuickActionStatus
+} from '../../../../src/commands/wizard/lwcGenerationCommand';
 import { WorkspaceUtils } from '../../../../src/utils/workspaceUtils';
 import { TempProjectDirManager } from '../../../TestHelper';
 import { Uri } from 'vscode';
 import { CompactLayoutField, OrgUtils } from '../../../../src/utils/orgUtils';
 import { CodeBuilder } from '../../../../src/utils/codeBuilder';
-import mock from 'mock-fs';
-import * as proxyquire from 'proxyquire';
-
-// Mock the @salesforce/lwc-dev-mobile-core module to avoid ES module conflicts
-const mockCommonUtils = {
-    loadJsonFromFile: (file: string) => {
-        const fileContent = fs.readFileSync(file, 'utf8');
-        return JSON.parse(fileContent);
-    }
-};
+import mockFs from 'mock-fs';
 
 // Use proxyquire to mock the module
-const { LwcGenerationCommand, SObjectQuickActionStatus } = proxyquire.load('../../../../src/commands/wizard/lwcGenerationCommand', {
-    '@salesforce/lwc-dev-mobile-core': {
-        CommonUtils: mockCommonUtils
-    }
-});
-
 suite('LWC Generation Command Test Suite', () => {
     let sandbox: sinon.SinonSandbox;
 
@@ -47,7 +36,7 @@ suite('LWC Generation Command Test Suite', () => {
     test('Quick Action directories check', async () => {
         const baseDir = 'force-app/main/default/quickActions';
         // Set up mock file system
-        mock({
+        mockFs({
             [baseDir]: {
                 'sobject1.view.quickAction-meta.xml': '',
                 'sobject1.edit.quickAction-meta.xml': '',
@@ -64,7 +53,7 @@ suite('LWC Generation Command Test Suite', () => {
             Promise.resolve({ sobjects: ['sobject1', 'sobject2'] })
         );
 
-        const result: typeof SObjectQuickActionStatus =
+        const result: SObjectQuickActionStatus =
             await LwcGenerationCommand.checkForExistingQuickActions();
 
         assert.equal(
@@ -100,7 +89,7 @@ suite('LWC Generation Command Test Suite', () => {
         );
 
         // Restore mock file system
-        mock.restore();
+        mockFs.restore();
     });
 
     test('Should return error status for landing page with invalid json', async () => {
@@ -155,7 +144,7 @@ suite('LWC Generation Command Test Suite', () => {
 
     test('Should generate view, create, and edit quick actions', async () => {
         const extensionUri = Uri.file('whateva');
-        const quickActionStatus: typeof SObjectQuickActionStatus = {
+        const quickActionStatus: SObjectQuickActionStatus = {
             sobjects: {
                 account: {
                     view: false,

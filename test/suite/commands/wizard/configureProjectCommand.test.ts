@@ -62,7 +62,6 @@ suite('Configure Project Command Test Suite', async () => {
     });
 
     test('Open Project: No git installed is an error', async () => {
-
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
         const projectFolder =
@@ -116,7 +115,6 @@ suite('Configure Project Command Test Suite', async () => {
     });
 
     test('Open Project: Project is not the Starter Kit git repo', async () => {
-
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
         const projectFolder =
@@ -177,7 +175,6 @@ suite('Configure Project Command Test Suite', async () => {
     });
 
     test('Open Project: Valid Starter Kit project', async () => {
-
         const origCwd = process.cwd();
         const extensionUri = Uri.file('whateva');
         const projectFolder =
