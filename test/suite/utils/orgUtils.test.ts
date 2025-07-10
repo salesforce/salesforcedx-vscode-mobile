@@ -19,7 +19,7 @@ import {
     DescribeGlobalResult,
     DescribeSObjectResult,
     Field as FieldType
-} from 'jsforce';
+} from '@jsforce/jsforce-node';
 import { CoreExtensionService } from '../../../src/services';
 
 suite('Org Utils Test Suite', () => {

@@ -10,7 +10,7 @@ import { writeFile } from 'fs/promises';
 import { afterEach, beforeEach } from 'mocha';
 import * as path from 'path';
 import * as process from 'process';
-import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
+import { CommonUtils } from '../../../../src/utils/CommonUtils';
 import * as sinon from 'sinon';
 import { l10n, Uri, window } from 'vscode';
 import {
