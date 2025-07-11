@@ -10,7 +10,7 @@ import { access } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { UEMParser } from '../../utils/uemParser';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
-import { CommonUtils } from '../../utils/CommonUtils';
+import { CommonUtils } from '../../utils/commonUtils';
 import { OrgUtils } from '../../utils/orgUtils';
 import * as fs from 'fs';
 import { CodeBuilder } from '../../utils/codeBuilder';

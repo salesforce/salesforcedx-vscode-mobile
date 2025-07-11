@@ -10,7 +10,7 @@ import * as sinon from 'sinon';
 import { afterEach, beforeEach } from 'mocha';
 import { BriefcaseCommand } from '../../../../src/commands/wizard/briefcaseCommand';
 import { Uri, l10n, window, Progress, CancellationToken } from 'vscode';
-import { CommonUtils } from '../../../../src/utils/CommonUtils';
+import { CommonUtils } from '../../../../src/utils/commonUtils';
 import { InstructionsWebviewProvider } from '../../../../src/webviews/instructions';
 
 suite('Briefcase Command Test Suite', () => {
