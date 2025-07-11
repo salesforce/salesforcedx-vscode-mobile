@@ -161,7 +161,9 @@ export function generateEntityTree(rootASTNode: ASTNode): RootNode {
                     let parentEntity = undefined;
                     try {
                         parentEntity = resolveEntityNodeForProperty(ancestors);
-                    } catch (e) {}
+                    } catch (e) {
+                        /* empty */
+                    }
                     if (parentEntity === undefined) {
                         return;
                     }

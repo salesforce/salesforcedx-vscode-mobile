@@ -10,7 +10,7 @@ import { access } from 'fs/promises';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { UEMParser } from '../../utils/uemParser';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
-import { CommonUtils } from '@salesforce/lwc-dev-mobile-core';
+import { CommonUtils } from '../../utils/commonUtils';
 import { OrgUtils } from '../../utils/orgUtils';
 import * as fs from 'fs';
 import { CodeBuilder } from '../../utils/codeBuilder';
@@ -115,7 +115,7 @@ export class LwcGenerationCommand {
             try {
                 await access(landingPagePath);
                 const uem = CommonUtils.loadJsonFromFile(landingPagePath);
-                getSObjectsStatus.sobjects = UEMParser.findSObjects(uem);
+                getSObjectsStatus.sobjects = UEMParser.findSObjects(uem as any);
                 resolve(getSObjectsStatus);
             } catch (err) {
                 console.warn(

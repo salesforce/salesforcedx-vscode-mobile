@@ -6,7 +6,7 @@
  */
 
 import { ProgressLocation, Uri, window, l10n } from 'vscode';
-import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
+import { CommonUtils } from '../../utils/commonUtils';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 
 export class BriefcaseCommand {

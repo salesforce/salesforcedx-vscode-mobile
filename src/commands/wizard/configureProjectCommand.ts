@@ -7,7 +7,7 @@
 
 import { Uri, WebviewPanel, commands, l10n, window } from 'vscode';
 import * as process from 'process';
-import { CommonUtils } from '@salesforce/lwc-dev-mobile-core/lib/common/CommonUtils';
+import { CommonUtils } from '../../utils/commonUtils';
 import { InstructionsWebviewProvider } from '../../webviews/instructions';
 import { wizardCommand } from './onboardingWizard';
 import { CoreExtensionService } from '../../services/CoreExtensionService';
