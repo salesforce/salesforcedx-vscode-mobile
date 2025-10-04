@@ -212,10 +212,10 @@ suite('Configure Linting Tools Command Test Suite', () => {
             devDependencies: {
                 lwc: '1.2.3',
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                "@salesforce/eslint-plugin-lwc-mobile":"^1.1.0",
+                "@salesforce/eslint-plugin-lwc-mobile":"^1.2.0",
                 // eslint-disable-next-line @typescript-eslint/naming-convention
-                '@salesforce/eslint-plugin-lwc-graph-analyzer': '^0.9.0',
-                eslint: '^8.47.0'
+                '@salesforce/eslint-plugin-lwc-graph-analyzer': '^1.0.0',
+                eslint: '^9.29.0'
             }
         };
         assert.equal(
