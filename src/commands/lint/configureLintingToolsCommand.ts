@@ -142,7 +142,8 @@ export class ConfigureLintingToolsCommand {
                 } else if (!hasEslintConfigUserMobileFile) {
                     modifiedEslintConfig = this.convertEslintConfiguration();
                 } else {
-                    modifiedEslintConfig = this.updateMobileEslintConfiguration();
+                    modifiedEslintConfig =
+                        this.updateMobileEslintConfiguration();
                 }
             } catch (error) {
                 const event = `${commandName}.${MetricEvents.ERROR_UPDATING_ESLINT_CONFIGURATION}`;

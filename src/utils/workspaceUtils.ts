@@ -91,14 +91,17 @@ export class WorkspaceUtils {
         );
     }
 
-    static readEslintConfiguration(fileName: string): string  {
+    static readEslintConfiguration(fileName: string): string {
         return fs.readFileSync(
             path.join(this.getWorkspaceDir(), fileName),
             'utf8'
         );
     }
 
-    static writeEslintConfiguration(fileName: string, eslintConfiguration: string) {
+    static writeEslintConfiguration(
+        fileName: string,
+        eslintConfiguration: string
+    ) {
         fs.writeFileSync(
             path.join(this.getWorkspaceDir(), fileName),
             eslintConfiguration
@@ -106,14 +109,19 @@ export class WorkspaceUtils {
     }
 
     static eslintConfigurationExists(fileName: string): boolean {
-        return fs.existsSync(
-            path.join(this.getWorkspaceDir(), fileName)
-        );
+        return fs.existsSync(path.join(this.getWorkspaceDir(), fileName));
     }
 
     static legacyEslintConfigurationExists(): boolean {
-        const lwcConfigFile = path.join(this.getWorkspaceDir(), WorkspaceUtils.LWC_PATH, ESLINT_RC_FILE);
-        return this.eslintConfigurationExists(ESLINT_RC_FILE) || fs.existsSync(lwcConfigFile);
+        const lwcConfigFile = path.join(
+            this.getWorkspaceDir(),
+            WorkspaceUtils.LWC_PATH,
+            ESLINT_RC_FILE
+        );
+        return (
+            this.eslintConfigurationExists(ESLINT_RC_FILE) ||
+            fs.existsSync(lwcConfigFile)
+        );
     }
 
     static packageJsonExists(): boolean {
