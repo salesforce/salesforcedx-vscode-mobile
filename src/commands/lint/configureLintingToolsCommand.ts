@@ -6,8 +6,6 @@
  */
 
 import { commands, l10n, window, workspace, ExtensionContext } from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 import { WorkspaceUtils } from '../../utils/workspaceUtils';
 import {
     ESLINT_CONFIG_FILE,
@@ -15,9 +13,7 @@ import {
     ESLINT_CONFIG_FILE_CONTENT_WITHOUT_USER_CONFIG,
     ESLINT_CONFIG_MOBILE_FILE,
     ESLINT_CONFIG_MOBILE_FILE_CONTENT,
-    ESLINT_CONFIG_USER_FILE,
-    ESLINT_RC_FILE,
-    JSON_INDENTATION_SPACES
+    ESLINT_CONFIG_USER_FILE
 } from '../../utils/constants';
 import { CoreExtensionService } from '../../services/CoreExtensionService';
 import { TelemetryService } from '../../types';

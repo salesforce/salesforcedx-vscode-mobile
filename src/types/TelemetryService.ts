@@ -29,7 +29,6 @@ export type TelemetryReporter = {
         measurements?: { [key: string]: number }
     ): void;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     dispose(): Promise<any>;
 };
 

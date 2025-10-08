@@ -11,7 +11,6 @@ import {
     PACKAGE_JSON,
     SFDX_PROJECT_FILE,
     JSON_INDENTATION_SPACES,
-    ESLINT_CONFIG_FILE,
     ESLINT_RC_FILE
 } from './constants';
 import * as fs from 'fs';
