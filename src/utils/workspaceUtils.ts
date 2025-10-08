@@ -10,7 +10,9 @@ import { access } from 'fs/promises';
 import {
     PACKAGE_JSON,
     SFDX_PROJECT_FILE,
-    JSON_INDENTATION_SPACES
+    JSON_INDENTATION_SPACES,
+    ESLINT_CONFIG_FILE,
+    ESLINT_RC_FILE
 } from './constants';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -88,6 +90,31 @@ export class WorkspaceUtils {
             path.join(this.getWorkspaceDir(), PACKAGE_JSON),
             JSON.stringify(packageJson, null, JSON_INDENTATION_SPACES)
         );
+    }
+
+    static readEslintConfiguration(fileName: string): string  {
+        return fs.readFileSync(
+            path.join(this.getWorkspaceDir(), fileName),
+            'utf8'
+        );
+    }
+
+    static writeEslintConfiguration(fileName: string, eslintConfiguration: string) {
+        fs.writeFileSync(
+            path.join(this.getWorkspaceDir(), fileName),
+            eslintConfiguration
+        );
+    }
+
+    static eslintConfigurationExists(fileName: string): boolean {
+        return fs.existsSync(
+            path.join(this.getWorkspaceDir(), fileName)
+        );
+    }
+
+    static legacyEslintConfigurationExists(): boolean {
+        const lwcConfigFile = path.join(this.getWorkspaceDir(), WorkspaceUtils.LWC_PATH, ESLINT_RC_FILE);
+        return this.eslintConfigurationExists(ESLINT_RC_FILE) || fs.existsSync(lwcConfigFile);
     }
 
     static packageJsonExists(): boolean {
