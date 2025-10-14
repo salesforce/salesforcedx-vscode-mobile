@@ -24,7 +24,6 @@ enum MetricEvents {
     CONFIGURE_LINTING_TOOLS_COMMAND_STARTED = 'configure-linting-tools-command-started',
     UPDATED_PACKAGE_JSON = 'updated-package-json',
     UPDATED_ESLINT_CONFIGURATION = 'updated-eslintrc-config-js',
-    ALREADY_CONFIGURED = 'already-configured',
     LWC_FOLDER_DOES_NOT_EXIST = 'lwc-folder-does-not-exist',
     PACKAGE_JSON_DOES_NOT_EXIST = 'package-json-does-not-exist',
     ERROR_UPDATING_PACKAGE_JSON = 'error-updating-package-json',
@@ -125,8 +124,19 @@ export class ConfigureLintingToolsCommand {
                 return false;
             }
 
+            if (modifiedDevDependencies) {
+                telemetryService.sendCommandEvent(
+                    commandName,
+                    process.hrtime(),
+                    { metricEvents: MetricEvents.UPDATED_PACKAGE_JSON }
+                );
+                this.showMessage(
+                    `Updated package.json to include offline linting packages and dependencies. In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, "npm install" or "yarn install".`,
+                    MessageType.InformationOk
+                );
+            }
+
             // Update eslint configuration files
-            let modifiedEslintConfig = false;
             try {
                 const hasEslintConfigFile =
                     WorkspaceUtils.eslintConfigurationExists(
@@ -138,12 +148,11 @@ export class ConfigureLintingToolsCommand {
                     );
 
                 if (!hasEslintConfigFile) {
-                    modifiedEslintConfig = this.initializeEslintConfiguration();
+                    this.initializeEslintConfiguration();
                 } else if (!hasEslintConfigUserMobileFile) {
-                    modifiedEslintConfig = this.convertEslintConfiguration();
+                    this.convertEslintConfiguration();
                 } else {
-                    modifiedEslintConfig =
-                        this.updateMobileEslintConfiguration();
+                    this.updateMobileEslintConfiguration();
                 }
             } catch (error) {
                 const event = `${commandName}.${MetricEvents.ERROR_UPDATING_ESLINT_CONFIGURATION}`;
@@ -155,48 +164,13 @@ export class ConfigureLintingToolsCommand {
                 return false;
             }
 
-            if (modifiedDevDependencies) {
-                telemetryService.sendCommandEvent(
-                    commandName,
-                    process.hrtime(),
-                    { metricEvents: MetricEvents.UPDATED_PACKAGE_JSON }
-                );
-                this.showMessage(
-                    `Updated package.json to include offline linting packages and dependencies.`,
-                    MessageType.InformationOk
-                );
-            }
-
-            if (modifiedEslintConfig) {
-                telemetryService.sendCommandEvent(
-                    commandName,
-                    process.hrtime(),
-                    { metricEvents: MetricEvents.UPDATED_ESLINT_CONFIGURATION }
-                );
-                this.showMessage(
-                    `Updated eslint.config.js to include recommended linting rules.`,
-                    MessageType.InformationOk
-                );
-            }
-
-            if (modifiedDevDependencies || modifiedEslintConfig) {
-                this.showMessage(
-                    `In the Terminal window, be sure to run the install command for your configured package manager, to install the updated dependencies. For example, "npm install" or "yarn install".`,
-                    MessageType.InformationOk
-                );
-            }
-
-            if (!modifiedDevDependencies && !modifiedEslintConfig) {
-                telemetryService.sendCommandEvent(
-                    commandName,
-                    process.hrtime(),
-                    { metricEvents: MetricEvents.ALREADY_CONFIGURED }
-                );
-                this.showMessage(
-                    `All offline linting packages and dependencies are already configured in your project. No update has been made to package.json.`,
-                    MessageType.InformationOk
-                );
-            }
+            telemetryService.sendCommandEvent(commandName, process.hrtime(), {
+                metricEvents: MetricEvents.UPDATED_ESLINT_CONFIGURATION
+            });
+            this.showMessage(
+                `Updated eslint.config.js to include recommended linting rules.`,
+                MessageType.InformationOk
+            );
 
             return true;
         } catch (error) {
@@ -279,9 +253,8 @@ export class ConfigureLintingToolsCommand {
 
     /**
      * Current project doesn't have eslint.config.js file. Create eslint.config.js and eslint.config.mobile.js files.
-     * @returns
      */
-    static initializeEslintConfiguration(): boolean {
+    static initializeEslintConfiguration() {
         WorkspaceUtils.writeEslintConfiguration(
             ESLINT_CONFIG_FILE,
             ESLINT_CONFIG_FILE_CONTENT_WITHOUT_USER_CONFIG
@@ -290,7 +263,6 @@ export class ConfigureLintingToolsCommand {
             ESLINT_CONFIG_MOBILE_FILE,
             ESLINT_CONFIG_MOBILE_FILE_CONTENT
         );
-        return true;
     }
 
     /**
@@ -299,9 +271,8 @@ export class ConfigureLintingToolsCommand {
      * 1. copy eslint.config.js to eslint.config.use.js,
      * 2. create eslint.config.mobile.js
      * 3. create eslint.config.js to reference the user
-     * @returns boolean
      */
-    static convertEslintConfiguration(): boolean {
+    static convertEslintConfiguration() {
         const eslintConfiguration =
             WorkspaceUtils.readEslintConfiguration(ESLINT_CONFIG_FILE);
         WorkspaceUtils.writeEslintConfiguration(
@@ -316,20 +287,17 @@ export class ConfigureLintingToolsCommand {
             ESLINT_CONFIG_FILE,
             ESLINT_CONFIG_FILE_CONTENT_WITH_USER_CONFIG
         );
-        return true;
     }
 
     /**
      * Current project has eslint.config.js file and eslint.config.mobile.js file.
      * Only need to reflush eslint.config.mobile.js with default content
-     * @returns boolean
      */
-    static updateMobileEslintConfiguration(): boolean {
+    static updateMobileEslintConfiguration() {
         WorkspaceUtils.writeEslintConfiguration(
             ESLINT_CONFIG_MOBILE_FILE,
             ESLINT_CONFIG_MOBILE_FILE_CONTENT
         );
-        return true;
     }
 
     static async showMessage(

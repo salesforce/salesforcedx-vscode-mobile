@@ -176,10 +176,8 @@ suite('Configure Linting Tools Command Test Suite', () => {
         showInformationMessageStub.onCall(0).resolves({ title: 'Yes' });
         sinon
             .stub(ConfigureLintingToolsCommand, 'updateDevDependencies')
-            .returns(false);
         sinon
             .stub(ConfigureLintingToolsCommand, 'initializeEslintConfiguration')
-            .returns(false);
         showInformationMessageStub = sinon.stub(window, 'showErrorMessage');
         showInformationMessageStub.onCall(0).resolves({ title: 'OK' });
         const result = await ConfigureLintingToolsCommand.configure();
@@ -268,13 +266,13 @@ suite('Configure Linting Tools Command Test Suite', () => {
         const initializeEslintConfigStub = sinon.stub(
             ConfigureLintingToolsCommand,
             'initializeEslintConfiguration'
-        ).returns(true);
+        );
 
         // Mock the updateDevDependencies method to return true
         const updateDevDependenciesStub = sinon.stub(
             ConfigureLintingToolsCommand,
             'updateDevDependencies'
-        ).returns(true);
+        );
 
         const result = await ConfigureLintingToolsCommand.configure();
         
@@ -283,7 +281,7 @@ suite('Configure Linting Tools Command Test Suite', () => {
         assert.equal(initializeEslintConfigStub.callCount, 1);
         // Assert telemetry
         assert.equal(sendExceptionStub.callCount, 0);
-        assert.equal(sendCommandEventStub.callCount, 3); 
+        assert.equal(sendCommandEventStub.callCount, 2); 
     });
 
     test('Configure linting when project has eslint.config.js but no eslint.config.mobile.js', async () => {
@@ -313,7 +311,7 @@ suite('Configure Linting Tools Command Test Suite', () => {
         const convertEslintConfigStub = sinon.stub(
             ConfigureLintingToolsCommand,
             'convertEslintConfiguration'
-        ).returns(true);
+        );
 
         // Mock the updateDevDependencies method to return true
         const updateDevDependenciesStub = sinon.stub(
@@ -358,7 +356,7 @@ suite('Configure Linting Tools Command Test Suite', () => {
         const updateMobileEslintConfigStub = sinon.stub(
             ConfigureLintingToolsCommand,
             'updateMobileEslintConfiguration'
-        ).returns(true);
+        );
 
         // Mock the updateDevDependencies method to return true
         const updateDevDependenciesStub = sinon.stub(
