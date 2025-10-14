@@ -134,7 +134,7 @@ suite('Configure Linting Tools Command Test Suite', () => {
         assert.equal(sendCommandEventStub.callCount, 1);
     });
 
-    test('Configure linting cancelled because updating .eslintrc.json failed', async () => {
+    test('Configure linting cancelled because updating eslint configuration failed', async () => {
         sinon.stub(WorkspaceUtils, 'lwcFolderExists').returns(true);
         sinon.stub(WorkspaceUtils, 'packageJsonExists').returns(true);
         sinon.stub(WorkspaceUtils, 'eslintConfigurationExists').returns(false);
@@ -152,6 +152,27 @@ suite('Configure Linting Tools Command Test Suite', () => {
         sinon
             .stub(ConfigureLintingToolsCommand, 'initializeEslintConfiguration')
             .throws('error');
+        const showErrorMessageStub = sinon.stub(window, 'showErrorMessage');
+        showErrorMessageStub.onCall(0).resolves({ title: 'OK' });
+        const result = await ConfigureLintingToolsCommand.configure();
+        assert.equal(result, false);
+        // Assert telemetry
+        assert.equal(sendExceptionStub.callCount, 1);
+        assert.equal(sendCommandEventStub.callCount, 1);        
+    });
+
+    test('Configure linting shows message when uncaught error occurs', async () => {
+        sinon.stub(WorkspaceUtils, 'lwcFolderExists').throws('error');
+
+        const sendExceptionStub = sinon.stub();
+        const sendCommandEventStub = sinon.stub();
+        stubTelemetryService(sendExceptionStub, sendCommandEventStub);
+        const showInformationMessageStub = sinon.stub(
+            window,
+            'showInformationMessage'
+        );
+        showInformationMessageStub.onCall(0).resolves({ title: 'Yes' });
+        
         const showErrorMessageStub = sinon.stub(window, 'showErrorMessage');
         showErrorMessageStub.onCall(0).resolves({ title: 'OK' });
         const result = await ConfigureLintingToolsCommand.configure();
@@ -373,5 +394,7 @@ suite('Configure Linting Tools Command Test Suite', () => {
         assert.equal(sendExceptionStub.callCount, 0);
         assert.equal(sendCommandEventStub.callCount, 3); // CONFIGURE_LINTING_TOOLS_COMMAND_STARTED, UPDATED_PACKAGE_JSON, UPDATED_ESLINT_CONFIGURATION
     });
+
+
 
 });
