@@ -8,7 +8,7 @@
 import * as assert from 'assert';
 import * as path from 'path';
 import * as fs from 'fs';
-import { mkdir } from 'fs/promises';
+import { mkdir, rm} from 'fs/promises';
 import {
     NoStaticResourcesDirError,
     NoWorkspaceError,
@@ -20,7 +20,7 @@ import {
 } from '../../TestHelper';
 import { afterEach, beforeEach } from 'mocha';
 import * as sinon from 'sinon';
-import { SFDX_PROJECT_FILE } from '../../../src/utils/constants';
+import {ESLINT_CONFIG_FILE, ESLINT_RC_FILE, SFDX_PROJECT_FILE } from '../../../src/utils/constants';
 
 suite('Workspace Test Suite', () => {
     let getWorkspaceDirStub: sinon.SinonStub<[], string>;
@@ -96,6 +96,30 @@ suite('Workspace Test Suite', () => {
         assert.equal(JSON.stringify(content), JSON.stringify(packageJson));
     });
 
+    test('Existence of eslint configuration file can be determined', () => {
+        let exists = WorkspaceUtils.eslintConfigurationExists(ESLINT_CONFIG_FILE);
+        assert.equal(exists, false);
+
+        const eslintConfiguration = `
+        const eslintJs = require("@eslint/js");
+        const { defineConfig } = require("eslint/config");
+        const lwcConfig = require("@salesforce/eslint-config-lwc/recommended");
+
+        module.exports = defineConfig([
+            {
+                files: ["**/*.js"],
+                extends: [lwcConfig]
+            }
+        ]);
+        `;
+        WorkspaceUtils.writeEslintConfiguration(ESLINT_CONFIG_FILE, eslintConfiguration);
+        exists = WorkspaceUtils.eslintConfigurationExists(ESLINT_CONFIG_FILE);
+        assert.equal(exists, true);
+
+        const content = WorkspaceUtils.readEslintConfiguration(ESLINT_CONFIG_FILE);
+        assert.equal(content, eslintConfiguration);
+    });
+
     test('Existence of LWC folder can be determined', async () => {
         let exists = WorkspaceUtils.lwcFolderExists();
         assert.equal(exists, false);
@@ -123,4 +147,36 @@ suite('Workspace Test Suite', () => {
         opened = WorkspaceUtils.isSfdxProjectOpened();
         assert.equal(opened, true);
     });
+
+    test('Legacy ESLint configuration existance can be determined', async() => {
+        let exists = WorkspaceUtils.legacyEslintConfigurationExists();
+        assert.equal(exists, false);
+
+        const rootConfigFile = path.join(
+            tempProjectDirManager.projectDir, 
+            ESLINT_RC_FILE
+        );
+
+        fs.writeFileSync(rootConfigFile, '');
+
+        exists = WorkspaceUtils.legacyEslintConfigurationExists();
+        assert.equal(exists, true);
+
+        await rm(rootConfigFile);
+
+        exists = WorkspaceUtils.legacyEslintConfigurationExists();
+        assert.equal(exists, false);
+
+        await mkdir(path.join(tempProjectDirManager.projectDir, WorkspaceUtils.LWC_PATH), { recursive: true });
+
+        const lwcConfigFile = path.join(
+            tempProjectDirManager.projectDir, 
+            WorkspaceUtils.LWC_PATH,
+            ESLINT_RC_FILE
+        );
+        fs.writeFileSync(lwcConfigFile, '');
+
+        exists = WorkspaceUtils.legacyEslintConfigurationExists();
+        assert.equal(exists, true);
+    })
 });
