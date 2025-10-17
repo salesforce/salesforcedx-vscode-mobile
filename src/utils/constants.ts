@@ -37,7 +37,7 @@ module.exports = defineConfig([
 // Mobile eslint configuration file
 export const ESLINT_CONFIG_MOBILE_FILE = 'eslint.config.mobile.js';
 export const ESLINT_CONFIG_MOBILE_FILE_CONTENT = `
-const eslintJs = require("@eslint/js");
+const eslintJs = require('@eslint/js');
 const { defineConfig } = require("eslint/config");
 const lwcMobilePlugin = require("@salesforce/eslint-plugin-lwc-mobile");
 const lwcGraphAnalyzerPlugin = require("@salesforce/eslint-plugin-lwc-graph-analyzer");
@@ -45,19 +45,16 @@ const lwcGraphAnalyzerPlugin = require("@salesforce/eslint-plugin-lwc-graph-anal
 module.exports = defineConfig([
   // Salesforce LWC Mobile plugin configuration
   {
-    files: ["**/lwc/**/*.js"],
     plugins: {
-      eslintJs,
       "@salesforce/lwc-mobile": lwcMobilePlugin,
       "@salesforce/lwc-graph-analyzer": lwcGraphAnalyzerPlugin
-    },
-    extends: [
-      eslintJs.configs.recommended,
-      lwcMobilePlugin.recommendedConfigs,
-      lwcGraphAnalyzerPlugin.configs.recommended
-    ]
-  }
+    }
+  },
+  eslintJs.configs.recommended,
+  lwcGraphAnalyzerPlugin.configs.recommended,
+  ...lwcMobilePlugin.recommendedConfigs
 ]);
+
 `;
 
 // User eslint configuration file, contains the original eslint.config.js file content after ConfigureLintingToolsCommand's execution
