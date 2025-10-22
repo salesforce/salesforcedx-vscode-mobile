@@ -16,7 +16,7 @@ export const ESLINT_RC_FILE = '.eslintrc.json';
 // Default eslint 9 flat configuration file
 export const ESLINT_CONFIG_FILE = 'eslint.config.js';
 export const ESLINT_CONFIG_FILE_CONTENT_WITH_USER_CONFIG = `
-const { defineConfig } = require("eslint/config");
+const { defineConfig } = require('eslint/config');
 const eslintConfigMobile = require('./eslint.config.mobile');
 const eslintConfigUser = require('./eslint.config.user');
 
@@ -26,7 +26,7 @@ module.exports = defineConfig([
 ]);
 `;
 export const ESLINT_CONFIG_FILE_CONTENT_WITHOUT_USER_CONFIG = `
-const { defineConfig } = require("eslint/config");
+const { defineConfig } = require('eslint/config');
 const eslintConfigMobile = require('./eslint.config.mobile');
 
 module.exports = defineConfig([
@@ -38,9 +38,9 @@ module.exports = defineConfig([
 export const ESLINT_CONFIG_MOBILE_FILE = 'eslint.config.mobile.js';
 export const ESLINT_CONFIG_MOBILE_FILE_CONTENT = `
 const eslintJs = require('@eslint/js');
-const { defineConfig } = require("eslint/config");
-const lwcMobilePlugin = require("@salesforce/eslint-plugin-lwc-mobile");
-const lwcGraphAnalyzerPlugin = require("@salesforce/eslint-plugin-lwc-graph-analyzer");
+const { defineConfig } = require('eslint/config');
+const lwcMobilePlugin = require('@salesforce/eslint-plugin-lwc-mobile');
+const lwcGraphAnalyzerPlugin = require('@salesforce/eslint-plugin-lwc-graph-analyzer');
 
 module.exports = defineConfig([
   // Salesforce LWC Mobile plugin configuration
