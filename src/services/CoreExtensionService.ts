@@ -93,15 +93,10 @@ export class CoreExtensionService {
         if (!telemetryService) {
             throw new Error(TELEMETRY_SERVICE_NOT_FOUND);
         }
-        const { aiKey, name, version } = context.extension.packageJSON;
+        const { name } = context.extension.packageJSON;
         CoreExtensionService.telemetryService =
             telemetryService.getInstance(name);
-        CoreExtensionService.telemetryService.initializeService(
-            context,
-            name,
-            aiKey,
-            version
-        );
+        CoreExtensionService.telemetryService.initializeService(context);
     }
 
     private static isAboveMinimumRequiredVersion(

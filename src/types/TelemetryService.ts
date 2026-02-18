@@ -38,12 +38,7 @@ export interface TelemetryService {
     isTelemetryEnabled(): Promise<boolean>;
     getInstance(extensionName: string): TelemetryService;
     getReporters(): TelemetryReporter[];
-    initializeService(
-        extensionContext: ExtensionContext,
-        extensionName: string,
-        aiKey: string,
-        version: string
-    ): Promise<void>;
+    initializeService(extensionContext: ExtensionContext): Promise<void>;
     sendExtensionActivationEvent(hrstart: [number, number]): void;
     sendExtensionDeactivationEvent(): void;
     sendCommandEvent(
