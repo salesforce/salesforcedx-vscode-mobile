@@ -25,7 +25,7 @@
     },
     "enableO11y": "true",
     "o11yUploadEndpoint": "https://794testsite.my.site.com/byolwr/webruntime/log/metrics",
-    "productFeatureId": "aJCEE0000000mLm4AI",
+    "productFeatureId": "aJCEE0000000mGf4AI",
     "license": "SEE LICENSE IN LICENSE.txt",
     "icon": "images/package-icon.png",
     "galleryBanner": {
