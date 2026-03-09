@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: MIT
  * For full license text, see the LICENSE file in the repo root or https://opensource.org/licenses/MIT
  */
-export const MINIMUM_REQUIRED_VERSION_CORE_EXTENSION = '65.17.3';
+export const MINIMUM_REQUIRED_VERSION_CORE_EXTENSION = '66.0.3';
 export const CORE_EXTENSION_ID = 'salesforce.salesforcedx-vscode-core';
 export const SFDX_PROJECT_FILE = 'sfdx-project.json';
 export const PACKAGE_JSON = 'package.json';
