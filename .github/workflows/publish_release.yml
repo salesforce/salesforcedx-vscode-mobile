@@ -26,9 +26,17 @@ jobs:
             - name: Validate tag name
               id: validate_tag_name
               uses: actions/github-script@v7
+              # Pass the untrusted workflow_dispatch input through the environment
+              # instead of splicing it into the script body with ${{ }}. Template
+              # expansion pastes raw text into the source before the JS tokenizer
+              # runs (script injection, CWE-94); process.env is read after parsing,
+              # so the value arrives as inert data.
+              env:
+                  RELEASE_TAG_NAME: ${{ github.event.inputs.release-tag-name }}
               with:
+                  result-encoding: string
                   script: |
-                      let tagNameValue = "${{ github.event.inputs.release-tag-name }}";
+                      let tagNameValue = process.env.RELEASE_TAG_NAME;
                       console.log(`Input tag name / version: ${tagNameValue}`);
                       // Take the 'v' off to validate the SemVer version.
                       if (tagNameValue.startsWith('v')) {
@@ -50,10 +58,13 @@ jobs:
             - name: Get package name for tag
               id: get_package_name
               uses: actions/github-script@v7
+              env:
+                  RELEASE_TAG_NAME: ${{ steps.validate_tag_name.outputs.result }}
               with:
+                  result-encoding: string
                   script: |
                       const packageName = require('./package.json').name;
-                      const tagName = ${{ steps.validate_tag_name.outputs.result }}
+                      const tagName = process.env.RELEASE_TAG_NAME;
                       const packageVersion = tagName.slice(1); // Take the 'v' off the tag.
                       const vsixPackageName = `${packageName}-${packageVersion}.vsix`;
                       console.log(`Package name that will be used: ${vsixPackageName}`);
@@ -62,10 +73,14 @@ jobs:
             - name: Get release and associated VSIX asset
               id: get_release_and_asset
               uses: actions/github-script@v7
+              env:
+                  RELEASE_TAG_NAME: ${{ steps.validate_tag_name.outputs.result }}
+                  VSIX_PACKAGE_NAME: ${{ steps.get_package_name.outputs.result }}
               with:
+                  result-encoding: string
                   script: |
-                      const releaseTagName = ${{ steps.validate_tag_name.outputs.result }};
-                      const vsixPackageName = ${{ steps.get_package_name.outputs.result }};
+                      const releaseTagName = process.env.RELEASE_TAG_NAME;
+                      const vsixPackageName = process.env.VSIX_PACKAGE_NAME;
                       const response = await github.rest.repos.getReleaseByTag({
                         owner: context.repo.owner,
                         repo: context.repo.repo,
@@ -89,10 +104,13 @@ jobs:
             - name: Download asset
               id: download_asset
               uses: actions/github-script@v7
+              env:
+                  ASSET_URL: ${{ steps.get_release_and_asset.outputs.result }}
+                  VSIX_PACKAGE_NAME: ${{ steps.get_package_name.outputs.result }}
               with:
                   script: |
-                      const assetUrl = ${{ steps.get_release_and_asset.outputs.result }};
-                      const vsixPackageName = ${{ steps.get_package_name.outputs.result }};
+                      const assetUrl = process.env.ASSET_URL;
+                      const vsixPackageName = process.env.VSIX_PACKAGE_NAME;
                       console.log(`assetUrl: ${assetUrl}`);
                       const response = await github.request(`GET ${assetUrl}`, {
                           headers: {
@@ -110,6 +128,7 @@ jobs:
               env:
                   VSCE_PERSONAL_ACCESS_TOKEN: ${{ secrets.VSCE_PERSONAL_ACCESS_TOKEN }}
                   OPEN_VSX_PERSONAL_ACCESS_TOKEN: ${{ secrets.OPEN_VSX_PERSONAL_ACCESS_TOKEN }}
+                  VSIX_PACKAGE_NAME: ${{ steps.get_package_name.outputs.result }}
               run: |
-                  npx vsce publish -p ${{ env.VSCE_PERSONAL_ACCESS_TOKEN }} --packagePath ${{ steps.get_package_name.outputs.result }}
-                  npx ovsx publish ${{ steps.get_package_name.outputs.result }} -p ${{ env.OPEN_VSX_PERSONAL_ACCESS_TOKEN }}
+                  npx vsce publish -p "$VSCE_PERSONAL_ACCESS_TOKEN" --packagePath "$VSIX_PACKAGE_NAME"
+                  npx ovsx publish "$VSIX_PACKAGE_NAME" -p "$OPEN_VSX_PERSONAL_ACCESS_TOKEN"
