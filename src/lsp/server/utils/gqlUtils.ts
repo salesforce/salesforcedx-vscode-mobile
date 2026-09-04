@@ -70,10 +70,7 @@ const structureNodeNames = ['uiapi', 'query', 'edges', 'node'];
 
 // Node types supported in entity tree
 export type DiagnosticNode =
-    | EntityNode
-    | OperationNode
-    | RootNode
-    | PropertyNode;
+    EntityNode | OperationNode | RootNode | PropertyNode;
 
 /**
  * Traverse the GraphQL ASTNode to build an entity tree, using EntityNode as intermediate nodes and PropertyNode as leaf nodes.

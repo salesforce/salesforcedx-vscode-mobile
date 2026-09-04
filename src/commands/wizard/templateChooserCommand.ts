@@ -18,11 +18,7 @@ export type LandingPageStatus = {
 };
 
 export type LandingPageType =
-    | 'existing'
-    | 'default'
-    | 'caseManagement'
-    | 'healthcare'
-    | 'retail';
+    'existing' | 'default' | 'caseManagement' | 'healthcare' | 'retail';
 
 export type LandingPageCollectionStatus = {
     error?: string;
