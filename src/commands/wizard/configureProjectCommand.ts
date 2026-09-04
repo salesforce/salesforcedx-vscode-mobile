@@ -25,9 +25,7 @@ export interface ProjectConfigurationProcessor {
     executeProjectOpen(folderUri: Uri): Promise<void>;
 }
 
-export class DefaultProjectConfigurationProcessor
-    implements ProjectConfigurationProcessor
-{
+export class DefaultProjectConfigurationProcessor implements ProjectConfigurationProcessor {
     extensionUri: Uri;
 
     constructor(extensionUri: Uri) {
