@@ -108,7 +108,7 @@
     },
     "devDependencies": {
         "@babel/cli": "^7.28.3",
-        "@babel/core": "^7.28.4",
+        "@babel/core": "^7.29.6",
         "@babel/preset-env": "^7.28.3",
         "@istanbuljs/nyc-config-typescript": "^1.0.2",
         "@jsforce/jsforce-node": "^3.9.1",
