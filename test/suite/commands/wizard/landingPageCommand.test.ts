@@ -102,6 +102,18 @@ suite('Landing Page Command Test Suite', () => {
                     return Promise.resolve({ label: 'State', detail: 'State' });
                 case 3:
                     return Promise.resolve({ label: 'Zip', detail: 'Zip' });
+                case 4:
+                    // OrderBy field
+                    return Promise.resolve({ label: 'State', detail: 'State' });
+                case 5:
+                    // OrderBy direction
+                    return Promise.resolve({
+                        label: 'Descending',
+                        detail: 'DESC'
+                    });
+                case 6:
+                    // MaxItems
+                    return Promise.resolve({ label: '5', detail: '5' });
             }
 
             assert.fail('Should never reach here.');
@@ -142,8 +154,14 @@ suite('Landing Page Command Test Suite', () => {
         const apiNameArg = fakeAddRecordListCard.args[0][0]; // apiName
         const labelPluralArg = fakeAddRecordListCard.args[0][1]; // plural label
         const selectedFieldsArg = fakeAddRecordListCard.args[0][2]; // list of selected fields
+        const orderByFieldArg = fakeAddRecordListCard.args[0][3];
+        const isAscendingArg = fakeAddRecordListCard.args[0][4];
+        const maxItemsArg = fakeAddRecordListCard.args[0][5];
         assert.equal(apiNameArg, sobject.apiName);
         assert.equal(labelPluralArg, sobject.labelPlural);
         assert.deepStrictEqual(selectedFieldsArg.sort(), sobjectFields.sort());
+        assert.equal(orderByFieldArg, 'State');
+        assert.equal(isAscendingArg, false);
+        assert.equal(maxItemsArg, 5);
     });
 });
