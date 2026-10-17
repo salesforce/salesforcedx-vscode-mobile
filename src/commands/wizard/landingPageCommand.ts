@@ -56,7 +56,14 @@ export class LandingPageCommand {
                 uem = await LandingPageCommand.configureTimedListCard(uem);
             }
 
-            // TODO: Show progress somehow
+            if (selectedCardType.label !== LandingPageCommand.FINISHED_LABEL) {
+                void window.showInformationMessage(
+                    l10n.t(
+                        'Added "{0}" card. Select another card type or Finished to generate the landing page.',
+                        selectedCardType.label
+                    )
+                );
+            }
         }
 
         return uem.build();
@@ -197,13 +204,73 @@ export class LandingPageCommand {
             }
         }
 
-        // TODO: Get OrderBy field
-        // TODO: Get OrderBy direction
-        // TODO: Get MaxItems
+        // Prompt for OrderBy field
+        const orderByFieldPickItem = await UIUtils.showQuickPick(
+            l10n.t('Select which field to use for ordering the list.'),
+            undefined,
+            () => {
+                return Promise.resolve(fieldsPickList);
+            }
+        );
+        if (!orderByFieldPickItem?.detail) {
+            return Promise.resolve(uem);
+        }
+        const orderByField = orderByFieldPickItem.detail;
+
+        // Prompt for OrderBy direction
+        const ascendingOption: QuickPickItem = {
+            label: l10n.t('Ascending'),
+            detail: 'ASC'
+        };
+        const descendingOption: QuickPickItem = {
+            label: l10n.t('Descending'),
+            detail: 'DESC'
+        };
+        const orderByDirectionPickItem = await UIUtils.showQuickPick(
+            l10n.t('Select the sort direction for the list.'),
+            undefined,
+            () => {
+                return Promise.resolve([ascendingOption, descendingOption]);
+            }
+        );
+        if (!orderByDirectionPickItem) {
+            return Promise.resolve(uem);
+        }
+        const isAscending =
+            orderByDirectionPickItem.detail === ascendingOption.detail;
+
+        // Prompt for MaxItems (3-8)
+        const maxItemsPickList: QuickPickItem[] = [3, 4, 5, 6, 7, 8].map(
+            (n) => ({
+                label: String(n),
+                detail: String(n)
+            })
+        );
+        const maxItemsPickItem = await UIUtils.showQuickPick(
+            l10n.t(
+                'Select the maximum number of items to display on the card (3-8).'
+            ),
+            undefined,
+            () => {
+                return Promise.resolve(maxItemsPickList);
+            }
+        );
+        if (!maxItemsPickItem?.detail) {
+            return Promise.resolve(uem);
+        }
+        const maxItems = Number.parseInt(maxItemsPickItem.detail, 10);
+
         // TODO: Swipe Actions
 
         return Promise.resolve(
-            uem.addRecordListCard(apiName, labelPlural, selectedFields)
+            uem.addRecordListCard(
+                apiName,
+                labelPlural,
+                selectedFields,
+                orderByField,
+                isAscending,
+                maxItems
+            )
         );
     }
 
