@@ -144,7 +144,7 @@
     "dependencies": {
         "@babel/traverse": "^7.28.4",
         "@graphql-tools/graphql-tag-pluck": "^8.3.37",
-        "@graphql-tools/utils": "^10.5.4",
+        "@graphql-tools/utils": "^13.2.0",
         "@salesforce/core": "^8.23.2",
         "@vscode/l10n": "^0.0.18",
         "graphql-tag": "^2.12.7",
